@@ -1,0 +1,15 @@
+services:
+  codewalker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "50051:50051"
+    volumes:
+      - ${REPO_PATH:-/tmp}:/repos/target:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CODEWALKER_REPO_ROOT=/repos/target
+      - CODEWALKER_PORT=50051
+      - CODEWALKER_LOG_LEVEL=${CODEWALKER_LOG_LEVEL:-info}
+      - CODEWALKER_LLM_PROVIDER=${CODEWALKER_LLM_PROVIDER:-anthropic}

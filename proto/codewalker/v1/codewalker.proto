@@ -1,0 +1,212 @@
+syntax = "proto3";
+
+package codewalker.v1;
+
+option go_package = "github.com/yourorg/codewalker/gen/codewalker/v1;codewalkerv1";
+
+// ---------------------------------------------------------------------------
+// Enumerations
+// ---------------------------------------------------------------------------
+
+enum ExperienceLevel {
+  EXPERIENCE_LEVEL_UNSPECIFIED = 0;
+  EXPERIENCE_LEVEL_JUNIOR = 1;
+  EXPERIENCE_LEVEL_MID = 2;
+  EXPERIENCE_LEVEL_SENIOR = 3;
+}
+
+enum EdgeLabel {
+  EDGE_LABEL_UNSPECIFIED = 0;
+  EDGE_LABEL_SEQUENCE = 1;
+  EDGE_LABEL_TRUE_BRANCH = 2;
+  EDGE_LABEL_FALSE_BRANCH = 3;
+  EDGE_LABEL_CASE = 4;
+  EDGE_LABEL_BODY = 5;
+  EDGE_LABEL_EXIT = 6;
+  EDGE_LABEL_CALL = 7;
+}
+
+enum StepKind {
+  STEP_KIND_UNSPECIFIED = 0;
+  STEP_KIND_FUNCTION = 1;
+  STEP_KIND_CONDITIONAL = 2;
+  STEP_KIND_LOOP = 3;
+  STEP_KIND_ASSIGNMENT = 4;
+  STEP_KIND_CALL = 5;
+  STEP_KIND_SWITCH = 6;
+  STEP_KIND_RETURN = 7;
+  STEP_KIND_BLOCK = 8;
+}
+
+enum TermKind {
+  TERM_KIND_UNSPECIFIED = 0;
+  TERM_KIND_LANGUAGE = 1;
+  TERM_KIND_PATTERN = 2;
+  TERM_KIND_DOMAIN = 3;
+  TERM_KIND_LIBRARY = 4;
+}
+
+enum RephraseMode {
+  REPHRASE_MODE_UNSPECIFIED = 0;
+  REPHRASE_MODE_SIMPLER = 1;
+  REPHRASE_MODE_DEEPER = 2;
+  REPHRASE_MODE_ANALOGY = 3;
+  REPHRASE_MODE_TLDR = 4;
+}
+
+// ---------------------------------------------------------------------------
+// Source location
+// ---------------------------------------------------------------------------
+
+message SourceSpan {
+  string file_path = 1;
+  int32 start_line = 2;
+  int32 end_line = 3;
+  int32 start_col = 4;
+  int32 end_col = 5;
+  // Populated by default; omitted when OpenSessionRequest.omit_raw_source = true.
+  string raw_source = 6;
+}
+
+// ---------------------------------------------------------------------------
+// Graph elements
+// ---------------------------------------------------------------------------
+
+// ExternalCallInfo is set on non-navigable edges only.
+message ExternalCallInfo {
+  string package_name = 1;
+  string symbol_name = 2;
+  // Always populated via LLM.
+  string llm_summary = 3;
+  // Best-effort; only included when verified reachable.
+  string docs_url = 4;
+  string source_url = 5;
+  string version = 6;
+}
+
+message StepEdge {
+  string target_step_id = 1;
+  EdgeLabel label = 2;
+  string description = 3;
+  bool navigable = 4;
+  // Set only when navigable = false.
+  ExternalCallInfo external_call_info = 5;
+}
+
+message Step {
+  string id = 1;
+  string label = 2;
+  SourceSpan source = 3;
+  repeated StepEdge edges = 4;
+  bool visited = 5;
+  StepKind kind = 6;
+}
+
+// ---------------------------------------------------------------------------
+// Glossary
+// ---------------------------------------------------------------------------
+
+message GlossaryTerm {
+  string term = 1;
+  string definition = 2;
+  string step_id = 3;
+  TermKind kind = 4;
+}
+
+// ---------------------------------------------------------------------------
+// Session lifecycle
+// ---------------------------------------------------------------------------
+
+message OpenSessionRequest {
+  string repo_path = 1;
+  string file_path = 2;
+  string git_ref = 3;
+  // Entry-point symbol. If empty, the first top-level function is used.
+  string symbol = 4;
+  ExperienceLevel experience_level = 5;
+  // Set true for clients (IDE plugins) that can read files themselves.
+  bool omit_raw_source = 6;
+}
+
+message SessionProgress {
+  string message = 1;
+  // 0.0–1.0
+  float progress = 2;
+}
+
+message SessionReady {
+  string session_id = 1;
+  repeated Step steps = 2;
+  repeated GlossaryTerm glossary = 3;
+  string language = 4;
+  int32 total_steps = 5;
+  string entry_step_id = 6;
+}
+
+message SessionEvent {
+  oneof event {
+    SessionProgress progress = 1;
+    SessionReady ready = 2;
+  }
+}
+
+// Returned inside NarrateEvent.StepComplete and ExpandTerm responses.
+message SessionSummary {
+  string session_id = 1;
+  // Read-only; mapped from ExperienceLevel by adaptation.go.
+  int32 effective_level = 2;
+  string current_step_id = 3;
+  repeated string breadcrumb = 4;
+}
+
+// ---------------------------------------------------------------------------
+// Navigation + narration
+// ---------------------------------------------------------------------------
+
+message NavigateRequest {
+  string session_id = 1;
+  string target_step_id = 2;
+}
+
+message StepComplete {
+  repeated GlossaryTerm new_glossary_terms = 1;
+  repeated StepEdge available_edges = 2;
+  repeated string breadcrumb = 3;
+  SessionSummary session_summary = 4;
+}
+
+message NarrateEvent {
+  oneof event {
+    string token = 1;
+    StepComplete step_complete = 2;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rephrase
+// ---------------------------------------------------------------------------
+
+message RephraseRequest {
+  string session_id = 1;
+  RephraseMode mode = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Glossary expansion
+// ---------------------------------------------------------------------------
+
+message ExpandTermRequest {
+  string session_id = 1;
+  string term = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Service
+// ---------------------------------------------------------------------------
+
+service CodeWalkerService {
+  rpc OpenSession(OpenSessionRequest) returns (stream SessionEvent);
+  rpc Navigate(NavigateRequest) returns (stream NarrateEvent);
+  rpc Rephrase(RephraseRequest) returns (stream NarrateEvent);
+  rpc ExpandTerm(ExpandTermRequest) returns (stream NarrateEvent);
+}
