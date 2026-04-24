@@ -1,75 +1,254 @@
-# Codewalker — Session Briefing
+# Codewalker — Claude Code Briefing
 
-This document gives future Claude Code sessions the context needed to contribute
-to codewalker without re-deriving decisions already made.
-
----
-
-## What is codewalker?
-
-Codewalker is a gRPC service that helps developers understand code by narrating
-it step-by-step. It parses source files into an AST, converts the AST into a
-step graph, and streams LLM-generated narration as users navigate the graph.
-
-Two session types exist:
-- **Walkthrough sessions** — navigate and explain an existing source file.
-- **Review sessions** — explain code changes from a PR, commit, or branch
-  comparison.
+This document captures all architectural decisions made during design. Do not
+re-litigate these decisions unless you encounter a hard technical blocker.
+Ask the user before changing anything structural.
 
 ---
 
-## Initial implementation
+## What is this?
 
-### Architecture overview
+An AI-powered code walkthrough service. It explains code by guiding a user
+through it step by step, like a debugger with narration. Users can navigate
+forward/back, follow logical branches, request rephrasing, and look up
+unfamiliar terms via a glossary.
 
-The server exposes a single gRPC service (`CodeWalker`) defined in
-`proto/codewalker/v1/codewalker.proto`. All narration RPCs
-(`Navigate`, `Rephrase`, `ExpandTerm`) stream tokens back to the client so the
-UI can render progressively.
+Target audience: developers of all levels, debugging or reviewing unfamiliar
+code. The service adapts its narration to the user's experience level.
 
-### Key packages
+---
 
-| Package | Responsibility |
-|---|---|
-| `internal/session` | In-memory session store with TTL eviction |
-| `internal/parser` | Language-agnostic AST → IR, multi-language plugin registry |
-| `internal/graph` | Step graph construction and walker (immutable graph, mutable traversal) |
-| `internal/llm` | LLM provider abstraction; Anthropic SDK implementation |
-| `internal/forge` | Forge-agnostic PR/commit fetch; ForgeHandler plugin registry |
-| `internal/git` | Read files from git refs, detect package manifests |
-| `internal/resolver` | Resolve external call docs/source URLs via manifests then LLM |
-| `server` | gRPC handlers + middleware (recovery, structured logging) |
+## Tech stack
 
-### Plugin registries
+| Concern | Choice | Reason |
+|---|---|---|
+| Language | Go | go-git, tree-sitter bindings, static binary, goroutines for streaming |
+| Protocol | gRPC + protobuf | Bidirectional streaming, strongly typed contract, generated client stubs |
+| Git | go-git | Pure Go, no libgit2 dependency |
+| AST parsing | tree-sitter (Go bindings) | Language-agnostic, ~100 languages, query-based node extraction |
+| Protobuf tooling | buf | Linting, breaking change detection, code generation |
+| LLM | Anthropic Claude (v1) | Swappable behind an interface |
+| Deployment | Docker (distroless image) | Developer-friendly, sidesteps dependency issues, repo mounted as volume |
 
-Both language parsers and forge handlers use the same registry pattern:
-implementations import-register themselves via `init()` in their own package,
-so the core packages stay decoupled from concrete implementations.
+---
 
-- `internal/parser/languages/` — Go, TypeScript, Python, PHP
-- `internal/forge/forges/` — GitHub
+## Architecture decisions
 
-### Session lifecycle
+### Session model
+- On `OpenSession`, the server does **one analysis pass**: parse AST, build
+  step graph, extract glossary candidates. This is stored as server-side
+  session state.
+- Subsequent LLM calls send only the **current step's code slice + minimal
+  context** (function signature, call chain, variable types), not the whole
+  file. The session object manages context windowing.
+- Sessions are in-memory in v1. Persistence is a v2 concern.
 
-1. Client calls `OpenSession` (or `OpenReviewSession`).
-2. Server parses/fetches content, builds the step graph, streams `SessionProgress`
-   events, then `SessionReady` with the full graph and glossary.
-3. Client navigates with `Navigate`; server streams narration tokens then
-   `StepComplete`.
-4. `CloseSession` releases state; background TTL eviction reclaims idle sessions.
+### Step graph
+- Steps are **logical units** determined by the AST — conditionals, loops,
+  function calls, assignments — not individual lines.
+- The graph is a **graph, not a list**. A conditional has two outgoing edges
+  (TRUE_BRANCH, FALSE_BRANCH), a switch has N CASE edges, loops have a body
+  and an exit path.
+- Steps can be revisited (cycles handled explicitly — see cycle detection).
 
-### Experience levels
+### Symbol scoping
+- `OpenSessionRequest.symbol` sets the **entry point**, not a hard boundary.
+- `EDGE_LABEL_CALL` edges into other symbols defined in the same repo are
+  always included as navigable edges.
+- The user is never automatically taken into a callee — they must explicitly
+  follow the edge — but they are never blocked from doing so.
+- Callees outside the repo (stdlib, third-party) are non-navigable but still
+  appear as edges with `ExternalCallInfo`.
 
-`ExperienceLevel` (JUNIOR / MID / SENIOR) controls narration depth.
-`session.EffectiveLevel` maps the enum to an integer 1–10 scale.
-Planned v2: adaptive level based on observed user behaviour.
+### External calls
+Resolution follows a cascade — never leave the user with nothing:
+1. If a package manifest is found (go.mod, composer.json, package.json,
+   Gemfile, requirements.txt etc.) — resolve exact version, construct pinned
+   docs and source URLs.
+2. If language is known but no manifest — attempt to construct a docs URL
+   from the symbol name alone, flagged as unversioned.
+3. **Fallback in all cases** — LLM summary, clearly attributed as general
+   knowledge. `llm_summary` is always populated. URLs are best-effort and
+   only included if verified reachable. Do not surface broken links.
 
-### External call resolution
+### LLM provider
+- Defined as an interface (`internal/llm/provider.go`) from day one.
+- Claude (Anthropic) is the v1 implementation.
+- Ollama should be the v2 implementation (fully local / air-gapped use case).
+- Never hardcode model names or API endpoints outside `internal/llm/anthropic.go`.
 
-When a step calls an external symbol, the resolver runs a cascade:
-1. Package manifest (go.mod / package.json / composer.json) → pinned docs + source URL.
-2. Language-known fallback → unversioned docs URL.
-3. LLM summary-only fallback.
+### Experience level + adaptation
+- `OpenSessionRequest.experience_level` (JUNIOR/MID/SENIOR) is the starting
+  hint. It maps to a 1–10 `effective_level` on the server.
+- `effective_level` is exposed read-only in `SessionSummary` so clients can
+  display it (e.g. "explaining at level 4/10").
+- `internal/session/adaptation.go` exists as a **stub in v1** — it simply
+  maps ExperienceLevel to a fixed value. Do not implement adaptive logic yet.
+  The interface must exist so v2 can fill it in without touching other code.
+- v2 adaptive signals (for future reference): SIMPLER rephrase count, DEEPER
+  rephrase count, glossary terms expanded, steps navigated without rephrasing.
+
+### raw_source
+- `SourceSpan.raw_source` is populated by default — clients that cannot read
+  files themselves (browser extensions, web UIs) need it.
+- `OpenSessionRequest.omit_raw_source = true` lets clients that have file
+  access (IDE plugins) opt out to reduce message size.
+
+---
+
+## Proto contract
+
+The proto file (`proto/codewalker/v1/codewalker.proto`) is the source of
+truth. Key messages:
+
+- `OpenSessionRequest` — repo path, file path, git ref, optional symbol
+  scope, experience level, omit_raw_source flag
+- `SessionEvent` (streamed) — progress updates → `SessionReady` (step graph,
+  glossary, language, total steps)
+- `SessionSummary` — includes read-only `effective_level`
+- `Step` — id, label, source span, edges, visited flag, StepKind
+- `StepEdge` — target_step_id, EdgeLabel, description, `navigable` bool,
+  `ExternalCallInfo` (only set when navigable = false)
+- `ExternalCallInfo` — package_name, symbol_name, llm_summary (always set),
+  docs_url, source_url, version (last three best-effort only)
+- `NarrateEvent` (streamed) — token stream → `StepComplete` (new glossary
+  terms, available edges, breadcrumb)
+- `RephraseRequest` — session_id + RephraseMode (SIMPLER/DEEPER/ANALOGY/TLDR)
+- `GlossaryTerm` — term, definition, step_id, TermKind
+  (LANGUAGE/PATTERN/DOMAIN/LIBRARY)
+
+Use `buf` for all proto linting and code generation. Never run `protoc` directly.
+
+---
+
+## Language support
+
+### v1 (build these)
+- Go, TypeScript, Python, PHP
+
+### v2
+- JavaScript, Ruby, Java, C#, Shell
+
+### v3
+- PLpgSQL, PLSQL, TSQL, Apex
+
+### v4
+- Vue, HTML, CSS, SCSS, Dockerfile, Makefile, Gherkin, EJS, Jupyter Notebook
+
+Each language is a `LanguageHandler` implementation in
+`internal/parser/languages/`. The interface is defined in
+`internal/parser/handler.go`. Adding a language must not require changes
+outside that directory and the registry in `internal/parser/registry.go`.
+
+**Jupyter Notebook note**: not a language — it's a JSON container format
+wrapping Python cells. Extract code cells, treat as Python. The cell
+structure maps naturally onto the step concept and is a compelling use case.
+
+---
+
+## Project structure
+
+```
+codewalker/
+├── proto/codewalker/v1/codewalker.proto
+├── gen/codewalker/v1/                    # Generated — do not edit
+├── internal/
+│   ├── git/
+│   │   ├── client.go                     # go-git wrapper
+│   │   └── manifest.go                   # Package manifest detection
+│   ├── parser/
+│   │   ├── parser.go                     # Language detection + dispatch
+│   │   ├── registry.go                   # Language handler registry
+│   │   ├── handler.go                    # LanguageHandler interface
+│   │   └── languages/
+│   │       ├── golang.go
+│   │       ├── typescript.go
+│   │       ├── python.go
+│   │       └── php.go
+│   ├── graph/
+│   │   ├── builder.go                    # Builds Step graph from parser output
+│   │   ├── walker.go                     # Traversal — forward, back, follow edge
+│   │   └── cycle.go                      # Cycle detection
+│   ├── llm/
+│   │   ├── provider.go                   # Provider interface
+│   │   ├── anthropic.go                  # Claude implementation
+│   │   ├── context.go                    # Context windowing
+│   │   └── prompts/
+│   │       ├── narrate.go
+│   │       ├── rephrase.go
+│   │       ├── glossary.go
+│   │       └── external.go
+│   ├── session/
+│   │   ├── session.go
+│   │   ├── store.go
+│   │   └── adaptation.go                 # v2 stub — keep the interface, no logic yet
+│   └── resolver/
+│       ├── resolver.go
+│       └── ecosystems/
+│           ├── gomod.go
+│           ├── npm.go
+│           ├── composer.go
+│           └── fallback.go
+├── server/
+│   ├── server.go
+│   ├── open_session.go
+│   ├── navigate.go
+│   ├── rephrase.go
+│   ├── expand_term.go
+│   └── middleware/
+│       ├── logging.go
+│       └── recovery.go
+├── cmd/codewalker/main.go
+├── config/config.go
+├── deploy/
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── buf.yaml
+├── buf.gen.yaml
+├── go.mod
+├── go.sum
+├── Makefile
+└── README.md
+```
+
+---
+
+## Dockerfile approach
+
+Multi-stage build:
+1. **Build stage** — `golang:1.22-alpine`, compile static binary
+2. **Runtime stage** — `gcr.io/distroless/static` or `scratch`, copy binary only
+
+The repo to be explained is mounted as a read-only volume at `/repos/target`.
+The user sets `REPO_PATH` env var; docker-compose handles the mount.
+
+```yaml
+# docker-compose.yml sketch
+services:
+  codewalker:
+    build: .
+    ports:
+      - "50051:50051"
+    volumes:
+      - ${REPO_PATH}:/repos/target:ro
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+```
+
+---
+
+## v1 milestone
+
+**The service should be able to explain its own Go source code.**
+
+This means:
+- `OpenSession` works against a local Go repo
+- Step graph is built correctly for Go source
+- Navigation (forward, back, follow edge) works
+- Narration streams from Claude
+- Glossary terms are identified and expandable
+- Rephrasing works (all four modes)
+- External calls to Go stdlib surface an LLM summary + pkg.go.dev link
 
 ---
 
@@ -123,3 +302,32 @@ session support. Work through GitHub issues #1–#4 in order:
 2. ForgeHandler interface + registry (issue #2)
 3. GitHub ForgeHandler implementation (issue #3)
 4. OpenReviewSession handler (issue #4)
+
+---
+
+## Config
+
+Read from environment variables. No config files in v1.
+
+| Var | Default | Notes |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | — | Required |
+| `CODEWALKER_PORT` | `50051` | gRPC listen port |
+| `CODEWALKER_REPO_ROOT` | `/repos/target` | Mount point inside container |
+| `CODEWALKER_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
+| `CODEWALKER_LLM_PROVIDER` | `anthropic` | Extensible for v2 Ollama support |
+
+---
+
+## Notes for Claude Code
+
+- Prefer table-driven tests in Go — this codebase will need them for the
+  parser and graph packages especially.
+- The `gen/` directory is always derived from `proto/` — never edit generated
+  files, always regenerate via `make proto`.
+- gRPC streaming handlers must handle client disconnection gracefully —
+  check `ctx.Done()` in all streaming loops.
+- The LLM context window is the server's responsibility — clients should
+  never need to manage prompt history.
+- When in doubt about a design decision, check this document before asking
+  the user. If it's not covered here, ask.
