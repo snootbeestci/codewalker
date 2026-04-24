@@ -2224,13 +2224,18 @@ func (x *ReviewReady) GetEffectiveLevel() uint32 {
 type ForgeContext struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Kind          ForgeContextKind       `protobuf:"varint,1,opt,name=kind,proto3,enum=codewalker.v1.ForgeContextKind" json:"kind,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
-	Author        string                 `protobuf:"bytes,4,opt,name=author,proto3" json:"author,omitempty"`
-	BaseRef       string                 `protobuf:"bytes,5,opt,name=base_ref,json=baseRef,proto3" json:"base_ref,omitempty"`
-	HeadRef       string                 `protobuf:"bytes,6,opt,name=head_ref,json=headRef,proto3" json:"head_ref,omitempty"`
-	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
-	Files         []*ReviewFile          `protobuf:"bytes,8,rep,name=files,proto3" json:"files,omitempty"`
+	Forge         string                 `protobuf:"bytes,2,opt,name=forge,proto3" json:"forge,omitempty"` // e.g. "github", "gitlab"
+	Owner         string                 `protobuf:"bytes,3,opt,name=owner,proto3" json:"owner,omitempty"` // org or user
+	Repo          string                 `protobuf:"bytes,4,opt,name=repo,proto3" json:"repo,omitempty"`
+	BaseRef       string                 `protobuf:"bytes,5,opt,name=base_ref,json=baseRef,proto3" json:"base_ref,omitempty"`                   // base branch/SHA (PRs and comparisons)
+	HeadRef       string                 `protobuf:"bytes,6,opt,name=head_ref,json=headRef,proto3" json:"head_ref,omitempty"`                   // head branch/SHA
+	PrNumber      int32                  `protobuf:"varint,7,opt,name=pr_number,json=prNumber,proto3" json:"pr_number,omitempty"`               // set for PRs, 0 otherwise
+	PrTitle       string                 `protobuf:"bytes,8,opt,name=pr_title,json=prTitle,proto3" json:"pr_title,omitempty"`                   // set for PRs
+	PrDescription string                 `protobuf:"bytes,9,opt,name=pr_description,json=prDescription,proto3" json:"pr_description,omitempty"` // set for PRs — used as narration context
+	PrAuthor      string                 `protobuf:"bytes,10,opt,name=pr_author,json=prAuthor,proto3" json:"pr_author,omitempty"`
+	Url           string                 `protobuf:"bytes,11,opt,name=url,proto3" json:"url,omitempty"` // original URL as provided by client
+	// Per-file summary — lets clients render a file list before navigating.
+	Files         []*ReviewFile `protobuf:"bytes,12,rep,name=files,proto3" json:"files,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2272,23 +2277,23 @@ func (x *ForgeContext) GetKind() ForgeContextKind {
 	return ForgeContextKind_FORGE_CONTEXT_KIND_UNSPECIFIED
 }
 
-func (x *ForgeContext) GetTitle() string {
+func (x *ForgeContext) GetForge() string {
 	if x != nil {
-		return x.Title
+		return x.Forge
 	}
 	return ""
 }
 
-func (x *ForgeContext) GetUrl() string {
+func (x *ForgeContext) GetOwner() string {
 	if x != nil {
-		return x.Url
+		return x.Owner
 	}
 	return ""
 }
 
-func (x *ForgeContext) GetAuthor() string {
+func (x *ForgeContext) GetRepo() string {
 	if x != nil {
-		return x.Author
+		return x.Repo
 	}
 	return ""
 }
@@ -2307,9 +2312,37 @@ func (x *ForgeContext) GetHeadRef() string {
 	return ""
 }
 
-func (x *ForgeContext) GetDescription() string {
+func (x *ForgeContext) GetPrNumber() int32 {
 	if x != nil {
-		return x.Description
+		return x.PrNumber
+	}
+	return 0
+}
+
+func (x *ForgeContext) GetPrTitle() string {
+	if x != nil {
+		return x.PrTitle
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetPrDescription() string {
+	if x != nil {
+		return x.PrDescription
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetPrAuthor() string {
+	if x != nil {
+		return x.PrAuthor
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetUrl() string {
+	if x != nil {
+		return x.Url
 	}
 	return ""
 }
@@ -2322,15 +2355,14 @@ func (x *ForgeContext) GetFiles() []*ReviewFile {
 }
 
 type ReviewFile struct {
-	state        protoimpl.MessageState `protogen:"open.v1"`
-	FilePath     string                 `protobuf:"bytes,1,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
-	Language     string                 `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
-	ChangeKind   ChangeKind             `protobuf:"varint,3,opt,name=change_kind,json=changeKind,proto3,enum=codewalker.v1.ChangeKind" json:"change_kind,omitempty"`
-	HunkCount    uint32                 `protobuf:"varint,4,opt,name=hunk_count,json=hunkCount,proto3" json:"hunk_count,omitempty"`
-	LinesAdded   uint32                 `protobuf:"varint,5,opt,name=lines_added,json=linesAdded,proto3" json:"lines_added,omitempty"`
-	LinesRemoved uint32                 `protobuf:"varint,6,opt,name=lines_removed,json=linesRemoved,proto3" json:"lines_removed,omitempty"`
-	// ID of the first step for this file.
-	EntryStepId   string `protobuf:"bytes,7,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FilePath      string                 `protobuf:"bytes,1,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	Language      string                 `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
+	Change        ChangeKind             `protobuf:"varint,3,opt,name=change,proto3,enum=codewalker.v1.ChangeKind" json:"change,omitempty"`
+	HunksTotal    uint32                 `protobuf:"varint,4,opt,name=hunks_total,json=hunksTotal,proto3" json:"hunks_total,omitempty"`
+	LinesAdded    uint32                 `protobuf:"varint,5,opt,name=lines_added,json=linesAdded,proto3" json:"lines_added,omitempty"`
+	LinesRemoved  uint32                 `protobuf:"varint,6,opt,name=lines_removed,json=linesRemoved,proto3" json:"lines_removed,omitempty"`
+	EntryStepId   string                 `protobuf:"bytes,7,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"` // First hunk step for this file
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2379,16 +2411,16 @@ func (x *ReviewFile) GetLanguage() string {
 	return ""
 }
 
-func (x *ReviewFile) GetChangeKind() ChangeKind {
+func (x *ReviewFile) GetChange() ChangeKind {
 	if x != nil {
-		return x.ChangeKind
+		return x.Change
 	}
 	return ChangeKind_CHANGE_KIND_UNSPECIFIED
 }
 
-func (x *ReviewFile) GetHunkCount() uint32 {
+func (x *ReviewFile) GetHunksTotal() uint32 {
 	if x != nil {
-		return x.HunkCount
+		return x.HunksTotal
 	}
 	return 0
 }
@@ -2708,24 +2740,28 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\vtotal_steps\x18\x05 \x01(\rR\n" +
 	"totalSteps\x12\"\n" +
 	"\rentry_step_id\x18\x06 \x01(\tR\ventryStepId\x12'\n" +
-	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\"\x8c\x02\n" +
+	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\"\xf8\x02\n" +
 	"\fForgeContext\x123\n" +
 	"\x04kind\x18\x01 \x01(\x0e2\x1f.codewalker.v1.ForgeContextKindR\x04kind\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\x12\x16\n" +
-	"\x06author\x18\x04 \x01(\tR\x06author\x12\x19\n" +
+	"\x05forge\x18\x02 \x01(\tR\x05forge\x12\x14\n" +
+	"\x05owner\x18\x03 \x01(\tR\x05owner\x12\x12\n" +
+	"\x04repo\x18\x04 \x01(\tR\x04repo\x12\x19\n" +
 	"\bbase_ref\x18\x05 \x01(\tR\abaseRef\x12\x19\n" +
-	"\bhead_ref\x18\x06 \x01(\tR\aheadRef\x12 \n" +
-	"\vdescription\x18\a \x01(\tR\vdescription\x12/\n" +
-	"\x05files\x18\b \x03(\v2\x19.codewalker.v1.ReviewFileR\x05files\"\x8a\x02\n" +
+	"\bhead_ref\x18\x06 \x01(\tR\aheadRef\x12\x1b\n" +
+	"\tpr_number\x18\a \x01(\x05R\bprNumber\x12\x19\n" +
+	"\bpr_title\x18\b \x01(\tR\aprTitle\x12%\n" +
+	"\x0epr_description\x18\t \x01(\tR\rprDescription\x12\x1b\n" +
+	"\tpr_author\x18\n" +
+	" \x01(\tR\bprAuthor\x12\x10\n" +
+	"\x03url\x18\v \x01(\tR\x03url\x12/\n" +
+	"\x05files\x18\f \x03(\v2\x19.codewalker.v1.ReviewFileR\x05files\"\x83\x02\n" +
 	"\n" +
 	"ReviewFile\x12\x1b\n" +
 	"\tfile_path\x18\x01 \x01(\tR\bfilePath\x12\x1a\n" +
-	"\blanguage\x18\x02 \x01(\tR\blanguage\x12:\n" +
-	"\vchange_kind\x18\x03 \x01(\x0e2\x19.codewalker.v1.ChangeKindR\n" +
-	"changeKind\x12\x1d\n" +
-	"\n" +
-	"hunk_count\x18\x04 \x01(\rR\thunkCount\x12\x1f\n" +
+	"\blanguage\x18\x02 \x01(\tR\blanguage\x121\n" +
+	"\x06change\x18\x03 \x01(\x0e2\x19.codewalker.v1.ChangeKindR\x06change\x12\x1f\n" +
+	"\vhunks_total\x18\x04 \x01(\rR\n" +
+	"hunksTotal\x12\x1f\n" +
 	"\vlines_added\x18\x05 \x01(\rR\n" +
 	"linesAdded\x12#\n" +
 	"\rlines_removed\x18\x06 \x01(\rR\flinesRemoved\x12\"\n" +
@@ -2816,14 +2852,14 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"2\xd1\x04\n" +
 	"\n" +
 	"CodeWalker\x12O\n" +
-	"\vOpenSession\x12!.codewalker.v1.OpenSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12[\n" +
-	"\x11OpenReviewSession\x12'.codewalker.v1.OpenReviewSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12I\n" +
+	"\vOpenSession\x12!.codewalker.v1.OpenSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12I\n" +
 	"\bNavigate\x12\x1e.codewalker.v1.NavigateRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12I\n" +
 	"\bRephrase\x12\x1e.codewalker.v1.RephraseRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12M\n" +
 	"\n" +
 	"ExpandTerm\x12 .codewalker.v1.ExpandTermRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12W\n" +
 	"\fCloseSession\x12\".codewalker.v1.CloseSessionRequest\x1a#.codewalker.v1.CloseSessionResponse\x12W\n" +
-	"\fListSessions\x12\".codewalker.v1.ListSessionsRequest\x1a#.codewalker.v1.ListSessionsResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
+	"\fListSessions\x12\".codewalker.v1.ListSessionsRequest\x1a#.codewalker.v1.ListSessionsResponse\x12[\n" +
+	"\x11OpenReviewSession\x12'.codewalker.v1.OpenReviewSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01B1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
 
 var (
 	file_codewalker_v1_codewalker_proto_rawDescOnce sync.Once
@@ -2908,22 +2944,22 @@ var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	28, // 27: codewalker.v1.ReviewReady.glossary:type_name -> codewalker.v1.GlossaryTerm
 	6,  // 28: codewalker.v1.ForgeContext.kind:type_name -> codewalker.v1.ForgeContextKind
 	33, // 29: codewalker.v1.ForgeContext.files:type_name -> codewalker.v1.ReviewFile
-	7,  // 30: codewalker.v1.ReviewFile.change_kind:type_name -> codewalker.v1.ChangeKind
+	7,  // 30: codewalker.v1.ReviewFile.change:type_name -> codewalker.v1.ChangeKind
 	9,  // 31: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
 	10, // 32: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
-	30, // 33: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
-	23, // 34: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
-	27, // 35: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
-	29, // 36: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
-	14, // 37: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
-	16, // 38: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	23, // 33: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
+	27, // 34: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
+	29, // 35: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
+	14, // 36: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
+	16, // 37: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	30, // 38: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
 	11, // 39: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
-	11, // 40: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
-	24, // 41: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
-	24, // 42: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	24, // 43: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	15, // 44: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
-	17, // 45: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	24, // 40: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	24, // 41: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	24, // 42: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	15, // 43: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	17, // 44: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	11, // 45: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
 	39, // [39:46] is the sub-list for method output_type
 	32, // [32:39] is the sub-list for method input_type
 	32, // [32:32] is the sub-list for extension type_name

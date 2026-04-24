@@ -14,11 +14,6 @@ service CodeWalker {
   // progress before emitting a final SessionReady event.
   rpc OpenSession(OpenSessionRequest) returns (stream SessionEvent);
 
-  // Open a review session against a PR/commit URL.
-  // Server fetches forge context, builds per-file step graphs, and streams
-  // back progress before emitting a final ReviewReady event.
-  rpc OpenReviewSession(OpenReviewSessionRequest) returns (stream SessionEvent);
-
   // Navigate within an open session. Server streams narration tokens
   // followed by a StepComplete event.
   rpc Navigate(NavigateRequest) returns (stream NarrateEvent);
@@ -34,6 +29,11 @@ service CodeWalker {
 
   // List open sessions (useful for IDE plugins managing multiple tabs).
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+
+  // Open a review session against a PR, commit, or branch comparison URL.
+  // Server parses the URL, fetches the diff via the appropriate ForgeHandler,
+  // and streams back progress before emitting a final ReviewReady event.
+  rpc OpenReviewSession(OpenReviewSessionRequest) returns (stream SessionEvent);
 }
 
 // ─────────────────────────────────────────────
@@ -349,14 +349,19 @@ message ReviewReady {
 
 message ForgeContext {
   ForgeContextKind kind  = 1;
-  string           title = 2;
-  string           url   = 3;
-  string           author = 4;
-  string           base_ref = 5;
-  string           head_ref = 6;
-  string           description = 7;
+  string forge           = 2; // e.g. "github", "gitlab"
+  string owner           = 3; // org or user
+  string repo            = 4;
+  string base_ref        = 5; // base branch/SHA (PRs and comparisons)
+  string head_ref        = 6; // head branch/SHA
+  int32  pr_number       = 7; // set for PRs, 0 otherwise
+  string pr_title        = 8; // set for PRs
+  string pr_description  = 9; // set for PRs — used as narration context
+  string pr_author       = 10;
+  string url             = 11; // original URL as provided by client
 
-  repeated ReviewFile files = 8;
+  // Per-file summary — lets clients render a file list before navigating.
+  repeated ReviewFile files = 12;
 }
 
 enum ForgeContextKind {
@@ -367,15 +372,13 @@ enum ForgeContextKind {
 }
 
 message ReviewFile {
-  string     file_path    = 1;
-  string     language     = 2;
-  ChangeKind change_kind  = 3;
-  uint32     hunk_count   = 4;
-  uint32     lines_added  = 5;
+  string     file_path     = 1;
+  string     language      = 2;
+  ChangeKind change        = 3;
+  uint32     hunks_total   = 4;
+  uint32     lines_added   = 5;
   uint32     lines_removed = 6;
-
-  // ID of the first step for this file.
-  string entry_step_id = 7;
+  string     entry_step_id = 7; // First hunk step for this file
 }
 
 enum ChangeKind {
