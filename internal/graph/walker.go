@@ -138,6 +138,25 @@ func (w *Walker) Back() (*Step, error) {
 	return step, nil
 }
 
+// Forward navigates to the first navigable NEXT edge from the current step.
+func (w *Walker) Forward() (*Step, error) {
+	return w.FollowEdgeLabel(v1.EdgeLabel_EDGE_LABEL_NEXT)
+}
+
+// FollowEdgeLabel navigates to the first navigable edge with the given label.
+func (w *Walker) FollowEdgeLabel(label v1.EdgeLabel) (*Step, error) {
+	cur, ok := w.g.Step(w.current)
+	if !ok {
+		return nil, fmt.Errorf("walker: current step %q not found", w.current)
+	}
+	for _, e := range cur.Edges {
+		if e.Label == label && e.Navigable {
+			return w.GoTo(e.TargetStepId)
+		}
+	}
+	return nil, fmt.Errorf("walker: no navigable %s edge from %q", label, w.current)
+}
+
 // NavigableEdges returns the navigable edges of the current step.
 func (w *Walker) NavigableEdges() []*v1.StepEdge {
 	cur, ok := w.g.Step(w.current)

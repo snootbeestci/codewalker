@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: codewalker/v1/codewalker.proto
 
-package codewalkerv1
+package v1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -20,6 +20,299 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type StepKind int32
+
+const (
+	StepKind_STEP_KIND_UNSPECIFIED  StepKind = 0
+	StepKind_STEP_KIND_ENTRY        StepKind = 1 // Function/method entry
+	StepKind_STEP_KIND_ASSIGNMENT   StepKind = 2
+	StepKind_STEP_KIND_CONDITIONAL  StepKind = 3 // if/switch/ternary
+	StepKind_STEP_KIND_LOOP         StepKind = 4
+	StepKind_STEP_KIND_CALL         StepKind = 5 // Function/method call
+	StepKind_STEP_KIND_RETURN       StepKind = 6
+	StepKind_STEP_KIND_ERROR_HANDLE StepKind = 7 // try/catch, err != nil blocks
+	StepKind_STEP_KIND_EXIT         StepKind = 8
+)
+
+// Enum value maps for StepKind.
+var (
+	StepKind_name = map[int32]string{
+		0: "STEP_KIND_UNSPECIFIED",
+		1: "STEP_KIND_ENTRY",
+		2: "STEP_KIND_ASSIGNMENT",
+		3: "STEP_KIND_CONDITIONAL",
+		4: "STEP_KIND_LOOP",
+		5: "STEP_KIND_CALL",
+		6: "STEP_KIND_RETURN",
+		7: "STEP_KIND_ERROR_HANDLE",
+		8: "STEP_KIND_EXIT",
+	}
+	StepKind_value = map[string]int32{
+		"STEP_KIND_UNSPECIFIED":  0,
+		"STEP_KIND_ENTRY":        1,
+		"STEP_KIND_ASSIGNMENT":   2,
+		"STEP_KIND_CONDITIONAL":  3,
+		"STEP_KIND_LOOP":         4,
+		"STEP_KIND_CALL":         5,
+		"STEP_KIND_RETURN":       6,
+		"STEP_KIND_ERROR_HANDLE": 7,
+		"STEP_KIND_EXIT":         8,
+	}
+)
+
+func (x StepKind) Enum() *StepKind {
+	p := new(StepKind)
+	*p = x
+	return p
+}
+
+func (x StepKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StepKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[0].Descriptor()
+}
+
+func (StepKind) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[0]
+}
+
+func (x StepKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StepKind.Descriptor instead.
+func (StepKind) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{0}
+}
+
+type EdgeLabel int32
+
+const (
+	EdgeLabel_EDGE_LABEL_UNSPECIFIED  EdgeLabel = 0
+	EdgeLabel_EDGE_LABEL_NEXT         EdgeLabel = 1 // Sequential flow
+	EdgeLabel_EDGE_LABEL_TRUE_BRANCH  EdgeLabel = 2
+	EdgeLabel_EDGE_LABEL_FALSE_BRANCH EdgeLabel = 3
+	EdgeLabel_EDGE_LABEL_CASE         EdgeLabel = 4 // switch/match arm
+	EdgeLabel_EDGE_LABEL_LOOP_BODY    EdgeLabel = 5
+	EdgeLabel_EDGE_LABEL_LOOP_EXIT    EdgeLabel = 6
+	EdgeLabel_EDGE_LABEL_EXCEPTION    EdgeLabel = 7
+	EdgeLabel_EDGE_LABEL_CALL         EdgeLabel = 8 // Into a callee defined in this repo
+)
+
+// Enum value maps for EdgeLabel.
+var (
+	EdgeLabel_name = map[int32]string{
+		0: "EDGE_LABEL_UNSPECIFIED",
+		1: "EDGE_LABEL_NEXT",
+		2: "EDGE_LABEL_TRUE_BRANCH",
+		3: "EDGE_LABEL_FALSE_BRANCH",
+		4: "EDGE_LABEL_CASE",
+		5: "EDGE_LABEL_LOOP_BODY",
+		6: "EDGE_LABEL_LOOP_EXIT",
+		7: "EDGE_LABEL_EXCEPTION",
+		8: "EDGE_LABEL_CALL",
+	}
+	EdgeLabel_value = map[string]int32{
+		"EDGE_LABEL_UNSPECIFIED":  0,
+		"EDGE_LABEL_NEXT":         1,
+		"EDGE_LABEL_TRUE_BRANCH":  2,
+		"EDGE_LABEL_FALSE_BRANCH": 3,
+		"EDGE_LABEL_CASE":         4,
+		"EDGE_LABEL_LOOP_BODY":    5,
+		"EDGE_LABEL_LOOP_EXIT":    6,
+		"EDGE_LABEL_EXCEPTION":    7,
+		"EDGE_LABEL_CALL":         8,
+	}
+)
+
+func (x EdgeLabel) Enum() *EdgeLabel {
+	p := new(EdgeLabel)
+	*p = x
+	return p
+}
+
+func (x EdgeLabel) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (EdgeLabel) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[1].Descriptor()
+}
+
+func (EdgeLabel) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[1]
+}
+
+func (x EdgeLabel) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use EdgeLabel.Descriptor instead.
+func (EdgeLabel) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
+}
+
+type SimpleDirection int32
+
+const (
+	SimpleDirection_SIMPLE_DIRECTION_UNSPECIFIED SimpleDirection = 0
+	SimpleDirection_SIMPLE_DIRECTION_FORWARD     SimpleDirection = 1
+	SimpleDirection_SIMPLE_DIRECTION_BACK        SimpleDirection = 2
+)
+
+// Enum value maps for SimpleDirection.
+var (
+	SimpleDirection_name = map[int32]string{
+		0: "SIMPLE_DIRECTION_UNSPECIFIED",
+		1: "SIMPLE_DIRECTION_FORWARD",
+		2: "SIMPLE_DIRECTION_BACK",
+	}
+	SimpleDirection_value = map[string]int32{
+		"SIMPLE_DIRECTION_UNSPECIFIED": 0,
+		"SIMPLE_DIRECTION_FORWARD":     1,
+		"SIMPLE_DIRECTION_BACK":        2,
+	}
+)
+
+func (x SimpleDirection) Enum() *SimpleDirection {
+	p := new(SimpleDirection)
+	*p = x
+	return p
+}
+
+func (x SimpleDirection) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SimpleDirection) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[2].Descriptor()
+}
+
+func (SimpleDirection) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[2]
+}
+
+func (x SimpleDirection) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SimpleDirection.Descriptor instead.
+func (SimpleDirection) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
+}
+
+type RephraseMode int32
+
+const (
+	RephraseMode_REPHRASE_MODE_UNSPECIFIED RephraseMode = 0
+	RephraseMode_REPHRASE_MODE_SIMPLER     RephraseMode = 1 // Reduce assumed knowledge
+	RephraseMode_REPHRASE_MODE_DEEPER      RephraseMode = 2 // More detail, edge cases, internals
+	RephraseMode_REPHRASE_MODE_ANALOGY     RephraseMode = 3 // Explain via real-world analogy
+	RephraseMode_REPHRASE_MODE_TLDR        RephraseMode = 4 // One sentence summary
+)
+
+// Enum value maps for RephraseMode.
+var (
+	RephraseMode_name = map[int32]string{
+		0: "REPHRASE_MODE_UNSPECIFIED",
+		1: "REPHRASE_MODE_SIMPLER",
+		2: "REPHRASE_MODE_DEEPER",
+		3: "REPHRASE_MODE_ANALOGY",
+		4: "REPHRASE_MODE_TLDR",
+	}
+	RephraseMode_value = map[string]int32{
+		"REPHRASE_MODE_UNSPECIFIED": 0,
+		"REPHRASE_MODE_SIMPLER":     1,
+		"REPHRASE_MODE_DEEPER":      2,
+		"REPHRASE_MODE_ANALOGY":     3,
+		"REPHRASE_MODE_TLDR":        4,
+	}
+)
+
+func (x RephraseMode) Enum() *RephraseMode {
+	p := new(RephraseMode)
+	*p = x
+	return p
+}
+
+func (x RephraseMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RephraseMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[3].Descriptor()
+}
+
+func (RephraseMode) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[3]
+}
+
+func (x RephraseMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RephraseMode.Descriptor instead.
+func (RephraseMode) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
+}
+
+type TermKind int32
+
+const (
+	TermKind_TERM_KIND_UNSPECIFIED TermKind = 0
+	TermKind_TERM_KIND_LANGUAGE    TermKind = 1 // Language feature, e.g. "goroutine"
+	TermKind_TERM_KIND_PATTERN     TermKind = 2 // Design pattern, e.g. "middleware chain"
+	TermKind_TERM_KIND_DOMAIN      TermKind = 3 // Business/domain term from the codebase
+	TermKind_TERM_KIND_LIBRARY     TermKind = 4 // Third-party library or framework concept
+)
+
+// Enum value maps for TermKind.
+var (
+	TermKind_name = map[int32]string{
+		0: "TERM_KIND_UNSPECIFIED",
+		1: "TERM_KIND_LANGUAGE",
+		2: "TERM_KIND_PATTERN",
+		3: "TERM_KIND_DOMAIN",
+		4: "TERM_KIND_LIBRARY",
+	}
+	TermKind_value = map[string]int32{
+		"TERM_KIND_UNSPECIFIED": 0,
+		"TERM_KIND_LANGUAGE":    1,
+		"TERM_KIND_PATTERN":     2,
+		"TERM_KIND_DOMAIN":      3,
+		"TERM_KIND_LIBRARY":     4,
+	}
+)
+
+func (x TermKind) Enum() *TermKind {
+	p := new(TermKind)
+	*p = x
+	return p
+}
+
+func (x TermKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TermKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[4].Descriptor()
+}
+
+func (TermKind) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[4]
+}
+
+func (x TermKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TermKind.Descriptor instead.
+func (TermKind) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
+}
 
 type ExperienceLevel int32
 
@@ -57,11 +350,11 @@ func (x ExperienceLevel) String() string {
 }
 
 func (ExperienceLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[0].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[5].Descriptor()
 }
 
 func (ExperienceLevel) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[0]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[5]
 }
 
 func (x ExperienceLevel) Number() protoreflect.EnumNumber {
@@ -70,277 +363,105 @@ func (x ExperienceLevel) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ExperienceLevel.Descriptor instead.
 func (ExperienceLevel) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{0}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{5}
 }
 
-type EdgeLabel int32
+type ErrorCode int32
 
 const (
-	EdgeLabel_EDGE_LABEL_UNSPECIFIED  EdgeLabel = 0
-	EdgeLabel_EDGE_LABEL_SEQUENCE     EdgeLabel = 1
-	EdgeLabel_EDGE_LABEL_TRUE_BRANCH  EdgeLabel = 2
-	EdgeLabel_EDGE_LABEL_FALSE_BRANCH EdgeLabel = 3
-	EdgeLabel_EDGE_LABEL_CASE         EdgeLabel = 4
-	EdgeLabel_EDGE_LABEL_BODY         EdgeLabel = 5
-	EdgeLabel_EDGE_LABEL_EXIT         EdgeLabel = 6
-	EdgeLabel_EDGE_LABEL_CALL         EdgeLabel = 7
+	ErrorCode_ERROR_CODE_UNSPECIFIED        ErrorCode = 0
+	ErrorCode_ERROR_CODE_SESSION_NOT_FOUND  ErrorCode = 1
+	ErrorCode_ERROR_CODE_PARSE_FAILED       ErrorCode = 2
+	ErrorCode_ERROR_CODE_INVALID_REF        ErrorCode = 3
+	ErrorCode_ERROR_CODE_LLM_ERROR          ErrorCode = 4
+	ErrorCode_ERROR_CODE_UNSUPPORTED_LANG   ErrorCode = 5
+	ErrorCode_ERROR_CODE_INVALID_NAVIGATION ErrorCode = 6
 )
 
-// Enum value maps for EdgeLabel.
+// Enum value maps for ErrorCode.
 var (
-	EdgeLabel_name = map[int32]string{
-		0: "EDGE_LABEL_UNSPECIFIED",
-		1: "EDGE_LABEL_SEQUENCE",
-		2: "EDGE_LABEL_TRUE_BRANCH",
-		3: "EDGE_LABEL_FALSE_BRANCH",
-		4: "EDGE_LABEL_CASE",
-		5: "EDGE_LABEL_BODY",
-		6: "EDGE_LABEL_EXIT",
-		7: "EDGE_LABEL_CALL",
+	ErrorCode_name = map[int32]string{
+		0: "ERROR_CODE_UNSPECIFIED",
+		1: "ERROR_CODE_SESSION_NOT_FOUND",
+		2: "ERROR_CODE_PARSE_FAILED",
+		3: "ERROR_CODE_INVALID_REF",
+		4: "ERROR_CODE_LLM_ERROR",
+		5: "ERROR_CODE_UNSUPPORTED_LANG",
+		6: "ERROR_CODE_INVALID_NAVIGATION",
 	}
-	EdgeLabel_value = map[string]int32{
-		"EDGE_LABEL_UNSPECIFIED":  0,
-		"EDGE_LABEL_SEQUENCE":     1,
-		"EDGE_LABEL_TRUE_BRANCH":  2,
-		"EDGE_LABEL_FALSE_BRANCH": 3,
-		"EDGE_LABEL_CASE":         4,
-		"EDGE_LABEL_BODY":         5,
-		"EDGE_LABEL_EXIT":         6,
-		"EDGE_LABEL_CALL":         7,
+	ErrorCode_value = map[string]int32{
+		"ERROR_CODE_UNSPECIFIED":        0,
+		"ERROR_CODE_SESSION_NOT_FOUND":  1,
+		"ERROR_CODE_PARSE_FAILED":       2,
+		"ERROR_CODE_INVALID_REF":        3,
+		"ERROR_CODE_LLM_ERROR":          4,
+		"ERROR_CODE_UNSUPPORTED_LANG":   5,
+		"ERROR_CODE_INVALID_NAVIGATION": 6,
 	}
 )
 
-func (x EdgeLabel) Enum() *EdgeLabel {
-	p := new(EdgeLabel)
+func (x ErrorCode) Enum() *ErrorCode {
+	p := new(ErrorCode)
 	*p = x
 	return p
 }
 
-func (x EdgeLabel) String() string {
+func (x ErrorCode) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (EdgeLabel) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[1].Descriptor()
+func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[6].Descriptor()
 }
 
-func (EdgeLabel) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[1]
+func (ErrorCode) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[6]
 }
 
-func (x EdgeLabel) Number() protoreflect.EnumNumber {
+func (x ErrorCode) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use EdgeLabel.Descriptor instead.
-func (EdgeLabel) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use ErrorCode.Descriptor instead.
+func (ErrorCode) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{6}
 }
 
-type StepKind int32
-
-const (
-	StepKind_STEP_KIND_UNSPECIFIED StepKind = 0
-	StepKind_STEP_KIND_FUNCTION    StepKind = 1
-	StepKind_STEP_KIND_CONDITIONAL StepKind = 2
-	StepKind_STEP_KIND_LOOP        StepKind = 3
-	StepKind_STEP_KIND_ASSIGNMENT  StepKind = 4
-	StepKind_STEP_KIND_CALL        StepKind = 5
-	StepKind_STEP_KIND_SWITCH      StepKind = 6
-	StepKind_STEP_KIND_RETURN      StepKind = 7
-	StepKind_STEP_KIND_BLOCK       StepKind = 8
-)
-
-// Enum value maps for StepKind.
-var (
-	StepKind_name = map[int32]string{
-		0: "STEP_KIND_UNSPECIFIED",
-		1: "STEP_KIND_FUNCTION",
-		2: "STEP_KIND_CONDITIONAL",
-		3: "STEP_KIND_LOOP",
-		4: "STEP_KIND_ASSIGNMENT",
-		5: "STEP_KIND_CALL",
-		6: "STEP_KIND_SWITCH",
-		7: "STEP_KIND_RETURN",
-		8: "STEP_KIND_BLOCK",
-	}
-	StepKind_value = map[string]int32{
-		"STEP_KIND_UNSPECIFIED": 0,
-		"STEP_KIND_FUNCTION":    1,
-		"STEP_KIND_CONDITIONAL": 2,
-		"STEP_KIND_LOOP":        3,
-		"STEP_KIND_ASSIGNMENT":  4,
-		"STEP_KIND_CALL":        5,
-		"STEP_KIND_SWITCH":      6,
-		"STEP_KIND_RETURN":      7,
-		"STEP_KIND_BLOCK":       8,
-	}
-)
-
-func (x StepKind) Enum() *StepKind {
-	p := new(StepKind)
-	*p = x
-	return p
-}
-
-func (x StepKind) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (StepKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[2].Descriptor()
-}
-
-func (StepKind) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[2]
-}
-
-func (x StepKind) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use StepKind.Descriptor instead.
-func (StepKind) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
-}
-
-type TermKind int32
-
-const (
-	TermKind_TERM_KIND_UNSPECIFIED TermKind = 0
-	TermKind_TERM_KIND_LANGUAGE    TermKind = 1
-	TermKind_TERM_KIND_PATTERN     TermKind = 2
-	TermKind_TERM_KIND_DOMAIN      TermKind = 3
-	TermKind_TERM_KIND_LIBRARY     TermKind = 4
-)
-
-// Enum value maps for TermKind.
-var (
-	TermKind_name = map[int32]string{
-		0: "TERM_KIND_UNSPECIFIED",
-		1: "TERM_KIND_LANGUAGE",
-		2: "TERM_KIND_PATTERN",
-		3: "TERM_KIND_DOMAIN",
-		4: "TERM_KIND_LIBRARY",
-	}
-	TermKind_value = map[string]int32{
-		"TERM_KIND_UNSPECIFIED": 0,
-		"TERM_KIND_LANGUAGE":    1,
-		"TERM_KIND_PATTERN":     2,
-		"TERM_KIND_DOMAIN":      3,
-		"TERM_KIND_LIBRARY":     4,
-	}
-)
-
-func (x TermKind) Enum() *TermKind {
-	p := new(TermKind)
-	*p = x
-	return p
-}
-
-func (x TermKind) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (TermKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[3].Descriptor()
-}
-
-func (TermKind) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[3]
-}
-
-func (x TermKind) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use TermKind.Descriptor instead.
-func (TermKind) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
-}
-
-type RephraseMode int32
-
-const (
-	RephraseMode_REPHRASE_MODE_UNSPECIFIED RephraseMode = 0
-	RephraseMode_REPHRASE_MODE_SIMPLER     RephraseMode = 1
-	RephraseMode_REPHRASE_MODE_DEEPER      RephraseMode = 2
-	RephraseMode_REPHRASE_MODE_ANALOGY     RephraseMode = 3
-	RephraseMode_REPHRASE_MODE_TLDR        RephraseMode = 4
-)
-
-// Enum value maps for RephraseMode.
-var (
-	RephraseMode_name = map[int32]string{
-		0: "REPHRASE_MODE_UNSPECIFIED",
-		1: "REPHRASE_MODE_SIMPLER",
-		2: "REPHRASE_MODE_DEEPER",
-		3: "REPHRASE_MODE_ANALOGY",
-		4: "REPHRASE_MODE_TLDR",
-	}
-	RephraseMode_value = map[string]int32{
-		"REPHRASE_MODE_UNSPECIFIED": 0,
-		"REPHRASE_MODE_SIMPLER":     1,
-		"REPHRASE_MODE_DEEPER":      2,
-		"REPHRASE_MODE_ANALOGY":     3,
-		"REPHRASE_MODE_TLDR":        4,
-	}
-)
-
-func (x RephraseMode) Enum() *RephraseMode {
-	p := new(RephraseMode)
-	*p = x
-	return p
-}
-
-func (x RephraseMode) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (RephraseMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[4].Descriptor()
-}
-
-func (RephraseMode) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[4]
-}
-
-func (x RephraseMode) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use RephraseMode.Descriptor instead.
-func (RephraseMode) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
-}
-
-type SourceSpan struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	FilePath  string                 `protobuf:"bytes,1,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
-	StartLine int32                  `protobuf:"varint,2,opt,name=start_line,json=startLine,proto3" json:"start_line,omitempty"`
-	EndLine   int32                  `protobuf:"varint,3,opt,name=end_line,json=endLine,proto3" json:"end_line,omitempty"`
-	StartCol  int32                  `protobuf:"varint,4,opt,name=start_col,json=startCol,proto3" json:"start_col,omitempty"`
-	EndCol    int32                  `protobuf:"varint,5,opt,name=end_col,json=endCol,proto3" json:"end_col,omitempty"`
-	// Populated by default; omitted when OpenSessionRequest.omit_raw_source = true.
-	RawSource     string `protobuf:"bytes,6,opt,name=raw_source,json=rawSource,proto3" json:"raw_source,omitempty"`
+type OpenSessionRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Absolute path to the git repository root inside the container.
+	RepoPath string `protobuf:"bytes,1,opt,name=repo_path,json=repoPath,proto3" json:"repo_path,omitempty"`
+	// File path relative to repo root.
+	FilePath string `protobuf:"bytes,2,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	// Git ref: commit SHA, branch name, or tag. Defaults to HEAD.
+	Ref string `protobuf:"bytes,3,opt,name=ref,proto3" json:"ref,omitempty"`
+	// Optional: scope to a specific function/class/symbol by name.
+	// If empty, the whole file is walked.
+	Symbol string `protobuf:"bytes,4,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	// Hint to the narration engine about the audience level.
+	ExperienceLevel ExperienceLevel `protobuf:"varint,5,opt,name=experience_level,json=experienceLevel,proto3,enum=codewalker.v1.ExperienceLevel" json:"experience_level,omitempty"`
+	// If true, raw_source will be omitted from all SourceSpan messages
+	// in this session. Useful for clients that already have file access
+	// and want to reduce message size (e.g. IDE plugins).
+	OmitRawSource bool `protobuf:"varint,6,opt,name=omit_raw_source,json=omitRawSource,proto3" json:"omit_raw_source,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SourceSpan) Reset() {
-	*x = SourceSpan{}
+func (x *OpenSessionRequest) Reset() {
+	*x = OpenSessionRequest{}
 	mi := &file_codewalker_v1_codewalker_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SourceSpan) String() string {
+func (x *OpenSessionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SourceSpan) ProtoMessage() {}
+func (*OpenSessionRequest) ProtoMessage() {}
 
-func (x *SourceSpan) ProtoReflect() protoreflect.Message {
+func (x *OpenSessionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_codewalker_v1_codewalker_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -352,71 +473,748 @@ func (x *SourceSpan) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SourceSpan.ProtoReflect.Descriptor instead.
-func (*SourceSpan) Descriptor() ([]byte, []int) {
+// Deprecated: Use OpenSessionRequest.ProtoReflect.Descriptor instead.
+func (*OpenSessionRequest) Descriptor() ([]byte, []int) {
 	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SourceSpan) GetFilePath() string {
+func (x *OpenSessionRequest) GetRepoPath() string {
+	if x != nil {
+		return x.RepoPath
+	}
+	return ""
+}
+
+func (x *OpenSessionRequest) GetFilePath() string {
 	if x != nil {
 		return x.FilePath
 	}
 	return ""
 }
 
-func (x *SourceSpan) GetStartLine() int32 {
+func (x *OpenSessionRequest) GetRef() string {
 	if x != nil {
-		return x.StartLine
-	}
-	return 0
-}
-
-func (x *SourceSpan) GetEndLine() int32 {
-	if x != nil {
-		return x.EndLine
-	}
-	return 0
-}
-
-func (x *SourceSpan) GetStartCol() int32 {
-	if x != nil {
-		return x.StartCol
-	}
-	return 0
-}
-
-func (x *SourceSpan) GetEndCol() int32 {
-	if x != nil {
-		return x.EndCol
-	}
-	return 0
-}
-
-func (x *SourceSpan) GetRawSource() string {
-	if x != nil {
-		return x.RawSource
+		return x.Ref
 	}
 	return ""
 }
 
-// ExternalCallInfo is set on non-navigable edges only.
+func (x *OpenSessionRequest) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *OpenSessionRequest) GetExperienceLevel() ExperienceLevel {
+	if x != nil {
+		return x.ExperienceLevel
+	}
+	return ExperienceLevel_EXPERIENCE_LEVEL_UNSPECIFIED
+}
+
+func (x *OpenSessionRequest) GetOmitRawSource() bool {
+	if x != nil {
+		return x.OmitRawSource
+	}
+	return false
+}
+
+// Streamed back during and after session initialisation.
+type SessionEvent struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Event:
+	//
+	//	*SessionEvent_Progress
+	//	*SessionEvent_Ready
+	//	*SessionEvent_Error
+	Event         isSessionEvent_Event `protobuf_oneof:"event"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionEvent) Reset() {
+	*x = SessionEvent{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionEvent) ProtoMessage() {}
+
+func (x *SessionEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionEvent.ProtoReflect.Descriptor instead.
+func (*SessionEvent) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SessionEvent) GetEvent() isSessionEvent_Event {
+	if x != nil {
+		return x.Event
+	}
+	return nil
+}
+
+func (x *SessionEvent) GetProgress() *SessionProgress {
+	if x != nil {
+		if x, ok := x.Event.(*SessionEvent_Progress); ok {
+			return x.Progress
+		}
+	}
+	return nil
+}
+
+func (x *SessionEvent) GetReady() *SessionReady {
+	if x != nil {
+		if x, ok := x.Event.(*SessionEvent_Ready); ok {
+			return x.Ready
+		}
+	}
+	return nil
+}
+
+func (x *SessionEvent) GetError() *ServiceError {
+	if x != nil {
+		if x, ok := x.Event.(*SessionEvent_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isSessionEvent_Event interface {
+	isSessionEvent_Event()
+}
+
+type SessionEvent_Progress struct {
+	Progress *SessionProgress `protobuf:"bytes,1,opt,name=progress,proto3,oneof"` // Parsing / analysis updates
+}
+
+type SessionEvent_Ready struct {
+	Ready *SessionReady `protobuf:"bytes,2,opt,name=ready,proto3,oneof"` // Final event — session is usable
+}
+
+type SessionEvent_Error struct {
+	Error *ServiceError `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
+}
+
+func (*SessionEvent_Progress) isSessionEvent_Event() {}
+
+func (*SessionEvent_Ready) isSessionEvent_Event() {}
+
+func (*SessionEvent_Error) isSessionEvent_Event() {}
+
+type SessionProgress struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`  // e.g. "Parsing AST", "Building step graph"
+	Percent       uint32                 `protobuf:"varint,2,opt,name=percent,proto3" json:"percent,omitempty"` // 0–100
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionProgress) Reset() {
+	*x = SessionProgress{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionProgress) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionProgress) ProtoMessage() {}
+
+func (x *SessionProgress) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionProgress.ProtoReflect.Descriptor instead.
+func (*SessionProgress) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SessionProgress) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *SessionProgress) GetPercent() uint32 {
+	if x != nil {
+		return x.Percent
+	}
+	return 0
+}
+
+type SessionReady struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	// Flat list of all steps in the graph. Clients can render the full
+	// graph immediately without traversing edges. Use entry_step_id to
+	// identify where the walkthrough begins.
+	Steps []*Step `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
+	// Initial glossary terms identified during analysis.
+	Glossary []*GlossaryTerm `protobuf:"bytes,3,rep,name=glossary,proto3" json:"glossary,omitempty"`
+	// Language detected.
+	Language string `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
+	// Total number of steps in the graph (for progress indicators).
+	TotalSteps uint32 `protobuf:"varint,5,opt,name=total_steps,json=totalSteps,proto3" json:"total_steps,omitempty"`
+	// ID of the entry step — the root of the walkthrough.
+	EntryStepId   string `protobuf:"bytes,6,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionReady) Reset() {
+	*x = SessionReady{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionReady) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionReady) ProtoMessage() {}
+
+func (x *SessionReady) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionReady.ProtoReflect.Descriptor instead.
+func (*SessionReady) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SessionReady) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionReady) GetSteps() []*Step {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+func (x *SessionReady) GetGlossary() []*GlossaryTerm {
+	if x != nil {
+		return x.Glossary
+	}
+	return nil
+}
+
+func (x *SessionReady) GetLanguage() string {
+	if x != nil {
+		return x.Language
+	}
+	return ""
+}
+
+func (x *SessionReady) GetTotalSteps() uint32 {
+	if x != nil {
+		return x.TotalSteps
+	}
+	return 0
+}
+
+func (x *SessionReady) GetEntryStepId() string {
+	if x != nil {
+		return x.EntryStepId
+	}
+	return ""
+}
+
+type CloseSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CloseSessionRequest) Reset() {
+	*x = CloseSessionRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CloseSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloseSessionRequest) ProtoMessage() {}
+
+func (x *CloseSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloseSessionRequest.ProtoReflect.Descriptor instead.
+func (*CloseSessionRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CloseSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type CloseSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CloseSessionResponse) Reset() {
+	*x = CloseSessionResponse{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CloseSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloseSessionResponse) ProtoMessage() {}
+
+func (x *CloseSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloseSessionResponse.ProtoReflect.Descriptor instead.
+func (*CloseSessionResponse) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CloseSessionResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+type ListSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsRequest) Reset() {
+	*x = ListSessionsRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsRequest) ProtoMessage() {}
+
+func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
+func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{6}
+}
+
+type ListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*SessionSummary      `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsResponse) Reset() {
+	*x = ListSessionsResponse{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsResponse) ProtoMessage() {}
+
+func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListSessionsResponse) GetSessions() []*SessionSummary {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+type SessionSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	RepoPath      string                 `protobuf:"bytes,2,opt,name=repo_path,json=repoPath,proto3" json:"repo_path,omitempty"`
+	FilePath      string                 `protobuf:"bytes,3,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	Ref           string                 `protobuf:"bytes,4,opt,name=ref,proto3" json:"ref,omitempty"`
+	Language      string                 `protobuf:"bytes,5,opt,name=language,proto3" json:"language,omitempty"`
+	CurrentStepId string                 `protobuf:"bytes,6,opt,name=current_step_id,json=currentStepId,proto3" json:"current_step_id,omitempty"`
+	// Current narration level on a 1–10 scale. In v1 this is derived
+	// directly from the ExperienceLevel set on OpenSessionRequest.
+	// In v2 this will reflect adaptive adjustment based on session behaviour.
+	// Read-only — clients should display but not set this directly.
+	EffectiveLevel uint32 `protobuf:"varint,7,opt,name=effective_level,json=effectiveLevel,proto3" json:"effective_level,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SessionSummary) Reset() {
+	*x = SessionSummary{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionSummary) ProtoMessage() {}
+
+func (x *SessionSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionSummary.ProtoReflect.Descriptor instead.
+func (*SessionSummary) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SessionSummary) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetRepoPath() string {
+	if x != nil {
+		return x.RepoPath
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetRef() string {
+	if x != nil {
+		return x.Ref
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetLanguage() string {
+	if x != nil {
+		return x.Language
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetCurrentStepId() string {
+	if x != nil {
+		return x.CurrentStepId
+	}
+	return ""
+}
+
+func (x *SessionSummary) GetEffectiveLevel() uint32 {
+	if x != nil {
+		return x.EffectiveLevel
+	}
+	return 0
+}
+
+// A Step is a logical unit of code — a conditional, loop, function call,
+// assignment block etc. — as determined by the AST. Steps form a graph
+// (not a simple list) to model branches.
+type Step struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"` // Short human-readable label, e.g. "Check user is authenticated"
+	// Source location.
+	Span *SourceSpan `protobuf:"bytes,3,opt,name=span,proto3" json:"span,omitempty"`
+	// Navigation edges.
+	Edges []*StepEdge `protobuf:"bytes,4,rep,name=edges,proto3" json:"edges,omitempty"`
+	// Whether this step has already been narrated in this session.
+	Visited       bool     `protobuf:"varint,5,opt,name=visited,proto3" json:"visited,omitempty"`
+	Kind          StepKind `protobuf:"varint,6,opt,name=kind,proto3,enum=codewalker.v1.StepKind" json:"kind,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Step) Reset() {
+	*x = Step{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Step) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Step) ProtoMessage() {}
+
+func (x *Step) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Step.ProtoReflect.Descriptor instead.
+func (*Step) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Step) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Step) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *Step) GetSpan() *SourceSpan {
+	if x != nil {
+		return x.Span
+	}
+	return nil
+}
+
+func (x *Step) GetEdges() []*StepEdge {
+	if x != nil {
+		return x.Edges
+	}
+	return nil
+}
+
+func (x *Step) GetVisited() bool {
+	if x != nil {
+		return x.Visited
+	}
+	return false
+}
+
+func (x *Step) GetKind() StepKind {
+	if x != nil {
+		return x.Kind
+	}
+	return StepKind_STEP_KIND_UNSPECIFIED
+}
+
+type StepEdge struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	TargetStepId string                 `protobuf:"bytes,1,opt,name=target_step_id,json=targetStepId,proto3" json:"target_step_id,omitempty"`
+	Label        EdgeLabel              `protobuf:"varint,2,opt,name=label,proto3,enum=codewalker.v1.EdgeLabel" json:"label,omitempty"` // e.g. TRUE_BRANCH, FALSE_BRANCH, NEXT, CASE
+	Description  string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                   // Human readable, e.g. "user.role == admin"
+	// Whether this edge can be followed into source. False for external calls
+	// (stdlib, third-party dependencies) where no source is available in the repo.
+	Navigable bool `protobuf:"varint,4,opt,name=navigable,proto3" json:"navigable,omitempty"`
+	// Only set when navigable = false. Provides LLM summary and best-effort
+	// documentation/source links for the external symbol.
+	ExternalCallInfo *ExternalCallInfo `protobuf:"bytes,5,opt,name=external_call_info,json=externalCallInfo,proto3" json:"external_call_info,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *StepEdge) Reset() {
+	*x = StepEdge{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StepEdge) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StepEdge) ProtoMessage() {}
+
+func (x *StepEdge) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StepEdge.ProtoReflect.Descriptor instead.
+func (*StepEdge) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *StepEdge) GetTargetStepId() string {
+	if x != nil {
+		return x.TargetStepId
+	}
+	return ""
+}
+
+func (x *StepEdge) GetLabel() EdgeLabel {
+	if x != nil {
+		return x.Label
+	}
+	return EdgeLabel_EDGE_LABEL_UNSPECIFIED
+}
+
+func (x *StepEdge) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *StepEdge) GetNavigable() bool {
+	if x != nil {
+		return x.Navigable
+	}
+	return false
+}
+
+func (x *StepEdge) GetExternalCallInfo() *ExternalCallInfo {
+	if x != nil {
+		return x.ExternalCallInfo
+	}
+	return nil
+}
+
+// Metadata for calls that cannot be followed into repo source.
+// llm_summary is always populated. URLs are best-effort and only
+// included if verified reachable. source_url is pinned to a specific
+// version if a package manifest was found in the repo.
 type ExternalCallInfo struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	PackageName string                 `protobuf:"bytes,1,opt,name=package_name,json=packageName,proto3" json:"package_name,omitempty"`
-	SymbolName  string                 `protobuf:"bytes,2,opt,name=symbol_name,json=symbolName,proto3" json:"symbol_name,omitempty"`
-	// Always populated via LLM.
-	LlmSummary string `protobuf:"bytes,3,opt,name=llm_summary,json=llmSummary,proto3" json:"llm_summary,omitempty"`
-	// Best-effort; only included when verified reachable.
-	DocsUrl       string `protobuf:"bytes,4,opt,name=docs_url,json=docsUrl,proto3" json:"docs_url,omitempty"`
-	SourceUrl     string `protobuf:"bytes,5,opt,name=source_url,json=sourceUrl,proto3" json:"source_url,omitempty"`
-	Version       string `protobuf:"bytes,6,opt,name=version,proto3" json:"version,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PackageName   string                 `protobuf:"bytes,1,opt,name=package_name,json=packageName,proto3" json:"package_name,omitempty"`
+	SymbolName    string                 `protobuf:"bytes,2,opt,name=symbol_name,json=symbolName,proto3" json:"symbol_name,omitempty"`
+	LlmSummary    string                 `protobuf:"bytes,3,opt,name=llm_summary,json=llmSummary,proto3" json:"llm_summary,omitempty"` // Always populated — general knowledge summary
+	DocsUrl       string                 `protobuf:"bytes,4,opt,name=docs_url,json=docsUrl,proto3" json:"docs_url,omitempty"`          // e.g. https://pkg.go.dev/github.com/stripe/stripe-go#Charge
+	SourceUrl     string                 `protobuf:"bytes,5,opt,name=source_url,json=sourceUrl,proto3" json:"source_url,omitempty"`    // e.g. https://github.com/stripe/stripe-go/blob/v72.122.0/charge.go#L42
+	Version       string                 `protobuf:"bytes,6,opt,name=version,proto3" json:"version,omitempty"`                         // Resolved version if manifest found, empty otherwise
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExternalCallInfo) Reset() {
 	*x = ExternalCallInfo{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[1]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -428,7 +1226,7 @@ func (x *ExternalCallInfo) String() string {
 func (*ExternalCallInfo) ProtoMessage() {}
 
 func (x *ExternalCallInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[1]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -441,7 +1239,7 @@ func (x *ExternalCallInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalCallInfo.ProtoReflect.Descriptor instead.
 func (*ExternalCallInfo) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ExternalCallInfo) GetPackageName() string {
@@ -486,110 +1284,32 @@ func (x *ExternalCallInfo) GetVersion() string {
 	return ""
 }
 
-type StepEdge struct {
-	state        protoimpl.MessageState `protogen:"open.v1"`
-	TargetStepId string                 `protobuf:"bytes,1,opt,name=target_step_id,json=targetStepId,proto3" json:"target_step_id,omitempty"`
-	Label        EdgeLabel              `protobuf:"varint,2,opt,name=label,proto3,enum=codewalker.v1.EdgeLabel" json:"label,omitempty"`
-	Description  string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Navigable    bool                   `protobuf:"varint,4,opt,name=navigable,proto3" json:"navigable,omitempty"`
-	// Set only when navigable = false.
-	ExternalCallInfo *ExternalCallInfo `protobuf:"bytes,5,opt,name=external_call_info,json=externalCallInfo,proto3" json:"external_call_info,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *StepEdge) Reset() {
-	*x = StepEdge{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StepEdge) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StepEdge) ProtoMessage() {}
-
-func (x *StepEdge) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use StepEdge.ProtoReflect.Descriptor instead.
-func (*StepEdge) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *StepEdge) GetTargetStepId() string {
-	if x != nil {
-		return x.TargetStepId
-	}
-	return ""
-}
-
-func (x *StepEdge) GetLabel() EdgeLabel {
-	if x != nil {
-		return x.Label
-	}
-	return EdgeLabel_EDGE_LABEL_UNSPECIFIED
-}
-
-func (x *StepEdge) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *StepEdge) GetNavigable() bool {
-	if x != nil {
-		return x.Navigable
-	}
-	return false
-}
-
-func (x *StepEdge) GetExternalCallInfo() *ExternalCallInfo {
-	if x != nil {
-		return x.ExternalCallInfo
-	}
-	return nil
-}
-
-type Step struct {
+type SourceSpan struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
-	Source        *SourceSpan            `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
-	Edges         []*StepEdge            `protobuf:"bytes,4,rep,name=edges,proto3" json:"edges,omitempty"`
-	Visited       bool                   `protobuf:"varint,5,opt,name=visited,proto3" json:"visited,omitempty"`
-	Kind          StepKind               `protobuf:"varint,6,opt,name=kind,proto3,enum=codewalker.v1.StepKind" json:"kind,omitempty"`
+	StartLine     uint32                 `protobuf:"varint,1,opt,name=start_line,json=startLine,proto3" json:"start_line,omitempty"`
+	StartColumn   uint32                 `protobuf:"varint,2,opt,name=start_column,json=startColumn,proto3" json:"start_column,omitempty"`
+	EndLine       uint32                 `protobuf:"varint,3,opt,name=end_line,json=endLine,proto3" json:"end_line,omitempty"`
+	EndColumn     uint32                 `protobuf:"varint,4,opt,name=end_column,json=endColumn,proto3" json:"end_column,omitempty"`
+	RawSource     string                 `protobuf:"bytes,5,opt,name=raw_source,json=rawSource,proto3" json:"raw_source,omitempty"` // The actual code slice for this step
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Step) Reset() {
-	*x = Step{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[3]
+func (x *SourceSpan) Reset() {
+	*x = SourceSpan{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Step) String() string {
+func (x *SourceSpan) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Step) ProtoMessage() {}
+func (*SourceSpan) ProtoMessage() {}
 
-func (x *Step) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[3]
+func (x *SourceSpan) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -600,58 +1320,423 @@ func (x *Step) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Step.ProtoReflect.Descriptor instead.
-func (*Step) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use SourceSpan.ProtoReflect.Descriptor instead.
+func (*SourceSpan) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *Step) GetId() string {
+func (x *SourceSpan) GetStartLine() uint32 {
 	if x != nil {
-		return x.Id
+		return x.StartLine
+	}
+	return 0
+}
+
+func (x *SourceSpan) GetStartColumn() uint32 {
+	if x != nil {
+		return x.StartColumn
+	}
+	return 0
+}
+
+func (x *SourceSpan) GetEndLine() uint32 {
+	if x != nil {
+		return x.EndLine
+	}
+	return 0
+}
+
+func (x *SourceSpan) GetEndColumn() uint32 {
+	if x != nil {
+		return x.EndColumn
+	}
+	return 0
+}
+
+func (x *SourceSpan) GetRawSource() string {
+	if x != nil {
+		return x.RawSource
 	}
 	return ""
 }
 
-func (x *Step) GetLabel() string {
+type NavigateRequest struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	// Types that are valid to be assigned to Destination:
+	//
+	//	*NavigateRequest_Direction
+	//	*NavigateRequest_StepId
+	//	*NavigateRequest_FollowEdge
+	Destination   isNavigateRequest_Destination `protobuf_oneof:"destination"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NavigateRequest) Reset() {
+	*x = NavigateRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NavigateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NavigateRequest) ProtoMessage() {}
+
+func (x *NavigateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[13]
 	if x != nil {
-		return x.Label
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NavigateRequest.ProtoReflect.Descriptor instead.
+func (*NavigateRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *NavigateRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
 	}
 	return ""
 }
 
-func (x *Step) GetSource() *SourceSpan {
+func (x *NavigateRequest) GetDestination() isNavigateRequest_Destination {
 	if x != nil {
-		return x.Source
+		return x.Destination
 	}
 	return nil
 }
 
-func (x *Step) GetEdges() []*StepEdge {
+func (x *NavigateRequest) GetDirection() SimpleDirection {
 	if x != nil {
-		return x.Edges
+		if x, ok := x.Destination.(*NavigateRequest_Direction); ok {
+			return x.Direction
+		}
+	}
+	return SimpleDirection_SIMPLE_DIRECTION_UNSPECIFIED
+}
+
+func (x *NavigateRequest) GetStepId() string {
+	if x != nil {
+		if x, ok := x.Destination.(*NavigateRequest_StepId); ok {
+			return x.StepId
+		}
+	}
+	return ""
+}
+
+func (x *NavigateRequest) GetFollowEdge() EdgeLabel {
+	if x != nil {
+		if x, ok := x.Destination.(*NavigateRequest_FollowEdge); ok {
+			return x.FollowEdge
+		}
+	}
+	return EdgeLabel_EDGE_LABEL_UNSPECIFIED
+}
+
+type isNavigateRequest_Destination interface {
+	isNavigateRequest_Destination()
+}
+
+type NavigateRequest_Direction struct {
+	Direction SimpleDirection `protobuf:"varint,2,opt,name=direction,proto3,enum=codewalker.v1.SimpleDirection,oneof"` // FORWARD or BACK
+}
+
+type NavigateRequest_StepId struct {
+	StepId string `protobuf:"bytes,3,opt,name=step_id,json=stepId,proto3,oneof"` // Jump directly to a known step ID
+}
+
+type NavigateRequest_FollowEdge struct {
+	FollowEdge EdgeLabel `protobuf:"varint,4,opt,name=follow_edge,json=followEdge,proto3,enum=codewalker.v1.EdgeLabel,oneof"` // Follow a specific edge type from current step
+}
+
+func (*NavigateRequest_Direction) isNavigateRequest_Destination() {}
+
+func (*NavigateRequest_StepId) isNavigateRequest_Destination() {}
+
+func (*NavigateRequest_FollowEdge) isNavigateRequest_Destination() {}
+
+// Streamed back for Navigate, Rephrase, and ExpandTerm.
+type NarrateEvent struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Event:
+	//
+	//	*NarrateEvent_Token
+	//	*NarrateEvent_Complete
+	//	*NarrateEvent_Error
+	Event         isNarrateEvent_Event `protobuf_oneof:"event"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NarrateEvent) Reset() {
+	*x = NarrateEvent{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NarrateEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NarrateEvent) ProtoMessage() {}
+
+func (x *NarrateEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NarrateEvent.ProtoReflect.Descriptor instead.
+func (*NarrateEvent) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *NarrateEvent) GetEvent() isNarrateEvent_Event {
+	if x != nil {
+		return x.Event
 	}
 	return nil
 }
 
-func (x *Step) GetVisited() bool {
+func (x *NarrateEvent) GetToken() *NarrateToken {
 	if x != nil {
-		return x.Visited
+		if x, ok := x.Event.(*NarrateEvent_Token); ok {
+			return x.Token
+		}
 	}
-	return false
+	return nil
 }
 
-func (x *Step) GetKind() StepKind {
+func (x *NarrateEvent) GetComplete() *StepComplete {
 	if x != nil {
-		return x.Kind
+		if x, ok := x.Event.(*NarrateEvent_Complete); ok {
+			return x.Complete
+		}
 	}
-	return StepKind_STEP_KIND_UNSPECIFIED
+	return nil
+}
+
+func (x *NarrateEvent) GetError() *ServiceError {
+	if x != nil {
+		if x, ok := x.Event.(*NarrateEvent_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isNarrateEvent_Event interface {
+	isNarrateEvent_Event()
+}
+
+type NarrateEvent_Token struct {
+	Token *NarrateToken `protobuf:"bytes,1,opt,name=token,proto3,oneof"` // Streaming LLM token
+}
+
+type NarrateEvent_Complete struct {
+	Complete *StepComplete `protobuf:"bytes,2,opt,name=complete,proto3,oneof"` // Final event for this narration
+}
+
+type NarrateEvent_Error struct {
+	Error *ServiceError `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
+}
+
+func (*NarrateEvent_Token) isNarrateEvent_Event() {}
+
+func (*NarrateEvent_Complete) isNarrateEvent_Event() {}
+
+func (*NarrateEvent_Error) isNarrateEvent_Event() {}
+
+type NarrateToken struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NarrateToken) Reset() {
+	*x = NarrateToken{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NarrateToken) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NarrateToken) ProtoMessage() {}
+
+func (x *NarrateToken) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NarrateToken.ProtoReflect.Descriptor instead.
+func (*NarrateToken) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *NarrateToken) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type StepComplete struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	StepId string                 `protobuf:"bytes,1,opt,name=step_id,json=stepId,proto3" json:"step_id,omitempty"`
+	// Any new glossary terms surfaced during this narration.
+	NewTerms []*GlossaryTerm `protobuf:"bytes,2,rep,name=new_terms,json=newTerms,proto3" json:"new_terms,omitempty"`
+	// Navigation options available from this step (for UI rendering).
+	AvailableEdges []*StepEdge `protobuf:"bytes,3,rep,name=available_edges,json=availableEdges,proto3" json:"available_edges,omitempty"`
+	// Breadcrumb trail of step IDs visited so far this session.
+	Breadcrumb    []string `protobuf:"bytes,4,rep,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StepComplete) Reset() {
+	*x = StepComplete{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StepComplete) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StepComplete) ProtoMessage() {}
+
+func (x *StepComplete) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StepComplete.ProtoReflect.Descriptor instead.
+func (*StepComplete) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *StepComplete) GetStepId() string {
+	if x != nil {
+		return x.StepId
+	}
+	return ""
+}
+
+func (x *StepComplete) GetNewTerms() []*GlossaryTerm {
+	if x != nil {
+		return x.NewTerms
+	}
+	return nil
+}
+
+func (x *StepComplete) GetAvailableEdges() []*StepEdge {
+	if x != nil {
+		return x.AvailableEdges
+	}
+	return nil
+}
+
+func (x *StepComplete) GetBreadcrumb() []string {
+	if x != nil {
+		return x.Breadcrumb
+	}
+	return nil
+}
+
+type RephraseRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Mode          RephraseMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=codewalker.v1.RephraseMode" json:"mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RephraseRequest) Reset() {
+	*x = RephraseRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RephraseRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RephraseRequest) ProtoMessage() {}
+
+func (x *RephraseRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RephraseRequest.ProtoReflect.Descriptor instead.
+func (*RephraseRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *RephraseRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *RephraseRequest) GetMode() RephraseMode {
+	if x != nil {
+		return x.Mode
+	}
+	return RephraseMode_REPHRASE_MODE_UNSPECIFIED
 }
 
 type GlossaryTerm struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Term          string                 `protobuf:"bytes,1,opt,name=term,proto3" json:"term,omitempty"`
-	Definition    string                 `protobuf:"bytes,2,opt,name=definition,proto3" json:"definition,omitempty"`
-	StepId        string                 `protobuf:"bytes,3,opt,name=step_id,json=stepId,proto3" json:"step_id,omitempty"`
+	Definition    string                 `protobuf:"bytes,2,opt,name=definition,proto3" json:"definition,omitempty"`       // Brief inline definition
+	StepId        string                 `protobuf:"bytes,3,opt,name=step_id,json=stepId,proto3" json:"step_id,omitempty"` // Step where this term first appeared
 	Kind          TermKind               `protobuf:"varint,4,opt,name=kind,proto3,enum=codewalker.v1.TermKind" json:"kind,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -659,7 +1744,7 @@ type GlossaryTerm struct {
 
 func (x *GlossaryTerm) Reset() {
 	*x = GlossaryTerm{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[4]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -671,7 +1756,7 @@ func (x *GlossaryTerm) String() string {
 func (*GlossaryTerm) ProtoMessage() {}
 
 func (x *GlossaryTerm) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[4]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -684,7 +1769,7 @@ func (x *GlossaryTerm) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GlossaryTerm.ProtoReflect.Descriptor instead.
 func (*GlossaryTerm) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GlossaryTerm) GetTerm() string {
@@ -715,645 +1800,17 @@ func (x *GlossaryTerm) GetKind() TermKind {
 	return TermKind_TERM_KIND_UNSPECIFIED
 }
 
-type OpenSessionRequest struct {
-	state    protoimpl.MessageState `protogen:"open.v1"`
-	RepoPath string                 `protobuf:"bytes,1,opt,name=repo_path,json=repoPath,proto3" json:"repo_path,omitempty"`
-	FilePath string                 `protobuf:"bytes,2,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
-	GitRef   string                 `protobuf:"bytes,3,opt,name=git_ref,json=gitRef,proto3" json:"git_ref,omitempty"`
-	// Entry-point symbol. If empty, the first top-level function is used.
-	Symbol          string          `protobuf:"bytes,4,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	ExperienceLevel ExperienceLevel `protobuf:"varint,5,opt,name=experience_level,json=experienceLevel,proto3,enum=codewalker.v1.ExperienceLevel" json:"experience_level,omitempty"`
-	// Set true for clients (IDE plugins) that can read files themselves.
-	OmitRawSource bool `protobuf:"varint,6,opt,name=omit_raw_source,json=omitRawSource,proto3" json:"omit_raw_source,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OpenSessionRequest) Reset() {
-	*x = OpenSessionRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OpenSessionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OpenSessionRequest) ProtoMessage() {}
-
-func (x *OpenSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OpenSessionRequest.ProtoReflect.Descriptor instead.
-func (*OpenSessionRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *OpenSessionRequest) GetRepoPath() string {
-	if x != nil {
-		return x.RepoPath
-	}
-	return ""
-}
-
-func (x *OpenSessionRequest) GetFilePath() string {
-	if x != nil {
-		return x.FilePath
-	}
-	return ""
-}
-
-func (x *OpenSessionRequest) GetGitRef() string {
-	if x != nil {
-		return x.GitRef
-	}
-	return ""
-}
-
-func (x *OpenSessionRequest) GetSymbol() string {
-	if x != nil {
-		return x.Symbol
-	}
-	return ""
-}
-
-func (x *OpenSessionRequest) GetExperienceLevel() ExperienceLevel {
-	if x != nil {
-		return x.ExperienceLevel
-	}
-	return ExperienceLevel_EXPERIENCE_LEVEL_UNSPECIFIED
-}
-
-func (x *OpenSessionRequest) GetOmitRawSource() bool {
-	if x != nil {
-		return x.OmitRawSource
-	}
-	return false
-}
-
-type SessionProgress struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	Progress      uint32                 `protobuf:"varint,2,opt,name=progress,proto3" json:"progress,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SessionProgress) Reset() {
-	*x = SessionProgress{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SessionProgress) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SessionProgress) ProtoMessage() {}
-
-func (x *SessionProgress) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SessionProgress.ProtoReflect.Descriptor instead.
-func (*SessionProgress) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *SessionProgress) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *SessionProgress) GetProgress() uint32 {
-	if x != nil {
-		return x.Progress
-	}
-	return 0
-}
-
-type SessionReady struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Steps         []*Step                `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
-	Glossary      []*GlossaryTerm        `protobuf:"bytes,3,rep,name=glossary,proto3" json:"glossary,omitempty"`
-	Language      string                 `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
-	TotalSteps    int32                  `protobuf:"varint,5,opt,name=total_steps,json=totalSteps,proto3" json:"total_steps,omitempty"`
-	EntryStepId   string                 `protobuf:"bytes,6,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SessionReady) Reset() {
-	*x = SessionReady{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SessionReady) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SessionReady) ProtoMessage() {}
-
-func (x *SessionReady) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SessionReady.ProtoReflect.Descriptor instead.
-func (*SessionReady) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *SessionReady) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *SessionReady) GetSteps() []*Step {
-	if x != nil {
-		return x.Steps
-	}
-	return nil
-}
-
-func (x *SessionReady) GetGlossary() []*GlossaryTerm {
-	if x != nil {
-		return x.Glossary
-	}
-	return nil
-}
-
-func (x *SessionReady) GetLanguage() string {
-	if x != nil {
-		return x.Language
-	}
-	return ""
-}
-
-func (x *SessionReady) GetTotalSteps() int32 {
-	if x != nil {
-		return x.TotalSteps
-	}
-	return 0
-}
-
-func (x *SessionReady) GetEntryStepId() string {
-	if x != nil {
-		return x.EntryStepId
-	}
-	return ""
-}
-
-type SessionEvent struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Event:
-	//
-	//	*SessionEvent_Progress
-	//	*SessionEvent_Ready
-	Event         isSessionEvent_Event `protobuf_oneof:"event"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SessionEvent) Reset() {
-	*x = SessionEvent{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SessionEvent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SessionEvent) ProtoMessage() {}
-
-func (x *SessionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SessionEvent.ProtoReflect.Descriptor instead.
-func (*SessionEvent) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *SessionEvent) GetEvent() isSessionEvent_Event {
-	if x != nil {
-		return x.Event
-	}
-	return nil
-}
-
-func (x *SessionEvent) GetProgress() *SessionProgress {
-	if x != nil {
-		if x, ok := x.Event.(*SessionEvent_Progress); ok {
-			return x.Progress
-		}
-	}
-	return nil
-}
-
-func (x *SessionEvent) GetReady() *SessionReady {
-	if x != nil {
-		if x, ok := x.Event.(*SessionEvent_Ready); ok {
-			return x.Ready
-		}
-	}
-	return nil
-}
-
-type isSessionEvent_Event interface {
-	isSessionEvent_Event()
-}
-
-type SessionEvent_Progress struct {
-	Progress *SessionProgress `protobuf:"bytes,1,opt,name=progress,proto3,oneof"`
-}
-
-type SessionEvent_Ready struct {
-	Ready *SessionReady `protobuf:"bytes,2,opt,name=ready,proto3,oneof"`
-}
-
-func (*SessionEvent_Progress) isSessionEvent_Event() {}
-
-func (*SessionEvent_Ready) isSessionEvent_Event() {}
-
-// Returned inside NarrateEvent.StepComplete and ExpandTerm responses.
-type SessionSummary struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	// Read-only; mapped from ExperienceLevel by adaptation.go.
-	EffectiveLevel int32    `protobuf:"varint,2,opt,name=effective_level,json=effectiveLevel,proto3" json:"effective_level,omitempty"`
-	CurrentStepId  string   `protobuf:"bytes,3,opt,name=current_step_id,json=currentStepId,proto3" json:"current_step_id,omitempty"`
-	Breadcrumb     []string `protobuf:"bytes,4,rep,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *SessionSummary) Reset() {
-	*x = SessionSummary{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SessionSummary) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SessionSummary) ProtoMessage() {}
-
-func (x *SessionSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SessionSummary.ProtoReflect.Descriptor instead.
-func (*SessionSummary) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *SessionSummary) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *SessionSummary) GetEffectiveLevel() int32 {
-	if x != nil {
-		return x.EffectiveLevel
-	}
-	return 0
-}
-
-func (x *SessionSummary) GetCurrentStepId() string {
-	if x != nil {
-		return x.CurrentStepId
-	}
-	return ""
-}
-
-func (x *SessionSummary) GetBreadcrumb() []string {
-	if x != nil {
-		return x.Breadcrumb
-	}
-	return nil
-}
-
-type NavigateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	TargetStepId  string                 `protobuf:"bytes,2,opt,name=target_step_id,json=targetStepId,proto3" json:"target_step_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NavigateRequest) Reset() {
-	*x = NavigateRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NavigateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NavigateRequest) ProtoMessage() {}
-
-func (x *NavigateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NavigateRequest.ProtoReflect.Descriptor instead.
-func (*NavigateRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *NavigateRequest) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *NavigateRequest) GetTargetStepId() string {
-	if x != nil {
-		return x.TargetStepId
-	}
-	return ""
-}
-
-type StepComplete struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	NewGlossaryTerms []*GlossaryTerm        `protobuf:"bytes,1,rep,name=new_glossary_terms,json=newGlossaryTerms,proto3" json:"new_glossary_terms,omitempty"`
-	AvailableEdges   []*StepEdge            `protobuf:"bytes,2,rep,name=available_edges,json=availableEdges,proto3" json:"available_edges,omitempty"`
-	Breadcrumb       []string               `protobuf:"bytes,3,rep,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
-	SessionSummary   *SessionSummary        `protobuf:"bytes,4,opt,name=session_summary,json=sessionSummary,proto3" json:"session_summary,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *StepComplete) Reset() {
-	*x = StepComplete{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StepComplete) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StepComplete) ProtoMessage() {}
-
-func (x *StepComplete) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use StepComplete.ProtoReflect.Descriptor instead.
-func (*StepComplete) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *StepComplete) GetNewGlossaryTerms() []*GlossaryTerm {
-	if x != nil {
-		return x.NewGlossaryTerms
-	}
-	return nil
-}
-
-func (x *StepComplete) GetAvailableEdges() []*StepEdge {
-	if x != nil {
-		return x.AvailableEdges
-	}
-	return nil
-}
-
-func (x *StepComplete) GetBreadcrumb() []string {
-	if x != nil {
-		return x.Breadcrumb
-	}
-	return nil
-}
-
-func (x *StepComplete) GetSessionSummary() *SessionSummary {
-	if x != nil {
-		return x.SessionSummary
-	}
-	return nil
-}
-
-type NarrateEvent struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Event:
-	//
-	//	*NarrateEvent_Token
-	//	*NarrateEvent_StepComplete
-	Event         isNarrateEvent_Event `protobuf_oneof:"event"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NarrateEvent) Reset() {
-	*x = NarrateEvent{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NarrateEvent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NarrateEvent) ProtoMessage() {}
-
-func (x *NarrateEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NarrateEvent.ProtoReflect.Descriptor instead.
-func (*NarrateEvent) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *NarrateEvent) GetEvent() isNarrateEvent_Event {
-	if x != nil {
-		return x.Event
-	}
-	return nil
-}
-
-func (x *NarrateEvent) GetToken() string {
-	if x != nil {
-		if x, ok := x.Event.(*NarrateEvent_Token); ok {
-			return x.Token
-		}
-	}
-	return ""
-}
-
-func (x *NarrateEvent) GetStepComplete() *StepComplete {
-	if x != nil {
-		if x, ok := x.Event.(*NarrateEvent_StepComplete); ok {
-			return x.StepComplete
-		}
-	}
-	return nil
-}
-
-type isNarrateEvent_Event interface {
-	isNarrateEvent_Event()
-}
-
-type NarrateEvent_Token struct {
-	Token string `protobuf:"bytes,1,opt,name=token,proto3,oneof"`
-}
-
-type NarrateEvent_StepComplete struct {
-	StepComplete *StepComplete `protobuf:"bytes,2,opt,name=step_complete,json=stepComplete,proto3,oneof"`
-}
-
-func (*NarrateEvent_Token) isNarrateEvent_Event() {}
-
-func (*NarrateEvent_StepComplete) isNarrateEvent_Event() {}
-
-type RephraseRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Mode          RephraseMode           `protobuf:"varint,2,opt,name=mode,proto3,enum=codewalker.v1.RephraseMode" json:"mode,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RephraseRequest) Reset() {
-	*x = RephraseRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RephraseRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RephraseRequest) ProtoMessage() {}
-
-func (x *RephraseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RephraseRequest.ProtoReflect.Descriptor instead.
-func (*RephraseRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *RephraseRequest) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *RephraseRequest) GetMode() RephraseMode {
-	if x != nil {
-		return x.Mode
-	}
-	return RephraseMode_REPHRASE_MODE_UNSPECIFIED
-}
-
 type ExpandTermRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Term          string                 `protobuf:"bytes,2,opt,name=term,proto3" json:"term,omitempty"`
+	Term          string                 `protobuf:"bytes,2,opt,name=term,proto3" json:"term,omitempty"` // Must match a term in the session glossary
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExpandTermRequest) Reset() {
 	*x = ExpandTermRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[14]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1365,7 +1822,7 @@ func (x *ExpandTermRequest) String() string {
 func (*ExpandTermRequest) ProtoMessage() {}
 
 func (x *ExpandTermRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[14]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1378,7 +1835,7 @@ func (x *ExpandTermRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExpandTermRequest.ProtoReflect.Descriptor instead.
 func (*ExpandTermRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{14}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ExpandTermRequest) GetSessionId() string {
@@ -1395,21 +1852,125 @@ func (x *ExpandTermRequest) GetTerm() string {
 	return ""
 }
 
+type ServiceError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          ErrorCode              `protobuf:"varint,1,opt,name=code,proto3,enum=codewalker.v1.ErrorCode" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Details       string                 `protobuf:"bytes,3,opt,name=details,proto3" json:"details,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServiceError) Reset() {
+	*x = ServiceError{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServiceError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceError) ProtoMessage() {}
+
+func (x *ServiceError) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceError.ProtoReflect.Descriptor instead.
+func (*ServiceError) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ServiceError) GetCode() ErrorCode {
+	if x != nil {
+		return x.Code
+	}
+	return ErrorCode_ERROR_CODE_UNSPECIFIED
+}
+
+func (x *ServiceError) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ServiceError) GetDetails() string {
+	if x != nil {
+		return x.Details
+	}
+	return ""
+}
+
 var File_codewalker_v1_codewalker_proto protoreflect.FileDescriptor
 
 const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\n" +
-	"\x1ecodewalker/v1/codewalker.proto\x12\rcodewalker.v1\"\xb8\x01\n" +
+	"\x1ecodewalker/v1/codewalker.proto\x12\rcodewalker.v1\"\xeb\x01\n" +
+	"\x12OpenSessionRequest\x12\x1b\n" +
+	"\trepo_path\x18\x01 \x01(\tR\brepoPath\x12\x1b\n" +
+	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x10\n" +
+	"\x03ref\x18\x03 \x01(\tR\x03ref\x12\x16\n" +
+	"\x06symbol\x18\x04 \x01(\tR\x06symbol\x12I\n" +
+	"\x10experience_level\x18\x05 \x01(\x0e2\x1e.codewalker.v1.ExperienceLevelR\x0fexperienceLevel\x12&\n" +
+	"\x0fomit_raw_source\x18\x06 \x01(\bR\romitRawSource\"\xbf\x01\n" +
+	"\fSessionEvent\x12<\n" +
+	"\bprogress\x18\x01 \x01(\v2\x1e.codewalker.v1.SessionProgressH\x00R\bprogress\x123\n" +
+	"\x05ready\x18\x02 \x01(\v2\x1b.codewalker.v1.SessionReadyH\x00R\x05ready\x123\n" +
+	"\x05error\x18\x03 \x01(\v2\x1b.codewalker.v1.ServiceErrorH\x00R\x05errorB\a\n" +
+	"\x05event\"E\n" +
+	"\x0fSessionProgress\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
+	"\apercent\x18\x02 \x01(\rR\apercent\"\xf2\x01\n" +
+	"\fSessionReady\x12\x1d\n" +
 	"\n" +
-	"SourceSpan\x12\x1b\n" +
-	"\tfile_path\x18\x01 \x01(\tR\bfilePath\x12\x1d\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12)\n" +
+	"\x05steps\x18\x02 \x03(\v2\x13.codewalker.v1.StepR\x05steps\x127\n" +
+	"\bglossary\x18\x03 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\bglossary\x12\x1a\n" +
+	"\blanguage\x18\x04 \x01(\tR\blanguage\x12\x1f\n" +
+	"\vtotal_steps\x18\x05 \x01(\rR\n" +
+	"totalSteps\x12\"\n" +
+	"\rentry_step_id\x18\x06 \x01(\tR\ventryStepId\"4\n" +
+	"\x13CloseSessionRequest\x12\x1d\n" +
 	"\n" +
-	"start_line\x18\x02 \x01(\x05R\tstartLine\x12\x19\n" +
-	"\bend_line\x18\x03 \x01(\x05R\aendLine\x12\x1b\n" +
-	"\tstart_col\x18\x04 \x01(\x05R\bstartCol\x12\x17\n" +
-	"\aend_col\x18\x05 \x01(\x05R\x06endCol\x12\x1d\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"&\n" +
+	"\x14CloseSessionResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\"\x15\n" +
+	"\x13ListSessionsRequest\"Q\n" +
+	"\x14ListSessionsResponse\x129\n" +
+	"\bsessions\x18\x01 \x03(\v2\x1d.codewalker.v1.SessionSummaryR\bsessions\"\xe8\x01\n" +
+	"\x0eSessionSummary\x12\x1d\n" +
 	"\n" +
-	"raw_source\x18\x06 \x01(\tR\trawSource\"\xcb\x01\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\trepo_path\x18\x02 \x01(\tR\brepoPath\x12\x1b\n" +
+	"\tfile_path\x18\x03 \x01(\tR\bfilePath\x12\x10\n" +
+	"\x03ref\x18\x04 \x01(\tR\x03ref\x12\x1a\n" +
+	"\blanguage\x18\x05 \x01(\tR\blanguage\x12&\n" +
+	"\x0fcurrent_step_id\x18\x06 \x01(\tR\rcurrentStepId\x12'\n" +
+	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\"\xd1\x01\n" +
+	"\x04Step\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\x12-\n" +
+	"\x04span\x18\x03 \x01(\v2\x19.codewalker.v1.SourceSpanR\x04span\x12-\n" +
+	"\x05edges\x18\x04 \x03(\v2\x17.codewalker.v1.StepEdgeR\x05edges\x12\x18\n" +
+	"\avisited\x18\x05 \x01(\bR\avisited\x12+\n" +
+	"\x04kind\x18\x06 \x01(\x0e2\x17.codewalker.v1.StepKindR\x04kind\"\xef\x01\n" +
+	"\bStepEdge\x12$\n" +
+	"\x0etarget_step_id\x18\x01 \x01(\tR\ftargetStepId\x12.\n" +
+	"\x05label\x18\x02 \x01(\x0e2\x18.codewalker.v1.EdgeLabelR\x05label\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
+	"\tnavigable\x18\x04 \x01(\bR\tnavigable\x12M\n" +
+	"\x12external_call_info\x18\x05 \x01(\v2\x1f.codewalker.v1.ExternalCallInfoR\x10externalCallInfo\"\xcb\x01\n" +
 	"\x10ExternalCallInfo\x12!\n" +
 	"\fpackage_name\x18\x01 \x01(\tR\vpackageName\x12\x1f\n" +
 	"\vsymbol_name\x18\x02 \x01(\tR\n" +
@@ -1419,123 +1980,116 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\bdocs_url\x18\x04 \x01(\tR\adocsUrl\x12\x1d\n" +
 	"\n" +
 	"source_url\x18\x05 \x01(\tR\tsourceUrl\x12\x18\n" +
-	"\aversion\x18\x06 \x01(\tR\aversion\"\xef\x01\n" +
-	"\bStepEdge\x12$\n" +
-	"\x0etarget_step_id\x18\x01 \x01(\tR\ftargetStepId\x12.\n" +
-	"\x05label\x18\x02 \x01(\x0e2\x18.codewalker.v1.EdgeLabelR\x05label\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
-	"\tnavigable\x18\x04 \x01(\bR\tnavigable\x12M\n" +
-	"\x12external_call_info\x18\x05 \x01(\v2\x1f.codewalker.v1.ExternalCallInfoR\x10externalCallInfo\"\xd5\x01\n" +
-	"\x04Step\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05label\x18\x02 \x01(\tR\x05label\x121\n" +
-	"\x06source\x18\x03 \x01(\v2\x19.codewalker.v1.SourceSpanR\x06source\x12-\n" +
-	"\x05edges\x18\x04 \x03(\v2\x17.codewalker.v1.StepEdgeR\x05edges\x12\x18\n" +
-	"\avisited\x18\x05 \x01(\bR\avisited\x12+\n" +
-	"\x04kind\x18\x06 \x01(\x0e2\x17.codewalker.v1.StepKindR\x04kind\"\x88\x01\n" +
+	"\aversion\x18\x06 \x01(\tR\aversion\"\xa7\x01\n" +
+	"\n" +
+	"SourceSpan\x12\x1d\n" +
+	"\n" +
+	"start_line\x18\x01 \x01(\rR\tstartLine\x12!\n" +
+	"\fstart_column\x18\x02 \x01(\rR\vstartColumn\x12\x19\n" +
+	"\bend_line\x18\x03 \x01(\rR\aendLine\x12\x1d\n" +
+	"\n" +
+	"end_column\x18\x04 \x01(\rR\tendColumn\x12\x1d\n" +
+	"\n" +
+	"raw_source\x18\x05 \x01(\tR\trawSource\"\xd7\x01\n" +
+	"\x0fNavigateRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12>\n" +
+	"\tdirection\x18\x02 \x01(\x0e2\x1e.codewalker.v1.SimpleDirectionH\x00R\tdirection\x12\x19\n" +
+	"\astep_id\x18\x03 \x01(\tH\x00R\x06stepId\x12;\n" +
+	"\vfollow_edge\x18\x04 \x01(\x0e2\x18.codewalker.v1.EdgeLabelH\x00R\n" +
+	"followEdgeB\r\n" +
+	"\vdestination\"\xbc\x01\n" +
+	"\fNarrateEvent\x123\n" +
+	"\x05token\x18\x01 \x01(\v2\x1b.codewalker.v1.NarrateTokenH\x00R\x05token\x129\n" +
+	"\bcomplete\x18\x02 \x01(\v2\x1b.codewalker.v1.StepCompleteH\x00R\bcomplete\x123\n" +
+	"\x05error\x18\x03 \x01(\v2\x1b.codewalker.v1.ServiceErrorH\x00R\x05errorB\a\n" +
+	"\x05event\"\"\n" +
+	"\fNarrateToken\x12\x12\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\"\xc3\x01\n" +
+	"\fStepComplete\x12\x17\n" +
+	"\astep_id\x18\x01 \x01(\tR\x06stepId\x128\n" +
+	"\tnew_terms\x18\x02 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\bnewTerms\x12@\n" +
+	"\x0favailable_edges\x18\x03 \x03(\v2\x17.codewalker.v1.StepEdgeR\x0eavailableEdges\x12\x1e\n" +
+	"\n" +
+	"breadcrumb\x18\x04 \x03(\tR\n" +
+	"breadcrumb\"a\n" +
+	"\x0fRephraseRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12/\n" +
+	"\x04mode\x18\x02 \x01(\x0e2\x1b.codewalker.v1.RephraseModeR\x04mode\"\x88\x01\n" +
 	"\fGlossaryTerm\x12\x12\n" +
 	"\x04term\x18\x01 \x01(\tR\x04term\x12\x1e\n" +
 	"\n" +
 	"definition\x18\x02 \x01(\tR\n" +
 	"definition\x12\x17\n" +
 	"\astep_id\x18\x03 \x01(\tR\x06stepId\x12+\n" +
-	"\x04kind\x18\x04 \x01(\x0e2\x17.codewalker.v1.TermKindR\x04kind\"\xf2\x01\n" +
-	"\x12OpenSessionRequest\x12\x1b\n" +
-	"\trepo_path\x18\x01 \x01(\tR\brepoPath\x12\x1b\n" +
-	"\tfile_path\x18\x02 \x01(\tR\bfilePath\x12\x17\n" +
-	"\agit_ref\x18\x03 \x01(\tR\x06gitRef\x12\x16\n" +
-	"\x06symbol\x18\x04 \x01(\tR\x06symbol\x12I\n" +
-	"\x10experience_level\x18\x05 \x01(\x0e2\x1e.codewalker.v1.ExperienceLevelR\x0fexperienceLevel\x12&\n" +
-	"\x0fomit_raw_source\x18\x06 \x01(\bR\romitRawSource\"G\n" +
-	"\x0fSessionProgress\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\x12\x1a\n" +
-	"\bprogress\x18\x02 \x01(\rR\bprogress\"\xf2\x01\n" +
-	"\fSessionReady\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12)\n" +
-	"\x05steps\x18\x02 \x03(\v2\x13.codewalker.v1.StepR\x05steps\x127\n" +
-	"\bglossary\x18\x03 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\bglossary\x12\x1a\n" +
-	"\blanguage\x18\x04 \x01(\tR\blanguage\x12\x1f\n" +
-	"\vtotal_steps\x18\x05 \x01(\x05R\n" +
-	"totalSteps\x12\"\n" +
-	"\rentry_step_id\x18\x06 \x01(\tR\ventryStepId\"\x8a\x01\n" +
-	"\fSessionEvent\x12<\n" +
-	"\bprogress\x18\x01 \x01(\v2\x1e.codewalker.v1.SessionProgressH\x00R\bprogress\x123\n" +
-	"\x05ready\x18\x02 \x01(\v2\x1b.codewalker.v1.SessionReadyH\x00R\x05readyB\a\n" +
-	"\x05event\"\xa0\x01\n" +
-	"\x0eSessionSummary\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12'\n" +
-	"\x0feffective_level\x18\x02 \x01(\x05R\x0eeffectiveLevel\x12&\n" +
-	"\x0fcurrent_step_id\x18\x03 \x01(\tR\rcurrentStepId\x12\x1e\n" +
-	"\n" +
-	"breadcrumb\x18\x04 \x03(\tR\n" +
-	"breadcrumb\"V\n" +
-	"\x0fNavigateRequest\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12$\n" +
-	"\x0etarget_step_id\x18\x02 \x01(\tR\ftargetStepId\"\x83\x02\n" +
-	"\fStepComplete\x12I\n" +
-	"\x12new_glossary_terms\x18\x01 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\x10newGlossaryTerms\x12@\n" +
-	"\x0favailable_edges\x18\x02 \x03(\v2\x17.codewalker.v1.StepEdgeR\x0eavailableEdges\x12\x1e\n" +
-	"\n" +
-	"breadcrumb\x18\x03 \x03(\tR\n" +
-	"breadcrumb\x12F\n" +
-	"\x0fsession_summary\x18\x04 \x01(\v2\x1d.codewalker.v1.SessionSummaryR\x0esessionSummary\"s\n" +
-	"\fNarrateEvent\x12\x16\n" +
-	"\x05token\x18\x01 \x01(\tH\x00R\x05token\x12B\n" +
-	"\rstep_complete\x18\x02 \x01(\v2\x1b.codewalker.v1.StepCompleteH\x00R\fstepCompleteB\a\n" +
-	"\x05event\"a\n" +
-	"\x0fRephraseRequest\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12/\n" +
-	"\x04mode\x18\x02 \x01(\x0e2\x1b.codewalker.v1.RephraseModeR\x04mode\"F\n" +
+	"\x04kind\x18\x04 \x01(\x0e2\x17.codewalker.v1.TermKindR\x04kind\"F\n" +
 	"\x11ExpandTermRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
-	"\x04term\x18\x02 \x01(\tR\x04term*\x87\x01\n" +
-	"\x0fExperienceLevel\x12 \n" +
-	"\x1cEXPERIENCE_LEVEL_UNSPECIFIED\x10\x00\x12\x1b\n" +
-	"\x17EXPERIENCE_LEVEL_JUNIOR\x10\x01\x12\x18\n" +
-	"\x14EXPERIENCE_LEVEL_MID\x10\x02\x12\x1b\n" +
-	"\x17EXPERIENCE_LEVEL_SENIOR\x10\x03*\xcd\x01\n" +
+	"\x04term\x18\x02 \x01(\tR\x04term\"p\n" +
+	"\fServiceError\x12,\n" +
+	"\x04code\x18\x01 \x01(\x0e2\x18.codewalker.v1.ErrorCodeR\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x18\n" +
+	"\adetails\x18\x03 \x01(\tR\adetails*\xdd\x01\n" +
+	"\bStepKind\x12\x19\n" +
+	"\x15STEP_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fSTEP_KIND_ENTRY\x10\x01\x12\x18\n" +
+	"\x14STEP_KIND_ASSIGNMENT\x10\x02\x12\x19\n" +
+	"\x15STEP_KIND_CONDITIONAL\x10\x03\x12\x12\n" +
+	"\x0eSTEP_KIND_LOOP\x10\x04\x12\x12\n" +
+	"\x0eSTEP_KIND_CALL\x10\x05\x12\x14\n" +
+	"\x10STEP_KIND_RETURN\x10\x06\x12\x1a\n" +
+	"\x16STEP_KIND_ERROR_HANDLE\x10\a\x12\x12\n" +
+	"\x0eSTEP_KIND_EXIT\x10\b*\xed\x01\n" +
 	"\tEdgeLabel\x12\x1a\n" +
-	"\x16EDGE_LABEL_UNSPECIFIED\x10\x00\x12\x17\n" +
-	"\x13EDGE_LABEL_SEQUENCE\x10\x01\x12\x1a\n" +
+	"\x16EDGE_LABEL_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fEDGE_LABEL_NEXT\x10\x01\x12\x1a\n" +
 	"\x16EDGE_LABEL_TRUE_BRANCH\x10\x02\x12\x1b\n" +
 	"\x17EDGE_LABEL_FALSE_BRANCH\x10\x03\x12\x13\n" +
-	"\x0fEDGE_LABEL_CASE\x10\x04\x12\x13\n" +
-	"\x0fEDGE_LABEL_BODY\x10\x05\x12\x13\n" +
-	"\x0fEDGE_LABEL_EXIT\x10\x06\x12\x13\n" +
-	"\x0fEDGE_LABEL_CALL\x10\a*\xdb\x01\n" +
-	"\bStepKind\x12\x19\n" +
-	"\x15STEP_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12STEP_KIND_FUNCTION\x10\x01\x12\x19\n" +
-	"\x15STEP_KIND_CONDITIONAL\x10\x02\x12\x12\n" +
-	"\x0eSTEP_KIND_LOOP\x10\x03\x12\x18\n" +
-	"\x14STEP_KIND_ASSIGNMENT\x10\x04\x12\x12\n" +
-	"\x0eSTEP_KIND_CALL\x10\x05\x12\x14\n" +
-	"\x10STEP_KIND_SWITCH\x10\x06\x12\x14\n" +
-	"\x10STEP_KIND_RETURN\x10\a\x12\x13\n" +
-	"\x0fSTEP_KIND_BLOCK\x10\b*\x81\x01\n" +
-	"\bTermKind\x12\x19\n" +
-	"\x15TERM_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12TERM_KIND_LANGUAGE\x10\x01\x12\x15\n" +
-	"\x11TERM_KIND_PATTERN\x10\x02\x12\x14\n" +
-	"\x10TERM_KIND_DOMAIN\x10\x03\x12\x15\n" +
-	"\x11TERM_KIND_LIBRARY\x10\x04*\x95\x01\n" +
+	"\x0fEDGE_LABEL_CASE\x10\x04\x12\x18\n" +
+	"\x14EDGE_LABEL_LOOP_BODY\x10\x05\x12\x18\n" +
+	"\x14EDGE_LABEL_LOOP_EXIT\x10\x06\x12\x18\n" +
+	"\x14EDGE_LABEL_EXCEPTION\x10\a\x12\x13\n" +
+	"\x0fEDGE_LABEL_CALL\x10\b*l\n" +
+	"\x0fSimpleDirection\x12 \n" +
+	"\x1cSIMPLE_DIRECTION_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18SIMPLE_DIRECTION_FORWARD\x10\x01\x12\x19\n" +
+	"\x15SIMPLE_DIRECTION_BACK\x10\x02*\x95\x01\n" +
 	"\fRephraseMode\x12\x1d\n" +
 	"\x19REPHRASE_MODE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15REPHRASE_MODE_SIMPLER\x10\x01\x12\x18\n" +
 	"\x14REPHRASE_MODE_DEEPER\x10\x02\x12\x19\n" +
 	"\x15REPHRASE_MODE_ANALOGY\x10\x03\x12\x16\n" +
-	"\x12REPHRASE_MODE_TLDR\x10\x042\xc9\x02\n" +
-	"\x11CodeWalkerService\x12O\n" +
+	"\x12REPHRASE_MODE_TLDR\x10\x04*\x81\x01\n" +
+	"\bTermKind\x12\x19\n" +
+	"\x15TERM_KIND_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12TERM_KIND_LANGUAGE\x10\x01\x12\x15\n" +
+	"\x11TERM_KIND_PATTERN\x10\x02\x12\x14\n" +
+	"\x10TERM_KIND_DOMAIN\x10\x03\x12\x15\n" +
+	"\x11TERM_KIND_LIBRARY\x10\x04*\x87\x01\n" +
+	"\x0fExperienceLevel\x12 \n" +
+	"\x1cEXPERIENCE_LEVEL_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17EXPERIENCE_LEVEL_JUNIOR\x10\x01\x12\x18\n" +
+	"\x14EXPERIENCE_LEVEL_MID\x10\x02\x12\x1b\n" +
+	"\x17EXPERIENCE_LEVEL_SENIOR\x10\x03*\xe0\x01\n" +
+	"\tErrorCode\x12\x1a\n" +
+	"\x16ERROR_CODE_UNSPECIFIED\x10\x00\x12 \n" +
+	"\x1cERROR_CODE_SESSION_NOT_FOUND\x10\x01\x12\x1b\n" +
+	"\x17ERROR_CODE_PARSE_FAILED\x10\x02\x12\x1a\n" +
+	"\x16ERROR_CODE_INVALID_REF\x10\x03\x12\x18\n" +
+	"\x14ERROR_CODE_LLM_ERROR\x10\x04\x12\x1f\n" +
+	"\x1bERROR_CODE_UNSUPPORTED_LANG\x10\x05\x12!\n" +
+	"\x1dERROR_CODE_INVALID_NAVIGATION\x10\x062\xf4\x03\n" +
+	"\n" +
+	"CodeWalker\x12O\n" +
 	"\vOpenSession\x12!.codewalker.v1.OpenSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12I\n" +
 	"\bNavigate\x12\x1e.codewalker.v1.NavigateRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12I\n" +
 	"\bRephrase\x12\x1e.codewalker.v1.RephraseRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12M\n" +
 	"\n" +
-	"ExpandTerm\x12 .codewalker.v1.ExpandTermRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01B>Z<github.com/yourorg/codewalker/gen/codewalker/v1;codewalkerv1b\x06proto3"
+	"ExpandTerm\x12 .codewalker.v1.ExpandTermRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12W\n" +
+	"\fCloseSession\x12\".codewalker.v1.CloseSessionRequest\x1a#.codewalker.v1.CloseSessionResponse\x12W\n" +
+	"\fListSessions\x12\".codewalker.v1.ListSessionsRequest\x1a#.codewalker.v1.ListSessionsResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
 
 var (
 	file_codewalker_v1_codewalker_proto_rawDescOnce sync.Once
@@ -1549,60 +2103,78 @@ func file_codewalker_v1_codewalker_proto_rawDescGZIP() []byte {
 	return file_codewalker_v1_codewalker_proto_rawDescData
 }
 
-var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_codewalker_v1_codewalker_proto_goTypes = []any{
-	(ExperienceLevel)(0),       // 0: codewalker.v1.ExperienceLevel
-	(EdgeLabel)(0),             // 1: codewalker.v1.EdgeLabel
-	(StepKind)(0),              // 2: codewalker.v1.StepKind
-	(TermKind)(0),              // 3: codewalker.v1.TermKind
-	(RephraseMode)(0),          // 4: codewalker.v1.RephraseMode
-	(*SourceSpan)(nil),         // 5: codewalker.v1.SourceSpan
-	(*ExternalCallInfo)(nil),   // 6: codewalker.v1.ExternalCallInfo
-	(*StepEdge)(nil),           // 7: codewalker.v1.StepEdge
-	(*Step)(nil),               // 8: codewalker.v1.Step
-	(*GlossaryTerm)(nil),       // 9: codewalker.v1.GlossaryTerm
-	(*OpenSessionRequest)(nil), // 10: codewalker.v1.OpenSessionRequest
-	(*SessionProgress)(nil),    // 11: codewalker.v1.SessionProgress
-	(*SessionReady)(nil),       // 12: codewalker.v1.SessionReady
-	(*SessionEvent)(nil),       // 13: codewalker.v1.SessionEvent
-	(*SessionSummary)(nil),     // 14: codewalker.v1.SessionSummary
-	(*NavigateRequest)(nil),    // 15: codewalker.v1.NavigateRequest
-	(*StepComplete)(nil),       // 16: codewalker.v1.StepComplete
-	(*NarrateEvent)(nil),       // 17: codewalker.v1.NarrateEvent
-	(*RephraseRequest)(nil),    // 18: codewalker.v1.RephraseRequest
-	(*ExpandTermRequest)(nil),  // 19: codewalker.v1.ExpandTermRequest
+	(StepKind)(0),                // 0: codewalker.v1.StepKind
+	(EdgeLabel)(0),               // 1: codewalker.v1.EdgeLabel
+	(SimpleDirection)(0),         // 2: codewalker.v1.SimpleDirection
+	(RephraseMode)(0),            // 3: codewalker.v1.RephraseMode
+	(TermKind)(0),                // 4: codewalker.v1.TermKind
+	(ExperienceLevel)(0),         // 5: codewalker.v1.ExperienceLevel
+	(ErrorCode)(0),               // 6: codewalker.v1.ErrorCode
+	(*OpenSessionRequest)(nil),   // 7: codewalker.v1.OpenSessionRequest
+	(*SessionEvent)(nil),         // 8: codewalker.v1.SessionEvent
+	(*SessionProgress)(nil),      // 9: codewalker.v1.SessionProgress
+	(*SessionReady)(nil),         // 10: codewalker.v1.SessionReady
+	(*CloseSessionRequest)(nil),  // 11: codewalker.v1.CloseSessionRequest
+	(*CloseSessionResponse)(nil), // 12: codewalker.v1.CloseSessionResponse
+	(*ListSessionsRequest)(nil),  // 13: codewalker.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil), // 14: codewalker.v1.ListSessionsResponse
+	(*SessionSummary)(nil),       // 15: codewalker.v1.SessionSummary
+	(*Step)(nil),                 // 16: codewalker.v1.Step
+	(*StepEdge)(nil),             // 17: codewalker.v1.StepEdge
+	(*ExternalCallInfo)(nil),     // 18: codewalker.v1.ExternalCallInfo
+	(*SourceSpan)(nil),           // 19: codewalker.v1.SourceSpan
+	(*NavigateRequest)(nil),      // 20: codewalker.v1.NavigateRequest
+	(*NarrateEvent)(nil),         // 21: codewalker.v1.NarrateEvent
+	(*NarrateToken)(nil),         // 22: codewalker.v1.NarrateToken
+	(*StepComplete)(nil),         // 23: codewalker.v1.StepComplete
+	(*RephraseRequest)(nil),      // 24: codewalker.v1.RephraseRequest
+	(*GlossaryTerm)(nil),         // 25: codewalker.v1.GlossaryTerm
+	(*ExpandTermRequest)(nil),    // 26: codewalker.v1.ExpandTermRequest
+	(*ServiceError)(nil),         // 27: codewalker.v1.ServiceError
 }
 var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
-	1,  // 0: codewalker.v1.StepEdge.label:type_name -> codewalker.v1.EdgeLabel
-	6,  // 1: codewalker.v1.StepEdge.external_call_info:type_name -> codewalker.v1.ExternalCallInfo
-	5,  // 2: codewalker.v1.Step.source:type_name -> codewalker.v1.SourceSpan
-	7,  // 3: codewalker.v1.Step.edges:type_name -> codewalker.v1.StepEdge
-	2,  // 4: codewalker.v1.Step.kind:type_name -> codewalker.v1.StepKind
-	3,  // 5: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
-	0,  // 6: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
-	8,  // 7: codewalker.v1.SessionReady.steps:type_name -> codewalker.v1.Step
-	9,  // 8: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
-	11, // 9: codewalker.v1.SessionEvent.progress:type_name -> codewalker.v1.SessionProgress
-	12, // 10: codewalker.v1.SessionEvent.ready:type_name -> codewalker.v1.SessionReady
-	9,  // 11: codewalker.v1.StepComplete.new_glossary_terms:type_name -> codewalker.v1.GlossaryTerm
-	7,  // 12: codewalker.v1.StepComplete.available_edges:type_name -> codewalker.v1.StepEdge
-	14, // 13: codewalker.v1.StepComplete.session_summary:type_name -> codewalker.v1.SessionSummary
-	16, // 14: codewalker.v1.NarrateEvent.step_complete:type_name -> codewalker.v1.StepComplete
-	4,  // 15: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
-	10, // 16: codewalker.v1.CodeWalkerService.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
-	15, // 17: codewalker.v1.CodeWalkerService.Navigate:input_type -> codewalker.v1.NavigateRequest
-	18, // 18: codewalker.v1.CodeWalkerService.Rephrase:input_type -> codewalker.v1.RephraseRequest
-	19, // 19: codewalker.v1.CodeWalkerService.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
-	13, // 20: codewalker.v1.CodeWalkerService.OpenSession:output_type -> codewalker.v1.SessionEvent
-	17, // 21: codewalker.v1.CodeWalkerService.Navigate:output_type -> codewalker.v1.NarrateEvent
-	17, // 22: codewalker.v1.CodeWalkerService.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	17, // 23: codewalker.v1.CodeWalkerService.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	20, // [20:24] is the sub-list for method output_type
-	16, // [16:20] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	5,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
+	9,  // 1: codewalker.v1.SessionEvent.progress:type_name -> codewalker.v1.SessionProgress
+	10, // 2: codewalker.v1.SessionEvent.ready:type_name -> codewalker.v1.SessionReady
+	27, // 3: codewalker.v1.SessionEvent.error:type_name -> codewalker.v1.ServiceError
+	16, // 4: codewalker.v1.SessionReady.steps:type_name -> codewalker.v1.Step
+	25, // 5: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
+	15, // 6: codewalker.v1.ListSessionsResponse.sessions:type_name -> codewalker.v1.SessionSummary
+	19, // 7: codewalker.v1.Step.span:type_name -> codewalker.v1.SourceSpan
+	17, // 8: codewalker.v1.Step.edges:type_name -> codewalker.v1.StepEdge
+	0,  // 9: codewalker.v1.Step.kind:type_name -> codewalker.v1.StepKind
+	1,  // 10: codewalker.v1.StepEdge.label:type_name -> codewalker.v1.EdgeLabel
+	18, // 11: codewalker.v1.StepEdge.external_call_info:type_name -> codewalker.v1.ExternalCallInfo
+	2,  // 12: codewalker.v1.NavigateRequest.direction:type_name -> codewalker.v1.SimpleDirection
+	1,  // 13: codewalker.v1.NavigateRequest.follow_edge:type_name -> codewalker.v1.EdgeLabel
+	22, // 14: codewalker.v1.NarrateEvent.token:type_name -> codewalker.v1.NarrateToken
+	23, // 15: codewalker.v1.NarrateEvent.complete:type_name -> codewalker.v1.StepComplete
+	27, // 16: codewalker.v1.NarrateEvent.error:type_name -> codewalker.v1.ServiceError
+	25, // 17: codewalker.v1.StepComplete.new_terms:type_name -> codewalker.v1.GlossaryTerm
+	17, // 18: codewalker.v1.StepComplete.available_edges:type_name -> codewalker.v1.StepEdge
+	3,  // 19: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
+	4,  // 20: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
+	6,  // 21: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
+	7,  // 22: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
+	20, // 23: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
+	24, // 24: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
+	26, // 25: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
+	11, // 26: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
+	13, // 27: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	8,  // 28: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
+	21, // 29: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	21, // 30: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	21, // 31: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	12, // 32: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	14, // 33: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	28, // [28:34] is the sub-list for method output_type
+	22, // [22:28] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_codewalker_v1_codewalker_proto_init() }
@@ -1610,21 +2182,28 @@ func file_codewalker_v1_codewalker_proto_init() {
 	if File_codewalker_v1_codewalker_proto != nil {
 		return
 	}
-	file_codewalker_v1_codewalker_proto_msgTypes[8].OneofWrappers = []any{
+	file_codewalker_v1_codewalker_proto_msgTypes[1].OneofWrappers = []any{
 		(*SessionEvent_Progress)(nil),
 		(*SessionEvent_Ready)(nil),
+		(*SessionEvent_Error)(nil),
 	}
-	file_codewalker_v1_codewalker_proto_msgTypes[12].OneofWrappers = []any{
+	file_codewalker_v1_codewalker_proto_msgTypes[13].OneofWrappers = []any{
+		(*NavigateRequest_Direction)(nil),
+		(*NavigateRequest_StepId)(nil),
+		(*NavigateRequest_FollowEdge)(nil),
+	}
+	file_codewalker_v1_codewalker_proto_msgTypes[14].OneofWrappers = []any{
 		(*NarrateEvent_Token)(nil),
-		(*NarrateEvent_StepComplete)(nil),
+		(*NarrateEvent_Complete)(nil),
+		(*NarrateEvent_Error)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_codewalker_v1_codewalker_proto_rawDesc), len(file_codewalker_v1_codewalker_proto_rawDesc)),
-			NumEnums:      5,
-			NumMessages:   15,
+			NumEnums:      7,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

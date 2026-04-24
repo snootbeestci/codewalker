@@ -19,8 +19,8 @@ func makeGraph(steps ...*graph.Step) *graph.Graph {
 }
 
 func TestWalkerGoTo(t *testing.T) {
-	stepA := &graph.Step{ID: "a", Label: "A", Kind: v1.StepKind_STEP_KIND_FUNCTION,
-		Edges: []*v1.StepEdge{{TargetStepId: "b", Label: v1.EdgeLabel_EDGE_LABEL_SEQUENCE, Navigable: true}}}
+	stepA := &graph.Step{ID: "a", Label: "A", Kind: v1.StepKind_STEP_KIND_ENTRY,
+		Edges: []*v1.StepEdge{{TargetStepId: "b", Label: v1.EdgeLabel_EDGE_LABEL_NEXT, Navigable: true}}}
 	stepB := &graph.Step{ID: "b", Label: "B", Kind: v1.StepKind_STEP_KIND_CALL}
 	g := makeGraph(stepA, stepB)
 

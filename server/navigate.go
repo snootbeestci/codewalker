@@ -4,20 +4,18 @@ import (
 	"strings"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
+	"github.com/yourorg/codewalker/internal/graph"
 	"github.com/yourorg/codewalker/internal/llm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-// Navigate implements CodeWalkerServiceServer.Navigate.
-func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalkerService_NavigateServer) error {
+// Navigate implements CodeWalkerServer.Navigate.
+func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_NavigateServer) error {
 	ctx := stream.Context()
 
 	if req.SessionId == "" {
 		return status.Error(codes.InvalidArgument, "session_id is required")
-	}
-	if req.TargetStepId == "" {
-		return status.Error(codes.InvalidArgument, "target_step_id is required")
 	}
 
 	sess, err := s.store.Get(req.SessionId)
@@ -26,18 +24,39 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalkerService_N
 	}
 
 	sess.Lock()
-	step, navErr := sess.Walker.GoTo(req.TargetStepId)
+	var step *graph.Step
+	var navErr error
+	switch d := req.Destination.(type) {
+	case *v1.NavigateRequest_Direction:
+		switch d.Direction {
+		case v1.SimpleDirection_SIMPLE_DIRECTION_FORWARD:
+			step, navErr = sess.Walker.Forward()
+		case v1.SimpleDirection_SIMPLE_DIRECTION_BACK:
+			step, navErr = sess.Walker.Back()
+		default:
+			sess.Unlock()
+			return status.Error(codes.InvalidArgument, "unknown direction")
+		}
+	case *v1.NavigateRequest_StepId:
+		step, navErr = sess.Walker.GoTo(d.StepId)
+	case *v1.NavigateRequest_FollowEdge:
+		step, navErr = sess.Walker.FollowEdgeLabel(d.FollowEdge)
+	default:
+		sess.Unlock()
+		return status.Error(codes.InvalidArgument, "destination is required")
+	}
+	crumb := sess.Walker.Breadcrumb()
+	availableEdges := sess.Walker.NavigableEdges()
 	sess.Unlock()
+
 	if navErr != nil {
 		return status.Errorf(codes.InvalidArgument, "navigation error: %v", navErr)
 	}
 
-	// Build narration request.
-	crumb := sess.Walker.Breadcrumb()
 	crumbLabels := make([]string, 0, len(crumb))
 	for _, id := range crumb {
-		if s, ok := sess.Graph.Step(id); ok {
-			crumbLabels = append(crumbLabels, s.Label)
+		if st, ok := sess.Graph.Step(id); ok {
+			crumbLabels = append(crumbLabels, st.Label)
 		}
 	}
 
@@ -46,7 +65,6 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalkerService_N
 		code = step.Source.RawSource
 	}
 	if code == "" && len(sess.Source) > 0 && step.Source != nil {
-		// Slice out of the original source.
 		code = sliceSource(sess.Source, int(step.Source.StartLine), int(step.Source.EndLine))
 	}
 
@@ -62,7 +80,6 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalkerService_N
 		return status.Errorf(codes.Internal, "narration error: %v", err)
 	}
 
-	// Stream tokens.
 	for token := range tokens {
 		select {
 		case <-ctx.Done():
@@ -70,19 +87,18 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalkerService_N
 		default:
 		}
 		if err := stream.Send(&v1.NarrateEvent{
-			Event: &v1.NarrateEvent_Token{Token: token},
+			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
 		}); err != nil {
 			return err
 		}
 	}
 
-	// Send StepComplete.
 	return stream.Send(&v1.NarrateEvent{
-		Event: &v1.NarrateEvent_StepComplete{
-			StepComplete: &v1.StepComplete{
-				AvailableEdges: sess.Walker.NavigableEdges(),
+		Event: &v1.NarrateEvent_Complete{
+			Complete: &v1.StepComplete{
+				StepId:         step.ID,
+				AvailableEdges: availableEdges,
 				Breadcrumb:     crumbLabels,
-				SessionSummary: sess.Summary(),
 			},
 		},
 	})

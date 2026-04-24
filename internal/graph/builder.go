@@ -26,20 +26,19 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 		}
 
 		span := &v1.SourceSpan{
-			FilePath:  filePath,
-			StartLine: int32(n.StartLine),
-			EndLine:   int32(n.EndLine),
-			StartCol:  int32(n.StartCol),
-			EndCol:    int32(n.EndCol),
+			StartLine:   uint32(n.StartLine),
+			EndLine:     uint32(n.EndLine),
+			StartColumn: uint32(n.StartCol),
+			EndColumn:   uint32(n.EndCol),
 		}
 		if !omitRawSource {
 			span.RawSource = n.Text
 		}
 
 		step := &Step{
-			ID:    id,
-			Label: n.Label,
-			Kind:  nodeKindToStepKind(n.Kind),
+			ID:     id,
+			Label:  n.Label,
+			Kind:   nodeKindToStepKind(n.Kind),
 			Source: span,
 		}
 		g.Add(step)
@@ -78,7 +77,7 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 			continue
 		}
 		if entrySymbol == "" || n.Label == entrySymbol {
-			entryStep = buildNode(n, "", v1.EdgeLabel_EDGE_LABEL_SEQUENCE)
+			entryStep = buildNode(n, "", v1.EdgeLabel_EDGE_LABEL_NEXT)
 			if entrySymbol == "" {
 				break // use first function
 			}
@@ -93,12 +92,12 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 		if entryStep != nil && n.Label == entryStep.Label {
 			continue
 		}
-		buildNode(n, "", v1.EdgeLabel_EDGE_LABEL_SEQUENCE)
+		buildNode(n, "", v1.EdgeLabel_EDGE_LABEL_NEXT)
 	}
 
 	if entryStep == nil && len(nodes) > 0 {
 		// Fallback: build first node whatever its kind.
-		entryStep = buildNode(nodes[0], "", v1.EdgeLabel_EDGE_LABEL_SEQUENCE)
+		entryStep = buildNode(nodes[0], "", v1.EdgeLabel_EDGE_LABEL_NEXT)
 	}
 
 	if entryStep != nil {
@@ -113,7 +112,7 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 func buildChildren(children []*parser.Node, build func(*parser.Node, string, v1.EdgeLabel) *Step) []*v1.StepEdge {
 	var edges []*v1.StepEdge
 	for i, child := range children {
-		label := v1.EdgeLabel_EDGE_LABEL_SEQUENCE
+		label := v1.EdgeLabel_EDGE_LABEL_NEXT
 		switch child.Kind {
 		case parser.NodeKindConditional:
 			// Conditional children represent the body — keep SEQUENCE for the
@@ -134,8 +133,8 @@ func buildChildren(children []*parser.Node, build func(*parser.Node, string, v1.
 func nodeKindToStepKind(k parser.NodeKind) v1.StepKind {
 	switch k {
 	case parser.NodeKindFunction:
-		return v1.StepKind_STEP_KIND_FUNCTION
-	case parser.NodeKindConditional:
+		return v1.StepKind_STEP_KIND_ENTRY
+	case parser.NodeKindConditional, parser.NodeKindSwitch:
 		return v1.StepKind_STEP_KIND_CONDITIONAL
 	case parser.NodeKindLoop:
 		return v1.StepKind_STEP_KIND_LOOP
@@ -143,12 +142,8 @@ func nodeKindToStepKind(k parser.NodeKind) v1.StepKind {
 		return v1.StepKind_STEP_KIND_ASSIGNMENT
 	case parser.NodeKindCall:
 		return v1.StepKind_STEP_KIND_CALL
-	case parser.NodeKindSwitch:
-		return v1.StepKind_STEP_KIND_SWITCH
 	case parser.NodeKindReturn:
 		return v1.StepKind_STEP_KIND_RETURN
-	case parser.NodeKindBlock:
-		return v1.StepKind_STEP_KIND_BLOCK
 	default:
 		return v1.StepKind_STEP_KIND_UNSPECIFIED
 	}

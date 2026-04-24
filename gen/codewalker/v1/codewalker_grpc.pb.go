@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: codewalker/v1/codewalker.proto
 
-package codewalkerv1
+package v1
 
 import (
 	context "context"
@@ -19,33 +19,46 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CodeWalkerService_OpenSession_FullMethodName = "/codewalker.v1.CodeWalkerService/OpenSession"
-	CodeWalkerService_Navigate_FullMethodName    = "/codewalker.v1.CodeWalkerService/Navigate"
-	CodeWalkerService_Rephrase_FullMethodName    = "/codewalker.v1.CodeWalkerService/Rephrase"
-	CodeWalkerService_ExpandTerm_FullMethodName  = "/codewalker.v1.CodeWalkerService/ExpandTerm"
+	CodeWalker_OpenSession_FullMethodName  = "/codewalker.v1.CodeWalker/OpenSession"
+	CodeWalker_Navigate_FullMethodName     = "/codewalker.v1.CodeWalker/Navigate"
+	CodeWalker_Rephrase_FullMethodName     = "/codewalker.v1.CodeWalker/Rephrase"
+	CodeWalker_ExpandTerm_FullMethodName   = "/codewalker.v1.CodeWalker/ExpandTerm"
+	CodeWalker_CloseSession_FullMethodName = "/codewalker.v1.CodeWalker/CloseSession"
+	CodeWalker_ListSessions_FullMethodName = "/codewalker.v1.CodeWalker/ListSessions"
 )
 
-// CodeWalkerServiceClient is the client API for CodeWalkerService service.
+// CodeWalkerClient is the client API for CodeWalker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CodeWalkerServiceClient interface {
+type CodeWalkerClient interface {
+	// Open a session against a file at a specific ref.
+	// Server parses the AST, builds the step graph, and streams back
+	// progress before emitting a final SessionReady event.
 	OpenSession(ctx context.Context, in *OpenSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error)
+	// Navigate within an open session. Server streams narration tokens
+	// followed by a StepComplete event.
 	Navigate(ctx context.Context, in *NavigateRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error)
+	// Request a rephrasing of the current step's narration.
 	Rephrase(ctx context.Context, in *RephraseRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error)
+	// Resolve a glossary term. Returns a full definition stream.
 	ExpandTerm(ctx context.Context, in *ExpandTermRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error)
+	// Close a session and release server-side state.
+	CloseSession(ctx context.Context, in *CloseSessionRequest, opts ...grpc.CallOption) (*CloseSessionResponse, error)
+	// List open sessions (useful for IDE plugins managing multiple tabs).
+	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
 }
 
-type codeWalkerServiceClient struct {
+type codeWalkerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCodeWalkerServiceClient(cc grpc.ClientConnInterface) CodeWalkerServiceClient {
-	return &codeWalkerServiceClient{cc}
+func NewCodeWalkerClient(cc grpc.ClientConnInterface) CodeWalkerClient {
+	return &codeWalkerClient{cc}
 }
 
-func (c *codeWalkerServiceClient) OpenSession(ctx context.Context, in *OpenSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error) {
+func (c *codeWalkerClient) OpenSession(ctx context.Context, in *OpenSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalkerService_ServiceDesc.Streams[0], CodeWalkerService_OpenSession_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[0], CodeWalker_OpenSession_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,11 +73,11 @@ func (c *codeWalkerServiceClient) OpenSession(ctx context.Context, in *OpenSessi
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_OpenSessionClient = grpc.ServerStreamingClient[SessionEvent]
+type CodeWalker_OpenSessionClient = grpc.ServerStreamingClient[SessionEvent]
 
-func (c *codeWalkerServiceClient) Navigate(ctx context.Context, in *NavigateRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
+func (c *codeWalkerClient) Navigate(ctx context.Context, in *NavigateRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalkerService_ServiceDesc.Streams[1], CodeWalkerService_Navigate_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[1], CodeWalker_Navigate_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,11 +92,11 @@ func (c *codeWalkerServiceClient) Navigate(ctx context.Context, in *NavigateRequ
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_NavigateClient = grpc.ServerStreamingClient[NarrateEvent]
+type CodeWalker_NavigateClient = grpc.ServerStreamingClient[NarrateEvent]
 
-func (c *codeWalkerServiceClient) Rephrase(ctx context.Context, in *RephraseRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
+func (c *codeWalkerClient) Rephrase(ctx context.Context, in *RephraseRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalkerService_ServiceDesc.Streams[2], CodeWalkerService_Rephrase_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[2], CodeWalker_Rephrase_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,11 +111,11 @@ func (c *codeWalkerServiceClient) Rephrase(ctx context.Context, in *RephraseRequ
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_RephraseClient = grpc.ServerStreamingClient[NarrateEvent]
+type CodeWalker_RephraseClient = grpc.ServerStreamingClient[NarrateEvent]
 
-func (c *codeWalkerServiceClient) ExpandTerm(ctx context.Context, in *ExpandTermRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
+func (c *codeWalkerClient) ExpandTerm(ctx context.Context, in *ExpandTermRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalkerService_ServiceDesc.Streams[3], CodeWalkerService_ExpandTerm_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[3], CodeWalker_ExpandTerm_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,127 +130,209 @@ func (c *codeWalkerServiceClient) ExpandTerm(ctx context.Context, in *ExpandTerm
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_ExpandTermClient = grpc.ServerStreamingClient[NarrateEvent]
+type CodeWalker_ExpandTermClient = grpc.ServerStreamingClient[NarrateEvent]
 
-// CodeWalkerServiceServer is the server API for CodeWalkerService service.
-// All implementations should embed UnimplementedCodeWalkerServiceServer
-// for forward compatibility.
-type CodeWalkerServiceServer interface {
-	OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error
-	Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error
-	Rephrase(*RephraseRequest, grpc.ServerStreamingServer[NarrateEvent]) error
-	ExpandTerm(*ExpandTermRequest, grpc.ServerStreamingServer[NarrateEvent]) error
+func (c *codeWalkerClient) CloseSession(ctx context.Context, in *CloseSessionRequest, opts ...grpc.CallOption) (*CloseSessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CloseSessionResponse)
+	err := c.cc.Invoke(ctx, CodeWalker_CloseSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// UnimplementedCodeWalkerServiceServer should be embedded to have
+func (c *codeWalkerClient) ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSessionsResponse)
+	err := c.cc.Invoke(ctx, CodeWalker_ListSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CodeWalkerServer is the server API for CodeWalker service.
+// All implementations should embed UnimplementedCodeWalkerServer
+// for forward compatibility.
+type CodeWalkerServer interface {
+	// Open a session against a file at a specific ref.
+	// Server parses the AST, builds the step graph, and streams back
+	// progress before emitting a final SessionReady event.
+	OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error
+	// Navigate within an open session. Server streams narration tokens
+	// followed by a StepComplete event.
+	Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error
+	// Request a rephrasing of the current step's narration.
+	Rephrase(*RephraseRequest, grpc.ServerStreamingServer[NarrateEvent]) error
+	// Resolve a glossary term. Returns a full definition stream.
+	ExpandTerm(*ExpandTermRequest, grpc.ServerStreamingServer[NarrateEvent]) error
+	// Close a session and release server-side state.
+	CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error)
+	// List open sessions (useful for IDE plugins managing multiple tabs).
+	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+}
+
+// UnimplementedCodeWalkerServer should be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedCodeWalkerServiceServer struct{}
+type UnimplementedCodeWalkerServer struct{}
 
-func (UnimplementedCodeWalkerServiceServer) OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error {
+func (UnimplementedCodeWalkerServer) OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error {
 	return status.Error(codes.Unimplemented, "method OpenSession not implemented")
 }
-func (UnimplementedCodeWalkerServiceServer) Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
+func (UnimplementedCodeWalkerServer) Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
 	return status.Error(codes.Unimplemented, "method Navigate not implemented")
 }
-func (UnimplementedCodeWalkerServiceServer) Rephrase(*RephraseRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
+func (UnimplementedCodeWalkerServer) Rephrase(*RephraseRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
 	return status.Error(codes.Unimplemented, "method Rephrase not implemented")
 }
-func (UnimplementedCodeWalkerServiceServer) ExpandTerm(*ExpandTermRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
+func (UnimplementedCodeWalkerServer) ExpandTerm(*ExpandTermRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
 	return status.Error(codes.Unimplemented, "method ExpandTerm not implemented")
 }
-func (UnimplementedCodeWalkerServiceServer) testEmbeddedByValue() {}
+func (UnimplementedCodeWalkerServer) CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CloseSession not implemented")
+}
+func (UnimplementedCodeWalkerServer) ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListSessions not implemented")
+}
+func (UnimplementedCodeWalkerServer) testEmbeddedByValue() {}
 
-// UnsafeCodeWalkerServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CodeWalkerServiceServer will
+// UnsafeCodeWalkerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CodeWalkerServer will
 // result in compilation errors.
-type UnsafeCodeWalkerServiceServer interface {
-	mustEmbedUnimplementedCodeWalkerServiceServer()
+type UnsafeCodeWalkerServer interface {
+	mustEmbedUnimplementedCodeWalkerServer()
 }
 
-func RegisterCodeWalkerServiceServer(s grpc.ServiceRegistrar, srv CodeWalkerServiceServer) {
-	// If the following call panics, it indicates UnimplementedCodeWalkerServiceServer was
+func RegisterCodeWalkerServer(s grpc.ServiceRegistrar, srv CodeWalkerServer) {
+	// If the following call panics, it indicates UnimplementedCodeWalkerServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&CodeWalkerService_ServiceDesc, srv)
+	s.RegisterService(&CodeWalker_ServiceDesc, srv)
 }
 
-func _CodeWalkerService_OpenSession_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _CodeWalker_OpenSession_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(OpenSessionRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(CodeWalkerServiceServer).OpenSession(m, &grpc.GenericServerStream[OpenSessionRequest, SessionEvent]{ServerStream: stream})
+	return srv.(CodeWalkerServer).OpenSession(m, &grpc.GenericServerStream[OpenSessionRequest, SessionEvent]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_OpenSessionServer = grpc.ServerStreamingServer[SessionEvent]
+type CodeWalker_OpenSessionServer = grpc.ServerStreamingServer[SessionEvent]
 
-func _CodeWalkerService_Navigate_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _CodeWalker_Navigate_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(NavigateRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(CodeWalkerServiceServer).Navigate(m, &grpc.GenericServerStream[NavigateRequest, NarrateEvent]{ServerStream: stream})
+	return srv.(CodeWalkerServer).Navigate(m, &grpc.GenericServerStream[NavigateRequest, NarrateEvent]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_NavigateServer = grpc.ServerStreamingServer[NarrateEvent]
+type CodeWalker_NavigateServer = grpc.ServerStreamingServer[NarrateEvent]
 
-func _CodeWalkerService_Rephrase_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _CodeWalker_Rephrase_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(RephraseRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(CodeWalkerServiceServer).Rephrase(m, &grpc.GenericServerStream[RephraseRequest, NarrateEvent]{ServerStream: stream})
+	return srv.(CodeWalkerServer).Rephrase(m, &grpc.GenericServerStream[RephraseRequest, NarrateEvent]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_RephraseServer = grpc.ServerStreamingServer[NarrateEvent]
+type CodeWalker_RephraseServer = grpc.ServerStreamingServer[NarrateEvent]
 
-func _CodeWalkerService_ExpandTerm_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _CodeWalker_ExpandTerm_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ExpandTermRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(CodeWalkerServiceServer).ExpandTerm(m, &grpc.GenericServerStream[ExpandTermRequest, NarrateEvent]{ServerStream: stream})
+	return srv.(CodeWalkerServer).ExpandTerm(m, &grpc.GenericServerStream[ExpandTermRequest, NarrateEvent]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type CodeWalkerService_ExpandTermServer = grpc.ServerStreamingServer[NarrateEvent]
+type CodeWalker_ExpandTermServer = grpc.ServerStreamingServer[NarrateEvent]
 
-// CodeWalkerService_ServiceDesc is the grpc.ServiceDesc for CodeWalkerService service.
+func _CodeWalker_CloseSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CodeWalkerServer).CloseSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CodeWalker_CloseSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CodeWalkerServer).CloseSession(ctx, req.(*CloseSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CodeWalker_ListSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CodeWalkerServer).ListSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CodeWalker_ListSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CodeWalkerServer).ListSessions(ctx, req.(*ListSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// CodeWalker_ServiceDesc is the grpc.ServiceDesc for CodeWalker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CodeWalkerService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "codewalker.v1.CodeWalkerService",
-	HandlerType: (*CodeWalkerServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+var CodeWalker_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "codewalker.v1.CodeWalker",
+	HandlerType: (*CodeWalkerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CloseSession",
+			Handler:    _CodeWalker_CloseSession_Handler,
+		},
+		{
+			MethodName: "ListSessions",
+			Handler:    _CodeWalker_ListSessions_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "OpenSession",
-			Handler:       _CodeWalkerService_OpenSession_Handler,
+			Handler:       _CodeWalker_OpenSession_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "Navigate",
-			Handler:       _CodeWalkerService_Navigate_Handler,
+			Handler:       _CodeWalker_Navigate_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "Rephrase",
-			Handler:       _CodeWalkerService_Rephrase_Handler,
+			Handler:       _CodeWalker_Rephrase_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "ExpandTerm",
-			Handler:       _CodeWalkerService_ExpandTerm_Handler,
+			Handler:       _CodeWalker_ExpandTerm_Handler,
 			ServerStreams: true,
 		},
 	},

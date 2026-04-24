@@ -2,210 +2,322 @@ syntax = "proto3";
 
 package codewalker.v1;
 
-option go_package = "github.com/yourorg/codewalker/gen/codewalker/v1;codewalkerv1";
+option go_package = "github.com/yourorg/codewalker/gen/codewalker/v1";
 
-// ---------------------------------------------------------------------------
-// Enumerations
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────
+// Core service definition
+// ─────────────────────────────────────────────
 
-enum ExperienceLevel {
-  EXPERIENCE_LEVEL_UNSPECIFIED = 0;
-  EXPERIENCE_LEVEL_JUNIOR = 1;
-  EXPERIENCE_LEVEL_MID = 2;
-  EXPERIENCE_LEVEL_SENIOR = 3;
+service CodeWalker {
+  // Open a session against a file at a specific ref.
+  // Server parses the AST, builds the step graph, and streams back
+  // progress before emitting a final SessionReady event.
+  rpc OpenSession(OpenSessionRequest) returns (stream SessionEvent);
+
+  // Navigate within an open session. Server streams narration tokens
+  // followed by a StepComplete event.
+  rpc Navigate(NavigateRequest) returns (stream NarrateEvent);
+
+  // Request a rephrasing of the current step's narration.
+  rpc Rephrase(RephraseRequest) returns (stream NarrateEvent);
+
+  // Resolve a glossary term. Returns a full definition stream.
+  rpc ExpandTerm(ExpandTermRequest) returns (stream NarrateEvent);
+
+  // Close a session and release server-side state.
+  rpc CloseSession(CloseSessionRequest) returns (CloseSessionResponse);
+
+  // List open sessions (useful for IDE plugins managing multiple tabs).
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
 }
 
-enum EdgeLabel {
-  EDGE_LABEL_UNSPECIFIED = 0;
-  EDGE_LABEL_SEQUENCE = 1;
-  EDGE_LABEL_TRUE_BRANCH = 2;
-  EDGE_LABEL_FALSE_BRANCH = 3;
-  EDGE_LABEL_CASE = 4;
-  EDGE_LABEL_BODY = 5;
-  EDGE_LABEL_EXIT = 6;
-  EDGE_LABEL_CALL = 7;
-}
-
-enum StepKind {
-  STEP_KIND_UNSPECIFIED = 0;
-  STEP_KIND_FUNCTION = 1;
-  STEP_KIND_CONDITIONAL = 2;
-  STEP_KIND_LOOP = 3;
-  STEP_KIND_ASSIGNMENT = 4;
-  STEP_KIND_CALL = 5;
-  STEP_KIND_SWITCH = 6;
-  STEP_KIND_RETURN = 7;
-  STEP_KIND_BLOCK = 8;
-}
-
-enum TermKind {
-  TERM_KIND_UNSPECIFIED = 0;
-  TERM_KIND_LANGUAGE = 1;
-  TERM_KIND_PATTERN = 2;
-  TERM_KIND_DOMAIN = 3;
-  TERM_KIND_LIBRARY = 4;
-}
-
-enum RephraseMode {
-  REPHRASE_MODE_UNSPECIFIED = 0;
-  REPHRASE_MODE_SIMPLER = 1;
-  REPHRASE_MODE_DEEPER = 2;
-  REPHRASE_MODE_ANALOGY = 3;
-  REPHRASE_MODE_TLDR = 4;
-}
-
-// ---------------------------------------------------------------------------
-// Source location
-// ---------------------------------------------------------------------------
-
-message SourceSpan {
-  string file_path = 1;
-  int32 start_line = 2;
-  int32 end_line = 3;
-  int32 start_col = 4;
-  int32 end_col = 5;
-  // Populated by default; omitted when OpenSessionRequest.omit_raw_source = true.
-  string raw_source = 6;
-}
-
-// ---------------------------------------------------------------------------
-// Graph elements
-// ---------------------------------------------------------------------------
-
-// ExternalCallInfo is set on non-navigable edges only.
-message ExternalCallInfo {
-  string package_name = 1;
-  string symbol_name = 2;
-  // Always populated via LLM.
-  string llm_summary = 3;
-  // Best-effort; only included when verified reachable.
-  string docs_url = 4;
-  string source_url = 5;
-  string version = 6;
-}
-
-message StepEdge {
-  string target_step_id = 1;
-  EdgeLabel label = 2;
-  string description = 3;
-  bool navigable = 4;
-  // Set only when navigable = false.
-  ExternalCallInfo external_call_info = 5;
-}
-
-message Step {
-  string id = 1;
-  string label = 2;
-  SourceSpan source = 3;
-  repeated StepEdge edges = 4;
-  bool visited = 5;
-  StepKind kind = 6;
-}
-
-// ---------------------------------------------------------------------------
-// Glossary
-// ---------------------------------------------------------------------------
-
-message GlossaryTerm {
-  string term = 1;
-  string definition = 2;
-  string step_id = 3;
-  TermKind kind = 4;
-}
-
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────
 // Session lifecycle
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────
 
 message OpenSessionRequest {
+  // Absolute path to the git repository root inside the container.
   string repo_path = 1;
+
+  // File path relative to repo root.
   string file_path = 2;
-  string git_ref = 3;
-  // Entry-point symbol. If empty, the first top-level function is used.
+
+  // Git ref: commit SHA, branch name, or tag. Defaults to HEAD.
+  string ref = 3;
+
+  // Optional: scope to a specific function/class/symbol by name.
+  // If empty, the whole file is walked.
   string symbol = 4;
+
+  // Hint to the narration engine about the audience level.
   ExperienceLevel experience_level = 5;
-  // Set true for clients (IDE plugins) that can read files themselves.
+
+  // If true, raw_source will be omitted from all SourceSpan messages
+  // in this session. Useful for clients that already have file access
+  // and want to reduce message size (e.g. IDE plugins).
   bool omit_raw_source = 6;
 }
 
+// Streamed back during and after session initialisation.
+message SessionEvent {
+  oneof event {
+    SessionProgress progress   = 1; // Parsing / analysis updates
+    SessionReady    ready      = 2; // Final event — session is usable
+    ServiceError    error      = 3;
+  }
+}
+
 message SessionProgress {
-  string message = 1;
-  uint32 progress = 2;
+  string message  = 1; // e.g. "Parsing AST", "Building step graph"
+  uint32 percent  = 2; // 0–100
 }
 
 message SessionReady {
   string session_id = 1;
+
+  // Flat list of all steps in the graph. Clients can render the full
+  // graph immediately without traversing edges. Use entry_step_id to
+  // identify where the walkthrough begins.
   repeated Step steps = 2;
+
+  // Initial glossary terms identified during analysis.
   repeated GlossaryTerm glossary = 3;
+
+  // Language detected.
   string language = 4;
-  int32 total_steps = 5;
+
+  // Total number of steps in the graph (for progress indicators).
+  uint32 total_steps = 5;
+
+  // ID of the entry step — the root of the walkthrough.
   string entry_step_id = 6;
 }
 
-message SessionEvent {
-  oneof event {
-    SessionProgress progress = 1;
-    SessionReady ready = 2;
-  }
-}
-
-// Returned inside NarrateEvent.StepComplete and ExpandTerm responses.
-message SessionSummary {
+message CloseSessionRequest {
   string session_id = 1;
-  // Read-only; mapped from ExperienceLevel by adaptation.go.
-  int32 effective_level = 2;
-  string current_step_id = 3;
-  repeated string breadcrumb = 4;
 }
 
-// ---------------------------------------------------------------------------
-// Navigation + narration
-// ---------------------------------------------------------------------------
+message CloseSessionResponse {
+  bool ok = 1;
+}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated SessionSummary sessions = 1;
+}
+
+message SessionSummary {
+  string session_id      = 1;
+  string repo_path       = 2;
+  string file_path       = 3;
+  string ref             = 4;
+  string language        = 5;
+  string current_step_id = 6;
+
+  // Current narration level on a 1–10 scale. In v1 this is derived
+  // directly from the ExperienceLevel set on OpenSessionRequest.
+  // In v2 this will reflect adaptive adjustment based on session behaviour.
+  // Read-only — clients should display but not set this directly.
+  uint32 effective_level = 7;
+}
+
+// ─────────────────────────────────────────────
+// Step graph
+// ─────────────────────────────────────────────
+
+// A Step is a logical unit of code — a conditional, loop, function call,
+// assignment block etc. — as determined by the AST. Steps form a graph
+// (not a simple list) to model branches.
+message Step {
+  string id    = 1;
+  string label = 2; // Short human-readable label, e.g. "Check user is authenticated"
+
+  // Source location.
+  SourceSpan span = 3;
+
+  // Navigation edges.
+  repeated StepEdge edges = 4;
+
+  // Whether this step has already been narrated in this session.
+  bool visited = 5;
+
+  StepKind kind = 6;
+}
+
+message StepEdge {
+  string           target_step_id     = 1;
+  EdgeLabel        label              = 2; // e.g. TRUE_BRANCH, FALSE_BRANCH, NEXT, CASE
+  string           description        = 3; // Human readable, e.g. "user.role == admin"
+
+  // Whether this edge can be followed into source. False for external calls
+  // (stdlib, third-party dependencies) where no source is available in the repo.
+  bool             navigable          = 4;
+
+  // Only set when navigable = false. Provides LLM summary and best-effort
+  // documentation/source links for the external symbol.
+  ExternalCallInfo external_call_info = 5;
+}
+
+// Metadata for calls that cannot be followed into repo source.
+// llm_summary is always populated. URLs are best-effort and only
+// included if verified reachable. source_url is pinned to a specific
+// version if a package manifest was found in the repo.
+message ExternalCallInfo {
+  string package_name = 1;
+  string symbol_name  = 2;
+  string llm_summary  = 3; // Always populated — general knowledge summary
+  string docs_url     = 4; // e.g. https://pkg.go.dev/github.com/stripe/stripe-go#Charge
+  string source_url   = 5; // e.g. https://github.com/stripe/stripe-go/blob/v72.122.0/charge.go#L42
+  string version      = 6; // Resolved version if manifest found, empty otherwise
+}
+
+message SourceSpan {
+  uint32 start_line   = 1;
+  uint32 start_column = 2;
+  uint32 end_line     = 3;
+  uint32 end_column   = 4;
+  string raw_source   = 5; // The actual code slice for this step
+}
+
+enum StepKind {
+  STEP_KIND_UNSPECIFIED  = 0;
+  STEP_KIND_ENTRY        = 1; // Function/method entry
+  STEP_KIND_ASSIGNMENT   = 2;
+  STEP_KIND_CONDITIONAL  = 3; // if/switch/ternary
+  STEP_KIND_LOOP         = 4;
+  STEP_KIND_CALL         = 5; // Function/method call
+  STEP_KIND_RETURN       = 6;
+  STEP_KIND_ERROR_HANDLE = 7; // try/catch, err != nil blocks
+  STEP_KIND_EXIT         = 8;
+}
+
+enum EdgeLabel {
+  EDGE_LABEL_UNSPECIFIED   = 0;
+  EDGE_LABEL_NEXT          = 1; // Sequential flow
+  EDGE_LABEL_TRUE_BRANCH   = 2;
+  EDGE_LABEL_FALSE_BRANCH  = 3;
+  EDGE_LABEL_CASE          = 4; // switch/match arm
+  EDGE_LABEL_LOOP_BODY     = 5;
+  EDGE_LABEL_LOOP_EXIT     = 6;
+  EDGE_LABEL_EXCEPTION     = 7;
+  EDGE_LABEL_CALL          = 8; // Into a callee defined in this repo
+}
+
+// ─────────────────────────────────────────────
+// Navigation
+// ─────────────────────────────────────────────
 
 message NavigateRequest {
   string session_id = 1;
-  string target_step_id = 2;
-}
 
-message StepComplete {
-  repeated GlossaryTerm new_glossary_terms = 1;
-  repeated StepEdge available_edges = 2;
-  repeated string breadcrumb = 3;
-  SessionSummary session_summary = 4;
-}
-
-message NarrateEvent {
-  oneof event {
-    string token = 1;
-    StepComplete step_complete = 2;
+  oneof destination {
+    SimpleDirection direction   = 2; // FORWARD or BACK
+    string          step_id     = 3; // Jump directly to a known step ID
+    EdgeLabel       follow_edge = 4; // Follow a specific edge type from current step
   }
 }
 
-// ---------------------------------------------------------------------------
-// Rephrase
-// ---------------------------------------------------------------------------
-
-message RephraseRequest {
-  string session_id = 1;
-  RephraseMode mode = 2;
+enum SimpleDirection {
+  SIMPLE_DIRECTION_UNSPECIFIED = 0;
+  SIMPLE_DIRECTION_FORWARD     = 1;
+  SIMPLE_DIRECTION_BACK        = 2;
 }
 
-// ---------------------------------------------------------------------------
-// Glossary expansion
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────
+// Narration streaming
+// ─────────────────────────────────────────────
+
+// Streamed back for Navigate, Rephrase, and ExpandTerm.
+message NarrateEvent {
+  oneof event {
+    NarrateToken    token    = 1; // Streaming LLM token
+    StepComplete    complete = 2; // Final event for this narration
+    ServiceError    error    = 3;
+  }
+}
+
+message NarrateToken {
+  string text = 1;
+}
+
+message StepComplete {
+  string step_id = 1;
+
+  // Any new glossary terms surfaced during this narration.
+  repeated GlossaryTerm new_terms = 2;
+
+  // Navigation options available from this step (for UI rendering).
+  repeated StepEdge available_edges = 3;
+
+  // Breadcrumb trail of step IDs visited so far this session.
+  repeated string breadcrumb = 4;
+}
+
+// ─────────────────────────────────────────────
+// Rephrasing
+// ─────────────────────────────────────────────
+
+message RephraseRequest {
+  string       session_id = 1;
+  RephraseMode mode       = 2;
+}
+
+enum RephraseMode {
+  REPHRASE_MODE_UNSPECIFIED = 0;
+  REPHRASE_MODE_SIMPLER     = 1; // Reduce assumed knowledge
+  REPHRASE_MODE_DEEPER      = 2; // More detail, edge cases, internals
+  REPHRASE_MODE_ANALOGY     = 3; // Explain via real-world analogy
+  REPHRASE_MODE_TLDR        = 4; // One sentence summary
+}
+
+// ─────────────────────────────────────────────
+// Glossary
+// ─────────────────────────────────────────────
+
+message GlossaryTerm {
+  string   term       = 1;
+  string   definition = 2; // Brief inline definition
+  string   step_id    = 3; // Step where this term first appeared
+  TermKind kind       = 4;
+}
+
+enum TermKind {
+  TERM_KIND_UNSPECIFIED = 0;
+  TERM_KIND_LANGUAGE    = 1; // Language feature, e.g. "goroutine"
+  TERM_KIND_PATTERN     = 2; // Design pattern, e.g. "middleware chain"
+  TERM_KIND_DOMAIN      = 3; // Business/domain term from the codebase
+  TERM_KIND_LIBRARY     = 4; // Third-party library or framework concept
+}
 
 message ExpandTermRequest {
   string session_id = 1;
-  string term = 2;
+  string term       = 2; // Must match a term in the session glossary
 }
 
-// ---------------------------------------------------------------------------
-// Service
-// ---------------------------------------------------------------------------
+// ─────────────────────────────────────────────
+// Shared
+// ─────────────────────────────────────────────
 
-service CodeWalkerService {
-  rpc OpenSession(OpenSessionRequest) returns (stream SessionEvent);
-  rpc Navigate(NavigateRequest) returns (stream NarrateEvent);
-  rpc Rephrase(RephraseRequest) returns (stream NarrateEvent);
-  rpc ExpandTerm(ExpandTermRequest) returns (stream NarrateEvent);
+enum ExperienceLevel {
+  EXPERIENCE_LEVEL_UNSPECIFIED = 0;
+  EXPERIENCE_LEVEL_JUNIOR      = 1;
+  EXPERIENCE_LEVEL_MID         = 2;
+  EXPERIENCE_LEVEL_SENIOR      = 3;
+}
+
+message ServiceError {
+  ErrorCode code    = 1;
+  string    message = 2;
+  string    details = 3;
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED       = 0;
+  ERROR_CODE_SESSION_NOT_FOUND  = 1;
+  ERROR_CODE_PARSE_FAILED       = 2;
+  ERROR_CODE_INVALID_REF        = 3;
+  ERROR_CODE_LLM_ERROR          = 4;
+  ERROR_CODE_UNSUPPORTED_LANG   = 5;
+  ERROR_CODE_INVALID_NAVIGATION = 6;
 }

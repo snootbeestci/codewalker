@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Rephrase implements CodeWalkerServiceServer.Rephrase.
-func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalkerService_RephraseServer) error {
+// Rephrase implements CodeWalkerServer.Rephrase.
+func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalker_RephraseServer) error {
 	ctx := stream.Context()
 
 	if req.SessionId == "" {
@@ -25,6 +25,7 @@ func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalkerService_R
 	sess.Lock()
 	currentStep, ok := sess.Walker.Current()
 	crumb := sess.Walker.Breadcrumb()
+	availableEdges := sess.Walker.NavigableEdges()
 	sess.Unlock()
 
 	if !ok {
@@ -46,8 +47,6 @@ func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalkerService_R
 		code = sliceSource(sess.Source, int(currentStep.Source.StartLine), int(currentStep.Source.EndLine))
 	}
 
-	modeStr := modeString(req.Mode)
-
 	tokens, err := s.provider.Rephrase(ctx, llm.RephraseRequest{
 		NarrateRequest: llm.NarrateRequest{
 			Code:      code,
@@ -57,7 +56,7 @@ func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalkerService_R
 			CallChain: crumbLabels,
 			Level:     sess.EffLevel,
 		},
-		Mode: modeStr,
+		Mode: modeString(req.Mode),
 	})
 	if err != nil {
 		return status.Errorf(codes.Internal, "rephrase error: %v", err)
@@ -70,18 +69,18 @@ func (s *Server) Rephrase(req *v1.RephraseRequest, stream v1.CodeWalkerService_R
 		default:
 		}
 		if err := stream.Send(&v1.NarrateEvent{
-			Event: &v1.NarrateEvent_Token{Token: token},
+			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
 		}); err != nil {
 			return err
 		}
 	}
 
 	return stream.Send(&v1.NarrateEvent{
-		Event: &v1.NarrateEvent_StepComplete{
-			StepComplete: &v1.StepComplete{
-				AvailableEdges: sess.Walker.NavigableEdges(),
+		Event: &v1.NarrateEvent_Complete{
+			Complete: &v1.StepComplete{
+				StepId:         currentStep.ID,
+				AvailableEdges: availableEdges,
 				Breadcrumb:     crumbLabels,
-				SessionSummary: sess.Summary(),
 			},
 		},
 	})

@@ -8,7 +8,7 @@ import (
 
 // Server implements the CodeWalkerServiceServer gRPC interface.
 type Server struct {
-	v1.UnimplementedCodeWalkerServiceServer
+	v1.UnimplementedCodeWalkerServer
 
 	store    *session.Store
 	provider llm.Provider
