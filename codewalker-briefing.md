@@ -182,6 +182,13 @@ codewalker/
 │   │   ├── session.go
 │   │   ├── store.go
 │   │   └── adaptation.go                 # v2 stub — keep the interface, no logic yet
+│   ├── forge/
+│   │   ├── handler.go                    # ForgeHandler interface
+│   │   ├── context.go                    # ForgeContext and related types
+│   │   ├── registry.go                   # Forge handler registry
+│   │   ├── error.go                      # Typed forge errors
+│   │   └── forges/
+│   │       └── github.go                 # GitHub ForgeHandler implementation
 │   └── resolver/
 │       ├── resolver.go
 │       └── ecosystems/
@@ -195,6 +202,7 @@ codewalker/
 │   ├── navigate.go
 │   ├── rephrase.go
 │   ├── expand_term.go
+│   ├── open_review_session.go
 │   └── middleware/
 │       ├── logging.go
 │       └── recovery.go
@@ -216,7 +224,7 @@ codewalker/
 ## Dockerfile approach
 
 Multi-stage build:
-1. **Build stage** — `golang:1.22-alpine`, compile static binary
+1. **Build stage** — `golang:1.24-alpine`, compile static binary
 2. **Runtime stage** — `gcr.io/distroless/static` or `scratch`, copy binary only
 
 The repo to be explained is mounted as a read-only volume at `/repos/target`.
@@ -295,13 +303,9 @@ existing code.
 
 ## What to build first
 
-The initial implementation is complete and working. Current focus is review
-session support. Work through GitHub issues #1–#4 in order:
-
-1. Proto update (issue #1) — must be first, everything else depends on it
-2. ForgeHandler interface + registry (issue #2)
-3. GitHub ForgeHandler implementation (issue #3)
-4. OpenReviewSession handler (issue #4)
+The initial implementation is complete, including review session support
+(OpenReviewSession, ForgeHandler interface, GitHub forge implementation).
+All issues #1–#5 are merged. The next focus is the PhpStorm plugin client.
 
 ---
 
