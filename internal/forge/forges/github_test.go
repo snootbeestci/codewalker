@@ -136,6 +136,33 @@ func TestParseHunks(t *testing.T) {
 	}
 }
 
+func TestParseHunkRange(t *testing.T) {
+	tests := []struct {
+		input     string
+		wantStart int
+		wantCount int
+	}{
+		{"+1,7", 1, 7},
+		{"-3,5", 3, 5},
+		{"+1", 1, 1},   // count omitted — defaults to 1
+		{"-42", 42, 1}, // count omitted — defaults to 1
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			start, count, err := parseHunkRange(tt.input)
+			if err != nil {
+				t.Fatalf("parseHunkRange(%q) = %v, want nil", tt.input, err)
+			}
+			if start != tt.wantStart {
+				t.Errorf("start = %d, want %d", start, tt.wantStart)
+			}
+			if count != tt.wantCount {
+				t.Errorf("count = %d, want %d", count, tt.wantCount)
+			}
+		})
+	}
+}
+
 func TestForgeResolve(t *testing.T) {
 	h, err := forge.Resolve("github.com")
 	if err != nil {

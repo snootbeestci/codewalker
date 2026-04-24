@@ -213,6 +213,8 @@ func (g *githubHandler) fetchPRReview(ctx context.Context, fc *forge.ForgeContex
 	fc.HeadRef = pr.Head.Ref
 
 	filesURL := fmt.Sprintf("%s/files?per_page=100", prURL)
+	// TODO: paginate — PRs with more than 100 changed files will be silently truncated.
+	// GitHub returns a Link header with rel="next" for subsequent pages.
 	resp2, err := g.apiDo(ctx, filesURL, token)
 	if err != nil {
 		return nil, err
