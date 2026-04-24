@@ -29,7 +29,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	}
 
 	// --- Step 1: open repo and read file ---
-	if err := send(stream, progress("opening repository", 0.05)); err != nil {
+	if err := send(stream, progress("opening repository", 5)); err != nil {
 		return err
 	}
 
@@ -44,7 +44,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	}
 
 	// --- Step 2: parse AST ---
-	if err := send(stream, progress("parsing AST", 0.20)); err != nil {
+	if err := send(stream, progress("parsing AST", 20)); err != nil {
 		return err
 	}
 
@@ -54,7 +54,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	}
 
 	// --- Step 3: build step graph ---
-	if err := send(stream, progress("building step graph", 0.40)); err != nil {
+	if err := send(stream, progress("building step graph", 40)); err != nil {
 		return err
 	}
 
@@ -64,7 +64,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	}
 
 	// --- Step 4: extract glossary candidates ---
-	if err := send(stream, progress("extracting glossary", 0.65)); err != nil {
+	if err := send(stream, progress("extracting glossary", 65)); err != nil {
 		return err
 	}
 
@@ -76,7 +76,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	})
 
 	// --- Step 5: create session ---
-	if err := send(stream, progress("creating session", 0.85)); err != nil {
+	if err := send(stream, progress("creating session", 85)); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func send(stream v1.CodeWalkerService_OpenSessionServer, evt *v1.SessionEvent) e
 	return stream.Send(evt)
 }
 
-func progress(msg string, pct float32) *v1.SessionEvent {
+func progress(msg string, pct uint32) *v1.SessionEvent {
 	return &v1.SessionEvent{
 		Event: &v1.SessionEvent_Progress{
 			Progress: &v1.SessionProgress{Message: msg, Progress: pct},

@@ -130,8 +130,7 @@ message OpenSessionRequest {
 
 message SessionProgress {
   string message = 1;
-  // 0.0–1.0
-  float progress = 2;
+  uint32 progress = 2;
 }
 
 message SessionReady {

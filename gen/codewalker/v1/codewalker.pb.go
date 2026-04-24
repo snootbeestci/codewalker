@@ -802,10 +802,9 @@ func (x *OpenSessionRequest) GetOmitRawSource() bool {
 }
 
 type SessionProgress struct {
-	state   protoimpl.MessageState `protogen:"open.v1"`
-	Message string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	// 0.0–1.0
-	Progress      float32 `protobuf:"fixed32,2,opt,name=progress,proto3" json:"progress,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Progress      uint32                 `protobuf:"varint,2,opt,name=progress,proto3" json:"progress,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -847,7 +846,7 @@ func (x *SessionProgress) GetMessage() string {
 	return ""
 }
 
-func (x *SessionProgress) GetProgress() float32 {
+func (x *SessionProgress) GetProgress() uint32 {
 	if x != nil {
 		return x.Progress
 	}
@@ -1450,7 +1449,7 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x0fomit_raw_source\x18\x06 \x01(\bR\romitRawSource\"G\n" +
 	"\x0fSessionProgress\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x1a\n" +
-	"\bprogress\x18\x02 \x01(\x02R\bprogress\"\xf2\x01\n" +
+	"\bprogress\x18\x02 \x01(\rR\bprogress\"\xf2\x01\n" +
 	"\fSessionReady\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12)\n" +

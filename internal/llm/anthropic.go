@@ -29,18 +29,22 @@ func NewAnthropicProvider(apiKey string) *AnthropicProvider {
 }
 
 // Narrate streams a narration for the given step.
+// Prompt assembly is delegated entirely to BuildMessages via StepContext.
 func (p *AnthropicProvider) Narrate(ctx context.Context, req NarrateRequest) (<-chan string, error) {
-	system, user := prompts.Narrate(
-		req.Code, req.Language, req.StepLabel, req.StepKind,
-		req.CallChain, req.Variables, req.Level,
-	)
-	return p.stream(ctx, system, user)
+	system, messages := BuildMessages(StepContext{
+		Language:        req.Language,
+		SymbolSignature: req.StepLabel,
+		CallChain:       req.CallChain,
+		RawSource:       req.Code,
+		EffectiveLevel:  uint32(req.Level),
+	})
+	return p.stream(ctx, system, messages)
 }
 
 // Rephrase streams a rephrased narration.
 func (p *AnthropicProvider) Rephrase(ctx context.Context, req RephraseRequest) (<-chan string, error) {
 	system, user := prompts.Rephrase(req.Code, req.Language, req.Mode, req.Level)
-	return p.stream(ctx, system, user)
+	return p.stream(ctx, system, oneMessage(user))
 }
 
 // SummarizeExternalCall returns a plain-text summary of an external symbol.
@@ -50,7 +54,7 @@ func (p *AnthropicProvider) SummarizeExternalCall(ctx context.Context, pkg, symb
 		Model:     anthropic.Model(model),
 		MaxTokens: 512,
 		System:    []anthropic.TextBlockParam{{Text: system}},
-		Messages:  WindowedMessages(user),
+		Messages:  oneMessage(user),
 	})
 	if err != nil {
 		return "", fmt.Errorf("anthropic: summarize external call: %w", err)
@@ -68,7 +72,7 @@ func (p *AnthropicProvider) ExtractGlossaryTerms(ctx context.Context, req Glossa
 		Model:     anthropic.Model(model),
 		MaxTokens: 1024,
 		System:    []anthropic.TextBlockParam{{Text: system}},
-		Messages:  WindowedMessages(user),
+		Messages:  oneMessage(user),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: extract glossary terms: %w", err)
@@ -94,30 +98,30 @@ func (p *AnthropicProvider) ExtractGlossaryTerms(ctx context.Context, req Glossa
 // ExpandTerm streams an expanded definition of a glossary term.
 func (p *AnthropicProvider) ExpandTerm(ctx context.Context, req ExpandTermRequest) (<-chan string, error) {
 	system, user := prompts.ExpandTerm(req.Term, req.Context, req.Language, req.Level)
-	return p.stream(ctx, system, user)
+	return p.stream(ctx, system, oneMessage(user))
 }
 
 // stream creates a streaming Messages request and returns a channel of tokens.
 // The channel is closed when the stream ends or the context is cancelled.
-func (p *AnthropicProvider) stream(ctx context.Context, system, user string) (<-chan string, error) {
+func (p *AnthropicProvider) stream(ctx context.Context, system string, messages []anthropic.MessageParam) (<-chan string, error) {
 	ch := make(chan string, 32)
 
-	stream := p.client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
+	s := p.client.Messages.NewStreaming(ctx, anthropic.MessageNewParams{
 		Model:     anthropic.Model(model),
 		MaxTokens: maxTokens,
 		System:    []anthropic.TextBlockParam{{Text: system}},
-		Messages:  WindowedMessages(user),
+		Messages:  messages,
 	})
 
 	go func() {
 		defer close(ch)
-		for stream.Next() {
+		for s.Next() {
 			select {
 			case <-ctx.Done():
 				return
 			default:
 			}
-			event := stream.Current()
+			event := s.Current()
 			switch e := event.AsAny().(type) {
 			case anthropic.ContentBlockDeltaEvent:
 				if delta, ok := e.Delta.AsAny().(anthropic.TextDelta); ok {
