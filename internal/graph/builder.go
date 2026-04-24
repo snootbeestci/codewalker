@@ -2,6 +2,7 @@ package graph
 
 import (
 	"fmt"
+	"log/slog"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	"github.com/yourorg/codewalker/internal/parser"
@@ -33,6 +34,9 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 		}
 		if !omitRawSource {
 			span.RawSource = n.Text
+			slog.Debug("step raw_source populated", "step_id", id, "src_len", len(n.Text))
+		} else {
+			slog.Debug("step raw_source omitted", "step_id", id)
 		}
 
 		step := &Step{
@@ -42,6 +46,7 @@ func Build(nodes []*parser.Node, src []byte, filePath string, omitRawSource bool
 			Source: span,
 		}
 		g.Add(step)
+		slog.Debug("step added", "step_id", id, "kind", step.Kind.String(), "start_line", n.StartLine, "end_line", n.EndLine)
 
 		// Build call edges from CallRefs.
 		for _, ref := range n.Calls {

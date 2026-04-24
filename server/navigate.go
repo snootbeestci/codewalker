@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log/slog"
 	"strings"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
@@ -53,6 +54,8 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 		return status.Errorf(codes.InvalidArgument, "navigation error: %v", navErr)
 	}
 
+	slog.Debug("navigated", "step_id", step.ID, "step_kind", step.Kind.String(), "step_label", step.Label)
+
 	crumbLabels := make([]string, 0, len(crumb))
 	for _, id := range crumb {
 		if st, ok := sess.Graph.Step(id); ok {
@@ -67,6 +70,7 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	if code == "" && len(sess.Source) > 0 && step.Source != nil {
 		code = sliceSource(sess.Source, int(step.Source.StartLine), int(step.Source.EndLine))
 	}
+	slog.Debug("source resolved", "step_id", step.ID, "code_len", len(code))
 
 	tokens, err := s.provider.Narrate(ctx, llm.NarrateRequest{
 		Code:      code,
@@ -79,19 +83,23 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	if err != nil {
 		return status.Errorf(codes.Internal, "narration error: %v", err)
 	}
+	slog.Debug("narration started", "step_id", step.ID)
 
+	tokenCount := 0
 	for token := range tokens {
 		select {
 		case <-ctx.Done():
 			return status.FromContextError(ctx.Err()).Err()
 		default:
 		}
+		tokenCount++
 		if err := stream.Send(&v1.NarrateEvent{
 			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
 		}); err != nil {
 			return err
 		}
 	}
+	slog.Debug("narration complete", "step_id", step.ID, "token_count", tokenCount)
 
 	return stream.Send(&v1.NarrateEvent{
 		Event: &v1.NarrateEvent_Complete{

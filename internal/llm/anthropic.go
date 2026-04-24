@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
@@ -31,6 +32,7 @@ func NewAnthropicProvider(apiKey string) *AnthropicProvider {
 // Narrate streams a narration for the given step.
 // Prompt assembly is delegated entirely to BuildMessages via StepContext.
 func (p *AnthropicProvider) Narrate(ctx context.Context, req NarrateRequest) (<-chan string, error) {
+	slog.Debug("narrate request", "language", req.Language, "effective_level", req.Level, "code_len", len(req.Code))
 	system, messages := BuildMessages(StepContext{
 		Language:        req.Language,
 		SymbolSignature: req.StepLabel,
@@ -115,6 +117,8 @@ func (p *AnthropicProvider) stream(ctx context.Context, system string, messages 
 
 	go func() {
 		defer close(ch)
+		tokenCount := 0
+		slog.Debug("anthropic stream started")
 		for s.Next() {
 			select {
 			case <-ctx.Done():
@@ -125,10 +129,12 @@ func (p *AnthropicProvider) stream(ctx context.Context, system string, messages 
 			switch e := event.AsAny().(type) {
 			case anthropic.ContentBlockDeltaEvent:
 				if delta, ok := e.Delta.AsAny().(anthropic.TextDelta); ok {
+					tokenCount++
 					ch <- delta.Text
 				}
 			}
 		}
+		slog.Debug("anthropic stream closed", "token_count", tokenCount)
 	}()
 
 	return ch, nil

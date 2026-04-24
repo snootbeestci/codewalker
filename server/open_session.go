@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	gogit "github.com/yourorg/codewalker/internal/git"
@@ -42,6 +43,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalker_Op
 	if err != nil {
 		return status.Errorf(codes.NotFound, "cannot read %q at ref %q: %v", req.FilePath, req.Ref, err)
 	}
+	slog.Debug("file read", "file_path", req.FilePath, "ref", req.Ref, "src_len", len(src))
 
 	// --- Step 2: parse AST ---
 	if err := send(stream, progress("parsing AST", 20)); err != nil {
@@ -52,6 +54,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalker_Op
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "parse error: %v", err)
 	}
+	slog.Debug("ast parsed", "language", language, "node_count", len(nodes))
 
 	// --- Step 3: build step graph ---
 	if err := send(stream, progress("building step graph", 40)); err != nil {
@@ -62,6 +65,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalker_Op
 	if err != nil {
 		return status.Errorf(codes.Internal, "graph build error: %v", err)
 	}
+	slog.Debug("graph built", "step_count", g.Len(), "entry_step_id", g.EntryID)
 
 	// --- Step 4: extract glossary candidates ---
 	if err := send(stream, progress("extracting glossary", 65)); err != nil {
@@ -74,6 +78,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalker_Op
 		Language: language,
 		Level:    effectiveLevel,
 	})
+	slog.Debug("glossary extracted", "term_count", len(glossaryCandidates))
 
 	// --- Step 5: create session ---
 	if err := send(stream, progress("creating session", 85)); err != nil {
