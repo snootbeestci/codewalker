@@ -134,7 +134,13 @@ func (p *AnthropicProvider) stream(ctx context.Context, system string, messages 
 				}
 			}
 		}
-		slog.Debug("anthropic stream closed", "token_count", tokenCount)
+		// s.Err() is the only way to observe stream errors — the error cannot be
+		// returned from stream() because this goroutine outlives that call.
+		if err := s.Err(); err != nil {
+			slog.Error("anthropic stream error", "error", err, "tokens_received", tokenCount)
+		} else {
+			slog.Debug("anthropic stream closed", "token_count", tokenCount)
+		}
 	}()
 
 	return ch, nil
