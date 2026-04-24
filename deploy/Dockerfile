@@ -7,6 +7,8 @@ WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 
+RUN GOBIN=/usr/local/bin go install github.com/grpc-ecosystem/grpc-health-probe@latest
+
 COPY . .
 RUN CGO_ENABLED=1 go build \
     -ldflags="-s -w -linkmode external -extldflags '-static'" \
@@ -16,6 +18,7 @@ RUN CGO_ENABLED=1 go build \
 FROM gcr.io/distroless/static
 
 COPY --from=builder /build/codewalker /codewalker
+COPY --from=builder /usr/local/bin/grpc-health-probe /usr/local/bin/grpc-health-probe
 
 EXPOSE 50051
 

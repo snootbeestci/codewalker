@@ -10,6 +10,8 @@ import (
 	"syscall"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
@@ -65,6 +67,11 @@ func run(cfg *config.Config) error {
 	)
 
 	v1.RegisterCodeWalkerServer(grpcServer, srv)
+
+	healthSrv := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthSrv)
+	healthSrv.SetServingStatus("codewalker.v1.CodeWalker", grpc_health_v1.HealthCheckResponse_SERVING)
+
 	reflection.Register(grpcServer)
 
 	addr := ":" + cfg.Port
