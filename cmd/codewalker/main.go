@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
@@ -41,7 +42,13 @@ func run(cfg *config.Config) error {
 		return fmt.Errorf("unknown LLM provider %q", cfg.LLMProvider)
 	}
 
+	// Root context: cancelling it stops background goroutines (eviction, etc.).
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	store := session.NewStore()
+	store.StartEviction(ctx, cfg.SessionTTL, cfg.EvictionInterval)
+
 	srv := server.New(store, provider, cfg.RepoRoot)
 
 	grpcServer := grpc.NewServer(
@@ -64,7 +71,12 @@ func run(cfg *config.Config) error {
 		return fmt.Errorf("listen %s: %w", addr, err)
 	}
 
-	slog.Info("codewalker listening", "addr", addr, "llm_provider", cfg.LLMProvider)
+	slog.Info("codewalker listening",
+		"addr", addr,
+		"llm_provider", cfg.LLMProvider,
+		"session_ttl", cfg.SessionTTL,
+		"eviction_interval", cfg.EvictionInterval,
+	)
 	return grpcServer.Serve(lis)
 }
 
