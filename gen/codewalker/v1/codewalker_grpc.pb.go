@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CodeWalker_OpenSession_FullMethodName  = "/codewalker.v1.CodeWalker/OpenSession"
-	CodeWalker_Navigate_FullMethodName     = "/codewalker.v1.CodeWalker/Navigate"
-	CodeWalker_Rephrase_FullMethodName     = "/codewalker.v1.CodeWalker/Rephrase"
-	CodeWalker_ExpandTerm_FullMethodName   = "/codewalker.v1.CodeWalker/ExpandTerm"
-	CodeWalker_CloseSession_FullMethodName = "/codewalker.v1.CodeWalker/CloseSession"
-	CodeWalker_ListSessions_FullMethodName = "/codewalker.v1.CodeWalker/ListSessions"
+	CodeWalker_OpenSession_FullMethodName       = "/codewalker.v1.CodeWalker/OpenSession"
+	CodeWalker_Navigate_FullMethodName          = "/codewalker.v1.CodeWalker/Navigate"
+	CodeWalker_Rephrase_FullMethodName          = "/codewalker.v1.CodeWalker/Rephrase"
+	CodeWalker_ExpandTerm_FullMethodName        = "/codewalker.v1.CodeWalker/ExpandTerm"
+	CodeWalker_CloseSession_FullMethodName      = "/codewalker.v1.CodeWalker/CloseSession"
+	CodeWalker_ListSessions_FullMethodName      = "/codewalker.v1.CodeWalker/ListSessions"
+	CodeWalker_OpenReviewSession_FullMethodName = "/codewalker.v1.CodeWalker/OpenReviewSession"
 )
 
 // CodeWalkerClient is the client API for CodeWalker service.
@@ -46,6 +47,10 @@ type CodeWalkerClient interface {
 	CloseSession(ctx context.Context, in *CloseSessionRequest, opts ...grpc.CallOption) (*CloseSessionResponse, error)
 	// List open sessions (useful for IDE plugins managing multiple tabs).
 	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
+	// Open a review session against a PR, commit, or branch comparison URL.
+	// Server parses the URL, fetches the diff via the appropriate ForgeHandler,
+	// and streams back progress before emitting a final ReviewReady event.
+	OpenReviewSession(ctx context.Context, in *OpenReviewSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error)
 }
 
 type codeWalkerClient struct {
@@ -152,6 +157,25 @@ func (c *codeWalkerClient) ListSessions(ctx context.Context, in *ListSessionsReq
 	return out, nil
 }
 
+func (c *codeWalkerClient) OpenReviewSession(ctx context.Context, in *OpenReviewSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[4], CodeWalker_OpenReviewSession_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[OpenReviewSessionRequest, SessionEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CodeWalker_OpenReviewSessionClient = grpc.ServerStreamingClient[SessionEvent]
+
 // CodeWalkerServer is the server API for CodeWalker service.
 // All implementations should embed UnimplementedCodeWalkerServer
 // for forward compatibility.
@@ -171,6 +195,10 @@ type CodeWalkerServer interface {
 	CloseSession(context.Context, *CloseSessionRequest) (*CloseSessionResponse, error)
 	// List open sessions (useful for IDE plugins managing multiple tabs).
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	// Open a review session against a PR, commit, or branch comparison URL.
+	// Server parses the URL, fetches the diff via the appropriate ForgeHandler,
+	// and streams back progress before emitting a final ReviewReady event.
+	OpenReviewSession(*OpenReviewSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error
 }
 
 // UnimplementedCodeWalkerServer should be embedded to have
@@ -197,6 +225,9 @@ func (UnimplementedCodeWalkerServer) CloseSession(context.Context, *CloseSession
 }
 func (UnimplementedCodeWalkerServer) ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListSessions not implemented")
+}
+func (UnimplementedCodeWalkerServer) OpenReviewSession(*OpenReviewSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error {
+	return status.Error(codes.Unimplemented, "method OpenReviewSession not implemented")
 }
 func (UnimplementedCodeWalkerServer) testEmbeddedByValue() {}
 
@@ -298,6 +329,17 @@ func _CodeWalker_ListSessions_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CodeWalker_OpenReviewSession_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(OpenReviewSessionRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CodeWalkerServer).OpenReviewSession(m, &grpc.GenericServerStream[OpenReviewSessionRequest, SessionEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CodeWalker_OpenReviewSessionServer = grpc.ServerStreamingServer[SessionEvent]
+
 // CodeWalker_ServiceDesc is the grpc.ServiceDesc for CodeWalker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -333,6 +375,11 @@ var CodeWalker_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ExpandTerm",
 			Handler:       _CodeWalker_ExpandTerm_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "OpenReviewSession",
+			Handler:       _CodeWalker_OpenReviewSession_Handler,
 			ServerStreams: true,
 		},
 	},
