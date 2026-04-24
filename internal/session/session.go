@@ -2,6 +2,7 @@ package session
 
 import (
 	"sync"
+	"time"
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	"github.com/yourorg/codewalker/internal/graph"
@@ -22,6 +23,7 @@ type Session struct {
 	FilePath      string
 	RepoPath      string
 	Ref           string
+	LastAccessed  time.Time
 }
 
 // New creates a Session from an already-built graph.
@@ -38,6 +40,7 @@ func New(id string, g *graph.Graph, effectiveLevel int, language string, omitRaw
 		FilePath:      filePath,
 		RepoPath:      repoPath,
 		Ref:           ref,
+		LastAccessed:  time.Now(),
 	}
 }
 
@@ -65,6 +68,13 @@ func (s *Session) AllGlossaryTerms() []*v1.GlossaryTerm {
 		out = append(out, t)
 	}
 	return out
+}
+
+// Touch updates LastAccessed to now, resetting the eviction TTL clock.
+func (s *Session) Touch() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.LastAccessed = time.Now()
 }
 
 // Lock locks the session mutex for callers that need atomic multi-step operations.
