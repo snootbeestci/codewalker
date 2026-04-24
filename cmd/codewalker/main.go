@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -77,7 +79,24 @@ func run(cfg *config.Config) error {
 		"session_ttl", cfg.SessionTTL,
 		"eviction_interval", cfg.EvictionInterval,
 	)
-	return grpcServer.Serve(lis)
+
+	serveErr := make(chan error, 1)
+	go func() {
+		serveErr <- grpcServer.Serve(lis)
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+
+	select {
+	case sig := <-quit:
+		slog.Info("shutdown signal received", "signal", sig)
+		grpcServer.GracefulStop() // waits for in-flight RPCs to complete
+		cancel()                  // stop background goroutines (eviction etc.)
+		return nil
+	case err := <-serveErr:
+		return fmt.Errorf("grpc serve: %w", err)
+	}
 }
 
 func setupLogging(level string) {
