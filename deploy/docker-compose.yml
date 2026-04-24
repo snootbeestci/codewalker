@@ -13,3 +13,9 @@ services:
       - CODEWALKER_PORT=50051
       - CODEWALKER_LOG_LEVEL=${CODEWALKER_LOG_LEVEL:-info}
       - CODEWALKER_LLM_PROVIDER=${CODEWALKER_LLM_PROVIDER:-anthropic}
+    healthcheck:
+      test: ["CMD", "grpc-health-probe", "-addr=:50051"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
