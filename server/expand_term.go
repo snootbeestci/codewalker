@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// ExpandTerm implements CodeWalkerServiceServer.ExpandTerm.
-func (s *Server) ExpandTerm(req *v1.ExpandTermRequest, stream v1.CodeWalkerService_ExpandTermServer) error {
+// ExpandTerm implements CodeWalkerServer.ExpandTerm.
+func (s *Server) ExpandTerm(req *v1.ExpandTermRequest, stream v1.CodeWalker_ExpandTermServer) error {
 	ctx := stream.Context()
 
 	if req.SessionId == "" {
@@ -23,9 +23,9 @@ func (s *Server) ExpandTerm(req *v1.ExpandTermRequest, stream v1.CodeWalkerServi
 		return status.Errorf(codes.NotFound, "%v", err)
 	}
 
-	// Gather context from the current step's source for the LLM.
 	sess.Lock()
 	currentStep, _ := sess.Walker.Current()
+	currentStepID := sess.Walker.CurrentID()
 	sess.Unlock()
 
 	contextCode := ""
@@ -53,16 +53,15 @@ func (s *Server) ExpandTerm(req *v1.ExpandTermRequest, stream v1.CodeWalkerServi
 		default:
 		}
 		if err := stream.Send(&v1.NarrateEvent{
-			Event: &v1.NarrateEvent_Token{Token: token},
+			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
 		}); err != nil {
 			return err
 		}
 	}
 
-	// Final StepComplete with the expanded definition added to new_glossary_terms.
 	expanded := &v1.GlossaryTerm{
 		Term:   req.Term,
-		StepId: sess.Walker.CurrentID(),
+		StepId: currentStepID,
 		Kind:   v1.TermKind_TERM_KIND_UNSPECIFIED,
 	}
 	if t, ok := sess.GetGlossaryTerm(req.Term); ok {
@@ -70,10 +69,10 @@ func (s *Server) ExpandTerm(req *v1.ExpandTermRequest, stream v1.CodeWalkerServi
 	}
 
 	return stream.Send(&v1.NarrateEvent{
-		Event: &v1.NarrateEvent_StepComplete{
-			StepComplete: &v1.StepComplete{
-				NewGlossaryTerms: []*v1.GlossaryTerm{expanded},
-				SessionSummary:   sess.Summary(),
+		Event: &v1.NarrateEvent_Complete{
+			Complete: &v1.StepComplete{
+				StepId:   currentStepID,
+				NewTerms: []*v1.GlossaryTerm{expanded},
 			},
 		},
 	})

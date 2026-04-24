@@ -15,8 +15,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// OpenSession implements CodeWalkerServiceServer.OpenSession.
-func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerService_OpenSessionServer) error {
+// OpenSession implements CodeWalkerServer.OpenSession.
+func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalker_OpenSessionServer) error {
 	ctx := stream.Context()
 
 	if req.FilePath == "" {
@@ -38,9 +38,9 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 		return status.Errorf(codes.NotFound, "cannot open repo at %q: %v", repoPath, err)
 	}
 
-	src, err := gitClient.ReadFile(req.GitRef, req.FilePath)
+	src, err := gitClient.ReadFile(req.Ref, req.FilePath)
 	if err != nil {
-		return status.Errorf(codes.NotFound, "cannot read %q at ref %q: %v", req.FilePath, req.GitRef, err)
+		return status.Errorf(codes.NotFound, "cannot read %q at ref %q: %v", req.FilePath, req.Ref, err)
 	}
 
 	// --- Step 2: parse AST ---
@@ -81,7 +81,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 	}
 
 	sessID := newSessionID()
-	sess := session.New(sessID, g, effectiveLevel, language, req.OmitRawSource, src, req.FilePath)
+	sess := session.New(sessID, g, effectiveLevel, language, req.OmitRawSource, src, req.FilePath, repoPath, req.Ref)
 
 	// Build proto glossary terms.
 	glossaryProto := make([]*v1.GlossaryTerm, 0, len(glossaryCandidates))
@@ -106,7 +106,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 				Steps:       steps,
 				Glossary:    glossaryProto,
 				Language:    language,
-				TotalSteps:  int32(g.Len()),
+				TotalSteps:  uint32(g.Len()),
 				EntryStepId: g.EntryID,
 			},
 		},
@@ -116,7 +116,7 @@ func (s *Server) OpenSession(req *v1.OpenSessionRequest, stream v1.CodeWalkerSer
 
 // --- helpers ---
 
-func send(stream v1.CodeWalkerService_OpenSessionServer, evt *v1.SessionEvent) error {
+func send(stream v1.CodeWalker_OpenSessionServer, evt *v1.SessionEvent) error {
 	if err := stream.Context().Err(); err != nil {
 		return status.FromContextError(err).Err()
 	}
@@ -126,7 +126,7 @@ func send(stream v1.CodeWalkerService_OpenSessionServer, evt *v1.SessionEvent) e
 func progress(msg string, pct uint32) *v1.SessionEvent {
 	return &v1.SessionEvent{
 		Event: &v1.SessionEvent_Progress{
-			Progress: &v1.SessionProgress{Message: msg, Progress: pct},
+			Progress: &v1.SessionProgress{Message: msg, Percent: pct},
 		},
 	}
 }
@@ -138,7 +138,7 @@ func protoSteps(g *graph.Graph) []*v1.Step {
 		out = append(out, &v1.Step{
 			Id:      s.ID,
 			Label:   s.Label,
-			Source:  s.Source,
+			Span:    s.Source,
 			Edges:   s.Edges,
 			Visited: s.Visited,
 			Kind:    s.Kind,
@@ -167,4 +167,3 @@ func termKindFromString(s string) v1.TermKind {
 		return v1.TermKind_TERM_KIND_UNSPECIFIED
 	}
 }
-

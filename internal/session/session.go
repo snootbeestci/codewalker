@@ -11,19 +11,21 @@ import (
 type Session struct {
 	mu sync.Mutex
 
-	ID           string
-	Graph        *graph.Graph
-	Walker       *graph.Walker
-	EffLevel     int // 1–10, from adaptation.go
-	Language     string
-	Glossary     map[string]*v1.GlossaryTerm
+	ID            string
+	Graph         *graph.Graph
+	Walker        *graph.Walker
+	EffLevel      int // 1–10, from adaptation.go
+	Language      string
+	Glossary      map[string]*v1.GlossaryTerm
 	OmitRawSource bool
-	Source       []byte
-	FilePath     string
+	Source        []byte
+	FilePath      string
+	RepoPath      string
+	Ref           string
 }
 
 // New creates a Session from an already-built graph.
-func New(id string, g *graph.Graph, effectiveLevel int, language string, omitRaw bool, src []byte, filePath string) *Session {
+func New(id string, g *graph.Graph, effectiveLevel int, language string, omitRaw bool, src []byte, filePath, repoPath, ref string) *Session {
 	return &Session{
 		ID:            id,
 		Graph:         g,
@@ -34,6 +36,8 @@ func New(id string, g *graph.Graph, effectiveLevel int, language string, omitRaw
 		OmitRawSource: omitRaw,
 		Source:        src,
 		FilePath:      filePath,
+		RepoPath:      repoPath,
+		Ref:           ref,
 	}
 }
 
@@ -73,19 +77,13 @@ func (s *Session) Unlock() { s.mu.Unlock() }
 func (s *Session) Summary() *v1.SessionSummary {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	crumb := s.Walker.Breadcrumb()
-	labels := make([]string, 0, len(crumb))
-	for _, id := range crumb {
-		if step, ok := s.Graph.Step(id); ok {
-			labels = append(labels, step.Label)
-		} else {
-			labels = append(labels, id)
-		}
-	}
 	return &v1.SessionSummary{
-		SessionId:     s.ID,
-		EffectiveLevel: int32(s.EffLevel),
-		CurrentStepId: s.Walker.CurrentID(),
-		Breadcrumb:    labels,
+		SessionId:      s.ID,
+		RepoPath:       s.RepoPath,
+		FilePath:       s.FilePath,
+		Ref:            s.Ref,
+		Language:       s.Language,
+		CurrentStepId:  s.Walker.CurrentID(),
+		EffectiveLevel: uint32(s.EffLevel),
 	}
 }

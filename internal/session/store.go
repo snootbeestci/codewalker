@@ -41,6 +41,17 @@ func (s *Store) Delete(id string) {
 	delete(s.sessions, id)
 }
 
+// All returns a snapshot of all active sessions.
+func (s *Store) All() []*Session {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	out := make([]*Session, 0, len(s.sessions))
+	for _, sess := range s.sessions {
+		out = append(out, sess)
+	}
+	return out
+}
+
 // Len returns the number of active sessions.
 func (s *Store) Len() int {
 	s.mu.RLock()

@@ -55,7 +55,7 @@ func run(cfg *config.Config) error {
 		),
 	)
 
-	v1.RegisterCodeWalkerServiceServer(grpcServer, srv)
+	v1.RegisterCodeWalkerServer(grpcServer, srv)
 	reflection.Register(grpcServer)
 
 	addr := ":" + cfg.Port
