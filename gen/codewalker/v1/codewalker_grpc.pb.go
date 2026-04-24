@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CodeWalker_OpenSession_FullMethodName  = "/codewalker.v1.CodeWalker/OpenSession"
-	CodeWalker_Navigate_FullMethodName     = "/codewalker.v1.CodeWalker/Navigate"
-	CodeWalker_Rephrase_FullMethodName     = "/codewalker.v1.CodeWalker/Rephrase"
-	CodeWalker_ExpandTerm_FullMethodName   = "/codewalker.v1.CodeWalker/ExpandTerm"
-	CodeWalker_CloseSession_FullMethodName = "/codewalker.v1.CodeWalker/CloseSession"
-	CodeWalker_ListSessions_FullMethodName = "/codewalker.v1.CodeWalker/ListSessions"
+	CodeWalker_OpenSession_FullMethodName       = "/codewalker.v1.CodeWalker/OpenSession"
+	CodeWalker_OpenReviewSession_FullMethodName = "/codewalker.v1.CodeWalker/OpenReviewSession"
+	CodeWalker_Navigate_FullMethodName          = "/codewalker.v1.CodeWalker/Navigate"
+	CodeWalker_Rephrase_FullMethodName          = "/codewalker.v1.CodeWalker/Rephrase"
+	CodeWalker_ExpandTerm_FullMethodName        = "/codewalker.v1.CodeWalker/ExpandTerm"
+	CodeWalker_CloseSession_FullMethodName      = "/codewalker.v1.CodeWalker/CloseSession"
+	CodeWalker_ListSessions_FullMethodName      = "/codewalker.v1.CodeWalker/ListSessions"
 )
 
 // CodeWalkerClient is the client API for CodeWalker service.
@@ -35,6 +36,10 @@ type CodeWalkerClient interface {
 	// Server parses the AST, builds the step graph, and streams back
 	// progress before emitting a final SessionReady event.
 	OpenSession(ctx context.Context, in *OpenSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error)
+	// Open a review session against a PR/commit URL.
+	// Server fetches forge context, builds per-file step graphs, and streams
+	// back progress before emitting a final ReviewReady event.
+	OpenReviewSession(ctx context.Context, in *OpenReviewSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error)
 	// Navigate within an open session. Server streams narration tokens
 	// followed by a StepComplete event.
 	Navigate(ctx context.Context, in *NavigateRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error)
@@ -75,9 +80,28 @@ func (c *codeWalkerClient) OpenSession(ctx context.Context, in *OpenSessionReque
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type CodeWalker_OpenSessionClient = grpc.ServerStreamingClient[SessionEvent]
 
+func (c *codeWalkerClient) OpenReviewSession(ctx context.Context, in *OpenReviewSessionRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SessionEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[1], CodeWalker_OpenReviewSession_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[OpenReviewSessionRequest, SessionEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CodeWalker_OpenReviewSessionClient = grpc.ServerStreamingClient[SessionEvent]
+
 func (c *codeWalkerClient) Navigate(ctx context.Context, in *NavigateRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[1], CodeWalker_Navigate_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[2], CodeWalker_Navigate_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +120,7 @@ type CodeWalker_NavigateClient = grpc.ServerStreamingClient[NarrateEvent]
 
 func (c *codeWalkerClient) Rephrase(ctx context.Context, in *RephraseRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[2], CodeWalker_Rephrase_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[3], CodeWalker_Rephrase_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +139,7 @@ type CodeWalker_RephraseClient = grpc.ServerStreamingClient[NarrateEvent]
 
 func (c *codeWalkerClient) ExpandTerm(ctx context.Context, in *ExpandTermRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NarrateEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[3], CodeWalker_ExpandTerm_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &CodeWalker_ServiceDesc.Streams[4], CodeWalker_ExpandTerm_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -160,6 +184,10 @@ type CodeWalkerServer interface {
 	// Server parses the AST, builds the step graph, and streams back
 	// progress before emitting a final SessionReady event.
 	OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error
+	// Open a review session against a PR/commit URL.
+	// Server fetches forge context, builds per-file step graphs, and streams
+	// back progress before emitting a final ReviewReady event.
+	OpenReviewSession(*OpenReviewSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error
 	// Navigate within an open session. Server streams narration tokens
 	// followed by a StepComplete event.
 	Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error
@@ -182,6 +210,9 @@ type UnimplementedCodeWalkerServer struct{}
 
 func (UnimplementedCodeWalkerServer) OpenSession(*OpenSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error {
 	return status.Error(codes.Unimplemented, "method OpenSession not implemented")
+}
+func (UnimplementedCodeWalkerServer) OpenReviewSession(*OpenReviewSessionRequest, grpc.ServerStreamingServer[SessionEvent]) error {
+	return status.Error(codes.Unimplemented, "method OpenReviewSession not implemented")
 }
 func (UnimplementedCodeWalkerServer) Navigate(*NavigateRequest, grpc.ServerStreamingServer[NarrateEvent]) error {
 	return status.Error(codes.Unimplemented, "method Navigate not implemented")
@@ -228,6 +259,17 @@ func _CodeWalker_OpenSession_Handler(srv interface{}, stream grpc.ServerStream) 
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type CodeWalker_OpenSessionServer = grpc.ServerStreamingServer[SessionEvent]
+
+func _CodeWalker_OpenReviewSession_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(OpenReviewSessionRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CodeWalkerServer).OpenReviewSession(m, &grpc.GenericServerStream[OpenReviewSessionRequest, SessionEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type CodeWalker_OpenReviewSessionServer = grpc.ServerStreamingServer[SessionEvent]
 
 func _CodeWalker_Navigate_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(NavigateRequest)
@@ -318,6 +360,11 @@ var CodeWalker_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "OpenSession",
 			Handler:       _CodeWalker_OpenSession_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "OpenReviewSession",
+			Handler:       _CodeWalker_OpenReviewSession_Handler,
 			ServerStreams: true,
 		},
 		{

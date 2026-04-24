@@ -21,6 +21,55 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SessionKind int32
+
+const (
+	SessionKind_SESSION_KIND_UNSPECIFIED SessionKind = 0
+	SessionKind_SESSION_KIND_WALKTHROUGH SessionKind = 1
+	SessionKind_SESSION_KIND_REVIEW      SessionKind = 2
+)
+
+// Enum value maps for SessionKind.
+var (
+	SessionKind_name = map[int32]string{
+		0: "SESSION_KIND_UNSPECIFIED",
+		1: "SESSION_KIND_WALKTHROUGH",
+		2: "SESSION_KIND_REVIEW",
+	}
+	SessionKind_value = map[string]int32{
+		"SESSION_KIND_UNSPECIFIED": 0,
+		"SESSION_KIND_WALKTHROUGH": 1,
+		"SESSION_KIND_REVIEW":      2,
+	}
+)
+
+func (x SessionKind) Enum() *SessionKind {
+	p := new(SessionKind)
+	*p = x
+	return p
+}
+
+func (x SessionKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[0].Descriptor()
+}
+
+func (SessionKind) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[0]
+}
+
+func (x SessionKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionKind.Descriptor instead.
+func (SessionKind) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{0}
+}
+
 type StepKind int32
 
 const (
@@ -33,6 +82,7 @@ const (
 	StepKind_STEP_KIND_RETURN       StepKind = 6
 	StepKind_STEP_KIND_ERROR_HANDLE StepKind = 7 // try/catch, err != nil blocks
 	StepKind_STEP_KIND_EXIT         StepKind = 8
+	StepKind_STEP_KIND_HUNK         StepKind = 9 // A diff hunk in a review session
 )
 
 // Enum value maps for StepKind.
@@ -47,6 +97,7 @@ var (
 		6: "STEP_KIND_RETURN",
 		7: "STEP_KIND_ERROR_HANDLE",
 		8: "STEP_KIND_EXIT",
+		9: "STEP_KIND_HUNK",
 	}
 	StepKind_value = map[string]int32{
 		"STEP_KIND_UNSPECIFIED":  0,
@@ -58,6 +109,7 @@ var (
 		"STEP_KIND_RETURN":       6,
 		"STEP_KIND_ERROR_HANDLE": 7,
 		"STEP_KIND_EXIT":         8,
+		"STEP_KIND_HUNK":         9,
 	}
 )
 
@@ -72,11 +124,11 @@ func (x StepKind) String() string {
 }
 
 func (StepKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[0].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[1].Descriptor()
 }
 
 func (StepKind) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[0]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[1]
 }
 
 func (x StepKind) Number() protoreflect.EnumNumber {
@@ -85,7 +137,7 @@ func (x StepKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use StepKind.Descriptor instead.
 func (StepKind) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{0}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
 }
 
 type EdgeLabel int32
@@ -139,11 +191,11 @@ func (x EdgeLabel) String() string {
 }
 
 func (EdgeLabel) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[1].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[2].Descriptor()
 }
 
 func (EdgeLabel) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[1]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[2]
 }
 
 func (x EdgeLabel) Number() protoreflect.EnumNumber {
@@ -152,7 +204,7 @@ func (x EdgeLabel) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use EdgeLabel.Descriptor instead.
 func (EdgeLabel) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{1}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
 }
 
 type SimpleDirection int32
@@ -188,11 +240,11 @@ func (x SimpleDirection) String() string {
 }
 
 func (SimpleDirection) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[2].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[3].Descriptor()
 }
 
 func (SimpleDirection) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[2]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[3]
 }
 
 func (x SimpleDirection) Number() protoreflect.EnumNumber {
@@ -201,7 +253,7 @@ func (x SimpleDirection) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SimpleDirection.Descriptor instead.
 func (SimpleDirection) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{2}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
 }
 
 type RephraseMode int32
@@ -243,11 +295,11 @@ func (x RephraseMode) String() string {
 }
 
 func (RephraseMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[3].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[4].Descriptor()
 }
 
 func (RephraseMode) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[3]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[4]
 }
 
 func (x RephraseMode) Number() protoreflect.EnumNumber {
@@ -256,7 +308,7 @@ func (x RephraseMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RephraseMode.Descriptor instead.
 func (RephraseMode) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{3}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
 }
 
 type TermKind int32
@@ -298,11 +350,11 @@ func (x TermKind) String() string {
 }
 
 func (TermKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[4].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[5].Descriptor()
 }
 
 func (TermKind) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[4]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[5]
 }
 
 func (x TermKind) Number() protoreflect.EnumNumber {
@@ -311,7 +363,114 @@ func (x TermKind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use TermKind.Descriptor instead.
 func (TermKind) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{4}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{5}
+}
+
+type ForgeContextKind int32
+
+const (
+	ForgeContextKind_FORGE_CONTEXT_KIND_UNSPECIFIED ForgeContextKind = 0
+	ForgeContextKind_FORGE_CONTEXT_KIND_PR          ForgeContextKind = 1
+	ForgeContextKind_FORGE_CONTEXT_KIND_COMMIT      ForgeContextKind = 2
+	ForgeContextKind_FORGE_CONTEXT_KIND_COMPARISON  ForgeContextKind = 3
+)
+
+// Enum value maps for ForgeContextKind.
+var (
+	ForgeContextKind_name = map[int32]string{
+		0: "FORGE_CONTEXT_KIND_UNSPECIFIED",
+		1: "FORGE_CONTEXT_KIND_PR",
+		2: "FORGE_CONTEXT_KIND_COMMIT",
+		3: "FORGE_CONTEXT_KIND_COMPARISON",
+	}
+	ForgeContextKind_value = map[string]int32{
+		"FORGE_CONTEXT_KIND_UNSPECIFIED": 0,
+		"FORGE_CONTEXT_KIND_PR":          1,
+		"FORGE_CONTEXT_KIND_COMMIT":      2,
+		"FORGE_CONTEXT_KIND_COMPARISON":  3,
+	}
+)
+
+func (x ForgeContextKind) Enum() *ForgeContextKind {
+	p := new(ForgeContextKind)
+	*p = x
+	return p
+}
+
+func (x ForgeContextKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ForgeContextKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[6].Descriptor()
+}
+
+func (ForgeContextKind) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[6]
+}
+
+func (x ForgeContextKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ForgeContextKind.Descriptor instead.
+func (ForgeContextKind) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{6}
+}
+
+type ChangeKind int32
+
+const (
+	ChangeKind_CHANGE_KIND_UNSPECIFIED ChangeKind = 0
+	ChangeKind_CHANGE_KIND_ADDED       ChangeKind = 1
+	ChangeKind_CHANGE_KIND_MODIFIED    ChangeKind = 2
+	ChangeKind_CHANGE_KIND_DELETED     ChangeKind = 3
+	ChangeKind_CHANGE_KIND_RENAMED     ChangeKind = 4
+)
+
+// Enum value maps for ChangeKind.
+var (
+	ChangeKind_name = map[int32]string{
+		0: "CHANGE_KIND_UNSPECIFIED",
+		1: "CHANGE_KIND_ADDED",
+		2: "CHANGE_KIND_MODIFIED",
+		3: "CHANGE_KIND_DELETED",
+		4: "CHANGE_KIND_RENAMED",
+	}
+	ChangeKind_value = map[string]int32{
+		"CHANGE_KIND_UNSPECIFIED": 0,
+		"CHANGE_KIND_ADDED":       1,
+		"CHANGE_KIND_MODIFIED":    2,
+		"CHANGE_KIND_DELETED":     3,
+		"CHANGE_KIND_RENAMED":     4,
+	}
+)
+
+func (x ChangeKind) Enum() *ChangeKind {
+	p := new(ChangeKind)
+	*p = x
+	return p
+}
+
+func (x ChangeKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ChangeKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_codewalker_v1_codewalker_proto_enumTypes[7].Descriptor()
+}
+
+func (ChangeKind) Type() protoreflect.EnumType {
+	return &file_codewalker_v1_codewalker_proto_enumTypes[7]
+}
+
+func (x ChangeKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ChangeKind.Descriptor instead.
+func (ChangeKind) EnumDescriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{7}
 }
 
 type ExperienceLevel int32
@@ -350,11 +509,11 @@ func (x ExperienceLevel) String() string {
 }
 
 func (ExperienceLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[5].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[8].Descriptor()
 }
 
 func (ExperienceLevel) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[5]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[8]
 }
 
 func (x ExperienceLevel) Number() protoreflect.EnumNumber {
@@ -363,7 +522,7 @@ func (x ExperienceLevel) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ExperienceLevel.Descriptor instead.
 func (ExperienceLevel) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{5}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{8}
 }
 
 type ErrorCode int32
@@ -376,18 +535,26 @@ const (
 	ErrorCode_ERROR_CODE_LLM_ERROR          ErrorCode = 4
 	ErrorCode_ERROR_CODE_UNSUPPORTED_LANG   ErrorCode = 5
 	ErrorCode_ERROR_CODE_INVALID_NAVIGATION ErrorCode = 6
+	ErrorCode_ERROR_CODE_UNSUPPORTED_FORGE  ErrorCode = 7
+	ErrorCode_ERROR_CODE_FORGE_AUTH_FAILED  ErrorCode = 8
+	ErrorCode_ERROR_CODE_FORGE_NOT_FOUND    ErrorCode = 9
+	ErrorCode_ERROR_CODE_INVALID_URL        ErrorCode = 10
 )
 
 // Enum value maps for ErrorCode.
 var (
 	ErrorCode_name = map[int32]string{
-		0: "ERROR_CODE_UNSPECIFIED",
-		1: "ERROR_CODE_SESSION_NOT_FOUND",
-		2: "ERROR_CODE_PARSE_FAILED",
-		3: "ERROR_CODE_INVALID_REF",
-		4: "ERROR_CODE_LLM_ERROR",
-		5: "ERROR_CODE_UNSUPPORTED_LANG",
-		6: "ERROR_CODE_INVALID_NAVIGATION",
+		0:  "ERROR_CODE_UNSPECIFIED",
+		1:  "ERROR_CODE_SESSION_NOT_FOUND",
+		2:  "ERROR_CODE_PARSE_FAILED",
+		3:  "ERROR_CODE_INVALID_REF",
+		4:  "ERROR_CODE_LLM_ERROR",
+		5:  "ERROR_CODE_UNSUPPORTED_LANG",
+		6:  "ERROR_CODE_INVALID_NAVIGATION",
+		7:  "ERROR_CODE_UNSUPPORTED_FORGE",
+		8:  "ERROR_CODE_FORGE_AUTH_FAILED",
+		9:  "ERROR_CODE_FORGE_NOT_FOUND",
+		10: "ERROR_CODE_INVALID_URL",
 	}
 	ErrorCode_value = map[string]int32{
 		"ERROR_CODE_UNSPECIFIED":        0,
@@ -397,6 +564,10 @@ var (
 		"ERROR_CODE_LLM_ERROR":          4,
 		"ERROR_CODE_UNSUPPORTED_LANG":   5,
 		"ERROR_CODE_INVALID_NAVIGATION": 6,
+		"ERROR_CODE_UNSUPPORTED_FORGE":  7,
+		"ERROR_CODE_FORGE_AUTH_FAILED":  8,
+		"ERROR_CODE_FORGE_NOT_FOUND":    9,
+		"ERROR_CODE_INVALID_URL":        10,
 	}
 )
 
@@ -411,11 +582,11 @@ func (x ErrorCode) String() string {
 }
 
 func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
-	return file_codewalker_v1_codewalker_proto_enumTypes[6].Descriptor()
+	return file_codewalker_v1_codewalker_proto_enumTypes[9].Descriptor()
 }
 
 func (ErrorCode) Type() protoreflect.EnumType {
-	return &file_codewalker_v1_codewalker_proto_enumTypes[6]
+	return &file_codewalker_v1_codewalker_proto_enumTypes[9]
 }
 
 func (x ErrorCode) Number() protoreflect.EnumNumber {
@@ -424,7 +595,7 @@ func (x ErrorCode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ErrorCode.Descriptor instead.
 func (ErrorCode) EnumDescriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{6}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{9}
 }
 
 type OpenSessionRequest struct {
@@ -528,6 +699,7 @@ type SessionEvent struct {
 	//	*SessionEvent_Progress
 	//	*SessionEvent_Ready
 	//	*SessionEvent_Error
+	//	*SessionEvent_ReviewReady
 	Event         isSessionEvent_Event `protobuf_oneof:"event"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -597,6 +769,15 @@ func (x *SessionEvent) GetError() *ServiceError {
 	return nil
 }
 
+func (x *SessionEvent) GetReviewReady() *ReviewReady {
+	if x != nil {
+		if x, ok := x.Event.(*SessionEvent_ReviewReady); ok {
+			return x.ReviewReady
+		}
+	}
+	return nil
+}
+
 type isSessionEvent_Event interface {
 	isSessionEvent_Event()
 }
@@ -613,11 +794,17 @@ type SessionEvent_Error struct {
 	Error *ServiceError `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
 }
 
+type SessionEvent_ReviewReady struct {
+	ReviewReady *ReviewReady `protobuf:"bytes,4,opt,name=review_ready,json=reviewReady,proto3,oneof"` // Final event for review sessions
+}
+
 func (*SessionEvent_Progress) isSessionEvent_Event() {}
 
 func (*SessionEvent_Ready) isSessionEvent_Event() {}
 
 func (*SessionEvent_Error) isSessionEvent_Event() {}
+
+func (*SessionEvent_ReviewReady) isSessionEvent_Event() {}
 
 type SessionProgress struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -942,7 +1129,8 @@ type SessionSummary struct {
 	// directly from the ExperienceLevel set on OpenSessionRequest.
 	// In v2 this will reflect adaptive adjustment based on session behaviour.
 	// Read-only — clients should display but not set this directly.
-	EffectiveLevel uint32 `protobuf:"varint,7,opt,name=effective_level,json=effectiveLevel,proto3" json:"effective_level,omitempty"`
+	EffectiveLevel uint32      `protobuf:"varint,7,opt,name=effective_level,json=effectiveLevel,proto3" json:"effective_level,omitempty"`
+	Kind           SessionKind `protobuf:"varint,8,opt,name=kind,proto3,enum=codewalker.v1.SessionKind" json:"kind,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1026,6 +1214,13 @@ func (x *SessionSummary) GetEffectiveLevel() uint32 {
 	return 0
 }
 
+func (x *SessionSummary) GetKind() SessionKind {
+	if x != nil {
+		return x.Kind
+	}
+	return SessionKind_SESSION_KIND_UNSPECIFIED
+}
+
 // A Step is a logical unit of code — a conditional, loop, function call,
 // assignment block etc. — as determined by the AST. Steps form a graph
 // (not a simple list) to model branches.
@@ -1038,8 +1233,10 @@ type Step struct {
 	// Navigation edges.
 	Edges []*StepEdge `protobuf:"bytes,4,rep,name=edges,proto3" json:"edges,omitempty"`
 	// Whether this step has already been narrated in this session.
-	Visited       bool     `protobuf:"varint,5,opt,name=visited,proto3" json:"visited,omitempty"`
-	Kind          StepKind `protobuf:"varint,6,opt,name=kind,proto3,enum=codewalker.v1.StepKind" json:"kind,omitempty"`
+	Visited bool     `protobuf:"varint,5,opt,name=visited,proto3" json:"visited,omitempty"`
+	Kind    StepKind `protobuf:"varint,6,opt,name=kind,proto3,enum=codewalker.v1.StepKind" json:"kind,omitempty"`
+	// Populated instead of span for review session steps.
+	HunkSpan      *HunkSpan `protobuf:"bytes,7,opt,name=hunk_span,json=hunkSpan,proto3" json:"hunk_span,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1114,6 +1311,13 @@ func (x *Step) GetKind() StepKind {
 		return x.Kind
 	}
 	return StepKind_STEP_KIND_UNSPECIFIED
+}
+
+func (x *Step) GetHunkSpan() *HunkSpan {
+	if x != nil {
+		return x.HunkSpan
+	}
+	return nil
 }
 
 type StepEdge struct {
@@ -1852,6 +2056,464 @@ func (x *ExpandTermRequest) GetTerm() string {
 	return ""
 }
 
+type OpenReviewSessionRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// URL of the PR or commit to review (e.g. https://github.com/org/repo/pull/42).
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// OAuth / personal access token for the forge.
+	ForgeToken      string          `protobuf:"bytes,2,opt,name=forge_token,json=forgeToken,proto3" json:"forge_token,omitempty"`
+	ExperienceLevel ExperienceLevel `protobuf:"varint,3,opt,name=experience_level,json=experienceLevel,proto3,enum=codewalker.v1.ExperienceLevel" json:"experience_level,omitempty"`
+	// If true, raw_source / raw_diff will be omitted from span messages.
+	OmitRawSource bool `protobuf:"varint,4,opt,name=omit_raw_source,json=omitRawSource,proto3" json:"omit_raw_source,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OpenReviewSessionRequest) Reset() {
+	*x = OpenReviewSessionRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OpenReviewSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OpenReviewSessionRequest) ProtoMessage() {}
+
+func (x *OpenReviewSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OpenReviewSessionRequest.ProtoReflect.Descriptor instead.
+func (*OpenReviewSessionRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *OpenReviewSessionRequest) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *OpenReviewSessionRequest) GetForgeToken() string {
+	if x != nil {
+		return x.ForgeToken
+	}
+	return ""
+}
+
+func (x *OpenReviewSessionRequest) GetExperienceLevel() ExperienceLevel {
+	if x != nil {
+		return x.ExperienceLevel
+	}
+	return ExperienceLevel_EXPERIENCE_LEVEL_UNSPECIFIED
+}
+
+func (x *OpenReviewSessionRequest) GetOmitRawSource() bool {
+	if x != nil {
+		return x.OmitRawSource
+	}
+	return false
+}
+
+type ReviewReady struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	SessionId    string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	ForgeContext *ForgeContext          `protobuf:"bytes,2,opt,name=forge_context,json=forgeContext,proto3" json:"forge_context,omitempty"`
+	// Flat list of all steps across all reviewed files.
+	Steps      []*Step         `protobuf:"bytes,3,rep,name=steps,proto3" json:"steps,omitempty"`
+	Glossary   []*GlossaryTerm `protobuf:"bytes,4,rep,name=glossary,proto3" json:"glossary,omitempty"`
+	TotalSteps uint32          `protobuf:"varint,5,opt,name=total_steps,json=totalSteps,proto3" json:"total_steps,omitempty"`
+	// ID of the first step the client should display.
+	EntryStepId    string `protobuf:"bytes,6,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"`
+	EffectiveLevel uint32 `protobuf:"varint,7,opt,name=effective_level,json=effectiveLevel,proto3" json:"effective_level,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ReviewReady) Reset() {
+	*x = ReviewReady{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewReady) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewReady) ProtoMessage() {}
+
+func (x *ReviewReady) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewReady.ProtoReflect.Descriptor instead.
+func (*ReviewReady) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ReviewReady) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ReviewReady) GetForgeContext() *ForgeContext {
+	if x != nil {
+		return x.ForgeContext
+	}
+	return nil
+}
+
+func (x *ReviewReady) GetSteps() []*Step {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+func (x *ReviewReady) GetGlossary() []*GlossaryTerm {
+	if x != nil {
+		return x.Glossary
+	}
+	return nil
+}
+
+func (x *ReviewReady) GetTotalSteps() uint32 {
+	if x != nil {
+		return x.TotalSteps
+	}
+	return 0
+}
+
+func (x *ReviewReady) GetEntryStepId() string {
+	if x != nil {
+		return x.EntryStepId
+	}
+	return ""
+}
+
+func (x *ReviewReady) GetEffectiveLevel() uint32 {
+	if x != nil {
+		return x.EffectiveLevel
+	}
+	return 0
+}
+
+type ForgeContext struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Kind          ForgeContextKind       `protobuf:"varint,1,opt,name=kind,proto3,enum=codewalker.v1.ForgeContextKind" json:"kind,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	Author        string                 `protobuf:"bytes,4,opt,name=author,proto3" json:"author,omitempty"`
+	BaseRef       string                 `protobuf:"bytes,5,opt,name=base_ref,json=baseRef,proto3" json:"base_ref,omitempty"`
+	HeadRef       string                 `protobuf:"bytes,6,opt,name=head_ref,json=headRef,proto3" json:"head_ref,omitempty"`
+	Description   string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	Files         []*ReviewFile          `protobuf:"bytes,8,rep,name=files,proto3" json:"files,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ForgeContext) Reset() {
+	*x = ForgeContext{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ForgeContext) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ForgeContext) ProtoMessage() {}
+
+func (x *ForgeContext) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ForgeContext.ProtoReflect.Descriptor instead.
+func (*ForgeContext) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ForgeContext) GetKind() ForgeContextKind {
+	if x != nil {
+		return x.Kind
+	}
+	return ForgeContextKind_FORGE_CONTEXT_KIND_UNSPECIFIED
+}
+
+func (x *ForgeContext) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetAuthor() string {
+	if x != nil {
+		return x.Author
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetBaseRef() string {
+	if x != nil {
+		return x.BaseRef
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetHeadRef() string {
+	if x != nil {
+		return x.HeadRef
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ForgeContext) GetFiles() []*ReviewFile {
+	if x != nil {
+		return x.Files
+	}
+	return nil
+}
+
+type ReviewFile struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	FilePath     string                 `protobuf:"bytes,1,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	Language     string                 `protobuf:"bytes,2,opt,name=language,proto3" json:"language,omitempty"`
+	ChangeKind   ChangeKind             `protobuf:"varint,3,opt,name=change_kind,json=changeKind,proto3,enum=codewalker.v1.ChangeKind" json:"change_kind,omitempty"`
+	HunkCount    uint32                 `protobuf:"varint,4,opt,name=hunk_count,json=hunkCount,proto3" json:"hunk_count,omitempty"`
+	LinesAdded   uint32                 `protobuf:"varint,5,opt,name=lines_added,json=linesAdded,proto3" json:"lines_added,omitempty"`
+	LinesRemoved uint32                 `protobuf:"varint,6,opt,name=lines_removed,json=linesRemoved,proto3" json:"lines_removed,omitempty"`
+	// ID of the first step for this file.
+	EntryStepId   string `protobuf:"bytes,7,opt,name=entry_step_id,json=entryStepId,proto3" json:"entry_step_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewFile) Reset() {
+	*x = ReviewFile{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewFile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewFile) ProtoMessage() {}
+
+func (x *ReviewFile) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewFile.ProtoReflect.Descriptor instead.
+func (*ReviewFile) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ReviewFile) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
+}
+
+func (x *ReviewFile) GetLanguage() string {
+	if x != nil {
+		return x.Language
+	}
+	return ""
+}
+
+func (x *ReviewFile) GetChangeKind() ChangeKind {
+	if x != nil {
+		return x.ChangeKind
+	}
+	return ChangeKind_CHANGE_KIND_UNSPECIFIED
+}
+
+func (x *ReviewFile) GetHunkCount() uint32 {
+	if x != nil {
+		return x.HunkCount
+	}
+	return 0
+}
+
+func (x *ReviewFile) GetLinesAdded() uint32 {
+	if x != nil {
+		return x.LinesAdded
+	}
+	return 0
+}
+
+func (x *ReviewFile) GetLinesRemoved() uint32 {
+	if x != nil {
+		return x.LinesRemoved
+	}
+	return 0
+}
+
+func (x *ReviewFile) GetEntryStepId() string {
+	if x != nil {
+		return x.EntryStepId
+	}
+	return ""
+}
+
+type HunkSpan struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FilePath      string                 `protobuf:"bytes,1,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	OldStart      uint32                 `protobuf:"varint,2,opt,name=old_start,json=oldStart,proto3" json:"old_start,omitempty"`
+	OldLines      uint32                 `protobuf:"varint,3,opt,name=old_lines,json=oldLines,proto3" json:"old_lines,omitempty"`
+	NewStart      uint32                 `protobuf:"varint,4,opt,name=new_start,json=newStart,proto3" json:"new_start,omitempty"`
+	NewLines      uint32                 `protobuf:"varint,5,opt,name=new_lines,json=newLines,proto3" json:"new_lines,omitempty"`
+	RawDiff       string                 `protobuf:"bytes,6,opt,name=raw_diff,json=rawDiff,proto3" json:"raw_diff,omitempty"` // The unified diff text for this hunk
+	ContextBefore string                 `protobuf:"bytes,7,opt,name=context_before,json=contextBefore,proto3" json:"context_before,omitempty"`
+	ContextAfter  string                 `protobuf:"bytes,8,opt,name=context_after,json=contextAfter,proto3" json:"context_after,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HunkSpan) Reset() {
+	*x = HunkSpan{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HunkSpan) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HunkSpan) ProtoMessage() {}
+
+func (x *HunkSpan) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HunkSpan.ProtoReflect.Descriptor instead.
+func (*HunkSpan) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *HunkSpan) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
+}
+
+func (x *HunkSpan) GetOldStart() uint32 {
+	if x != nil {
+		return x.OldStart
+	}
+	return 0
+}
+
+func (x *HunkSpan) GetOldLines() uint32 {
+	if x != nil {
+		return x.OldLines
+	}
+	return 0
+}
+
+func (x *HunkSpan) GetNewStart() uint32 {
+	if x != nil {
+		return x.NewStart
+	}
+	return 0
+}
+
+func (x *HunkSpan) GetNewLines() uint32 {
+	if x != nil {
+		return x.NewLines
+	}
+	return 0
+}
+
+func (x *HunkSpan) GetRawDiff() string {
+	if x != nil {
+		return x.RawDiff
+	}
+	return ""
+}
+
+func (x *HunkSpan) GetContextBefore() string {
+	if x != nil {
+		return x.ContextBefore
+	}
+	return ""
+}
+
+func (x *HunkSpan) GetContextAfter() string {
+	if x != nil {
+		return x.ContextAfter
+	}
+	return ""
+}
+
 type ServiceError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          ErrorCode              `protobuf:"varint,1,opt,name=code,proto3,enum=codewalker.v1.ErrorCode" json:"code,omitempty"`
@@ -1863,7 +2525,7 @@ type ServiceError struct {
 
 func (x *ServiceError) Reset() {
 	*x = ServiceError{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1875,7 +2537,7 @@ func (x *ServiceError) String() string {
 func (*ServiceError) ProtoMessage() {}
 
 func (x *ServiceError) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1888,7 +2550,7 @@ func (x *ServiceError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceError.ProtoReflect.Descriptor instead.
 func (*ServiceError) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{20}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ServiceError) GetCode() ErrorCode {
@@ -1923,11 +2585,12 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x03ref\x18\x03 \x01(\tR\x03ref\x12\x16\n" +
 	"\x06symbol\x18\x04 \x01(\tR\x06symbol\x12I\n" +
 	"\x10experience_level\x18\x05 \x01(\x0e2\x1e.codewalker.v1.ExperienceLevelR\x0fexperienceLevel\x12&\n" +
-	"\x0fomit_raw_source\x18\x06 \x01(\bR\romitRawSource\"\xbf\x01\n" +
+	"\x0fomit_raw_source\x18\x06 \x01(\bR\romitRawSource\"\x80\x02\n" +
 	"\fSessionEvent\x12<\n" +
 	"\bprogress\x18\x01 \x01(\v2\x1e.codewalker.v1.SessionProgressH\x00R\bprogress\x123\n" +
 	"\x05ready\x18\x02 \x01(\v2\x1b.codewalker.v1.SessionReadyH\x00R\x05ready\x123\n" +
-	"\x05error\x18\x03 \x01(\v2\x1b.codewalker.v1.ServiceErrorH\x00R\x05errorB\a\n" +
+	"\x05error\x18\x03 \x01(\v2\x1b.codewalker.v1.ServiceErrorH\x00R\x05error\x12?\n" +
+	"\freview_ready\x18\x04 \x01(\v2\x1a.codewalker.v1.ReviewReadyH\x00R\vreviewReadyB\a\n" +
 	"\x05event\"E\n" +
 	"\x0fSessionProgress\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
@@ -1948,7 +2611,7 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\"\x15\n" +
 	"\x13ListSessionsRequest\"Q\n" +
 	"\x14ListSessionsResponse\x129\n" +
-	"\bsessions\x18\x01 \x03(\v2\x1d.codewalker.v1.SessionSummaryR\bsessions\"\xe8\x01\n" +
+	"\bsessions\x18\x01 \x03(\v2\x1d.codewalker.v1.SessionSummaryR\bsessions\"\x98\x02\n" +
 	"\x0eSessionSummary\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1b\n" +
@@ -1957,14 +2620,16 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x03ref\x18\x04 \x01(\tR\x03ref\x12\x1a\n" +
 	"\blanguage\x18\x05 \x01(\tR\blanguage\x12&\n" +
 	"\x0fcurrent_step_id\x18\x06 \x01(\tR\rcurrentStepId\x12'\n" +
-	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\"\xd1\x01\n" +
+	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\x12.\n" +
+	"\x04kind\x18\b \x01(\x0e2\x1a.codewalker.v1.SessionKindR\x04kind\"\x87\x02\n" +
 	"\x04Step\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12-\n" +
 	"\x04span\x18\x03 \x01(\v2\x19.codewalker.v1.SourceSpanR\x04span\x12-\n" +
 	"\x05edges\x18\x04 \x03(\v2\x17.codewalker.v1.StepEdgeR\x05edges\x12\x18\n" +
 	"\avisited\x18\x05 \x01(\bR\avisited\x12+\n" +
-	"\x04kind\x18\x06 \x01(\x0e2\x17.codewalker.v1.StepKindR\x04kind\"\xef\x01\n" +
+	"\x04kind\x18\x06 \x01(\x0e2\x17.codewalker.v1.StepKindR\x04kind\x124\n" +
+	"\thunk_span\x18\a \x01(\v2\x17.codewalker.v1.HunkSpanR\bhunkSpan\"\xef\x01\n" +
 	"\bStepEdge\x12$\n" +
 	"\x0etarget_step_id\x18\x01 \x01(\tR\ftargetStepId\x12.\n" +
 	"\x05label\x18\x02 \x01(\x0e2\x18.codewalker.v1.EdgeLabelR\x05label\x12 \n" +
@@ -2027,11 +2692,61 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x11ExpandTermRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
-	"\x04term\x18\x02 \x01(\tR\x04term\"p\n" +
+	"\x04term\x18\x02 \x01(\tR\x04term\"\xc0\x01\n" +
+	"\x18OpenReviewSessionRequest\x12\x10\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1f\n" +
+	"\vforge_token\x18\x02 \x01(\tR\n" +
+	"forgeToken\x12I\n" +
+	"\x10experience_level\x18\x03 \x01(\x0e2\x1e.codewalker.v1.ExperienceLevelR\x0fexperienceLevel\x12&\n" +
+	"\x0fomit_raw_source\x18\x04 \x01(\bR\romitRawSource\"\xc0\x02\n" +
+	"\vReviewReady\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12@\n" +
+	"\rforge_context\x18\x02 \x01(\v2\x1b.codewalker.v1.ForgeContextR\fforgeContext\x12)\n" +
+	"\x05steps\x18\x03 \x03(\v2\x13.codewalker.v1.StepR\x05steps\x127\n" +
+	"\bglossary\x18\x04 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\bglossary\x12\x1f\n" +
+	"\vtotal_steps\x18\x05 \x01(\rR\n" +
+	"totalSteps\x12\"\n" +
+	"\rentry_step_id\x18\x06 \x01(\tR\ventryStepId\x12'\n" +
+	"\x0feffective_level\x18\a \x01(\rR\x0eeffectiveLevel\"\x8c\x02\n" +
+	"\fForgeContext\x123\n" +
+	"\x04kind\x18\x01 \x01(\x0e2\x1f.codewalker.v1.ForgeContextKindR\x04kind\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x10\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\x12\x16\n" +
+	"\x06author\x18\x04 \x01(\tR\x06author\x12\x19\n" +
+	"\bbase_ref\x18\x05 \x01(\tR\abaseRef\x12\x19\n" +
+	"\bhead_ref\x18\x06 \x01(\tR\aheadRef\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12/\n" +
+	"\x05files\x18\b \x03(\v2\x19.codewalker.v1.ReviewFileR\x05files\"\x8a\x02\n" +
+	"\n" +
+	"ReviewFile\x12\x1b\n" +
+	"\tfile_path\x18\x01 \x01(\tR\bfilePath\x12\x1a\n" +
+	"\blanguage\x18\x02 \x01(\tR\blanguage\x12:\n" +
+	"\vchange_kind\x18\x03 \x01(\x0e2\x19.codewalker.v1.ChangeKindR\n" +
+	"changeKind\x12\x1d\n" +
+	"\n" +
+	"hunk_count\x18\x04 \x01(\rR\thunkCount\x12\x1f\n" +
+	"\vlines_added\x18\x05 \x01(\rR\n" +
+	"linesAdded\x12#\n" +
+	"\rlines_removed\x18\x06 \x01(\rR\flinesRemoved\x12\"\n" +
+	"\rentry_step_id\x18\a \x01(\tR\ventryStepId\"\x82\x02\n" +
+	"\bHunkSpan\x12\x1b\n" +
+	"\tfile_path\x18\x01 \x01(\tR\bfilePath\x12\x1b\n" +
+	"\told_start\x18\x02 \x01(\rR\boldStart\x12\x1b\n" +
+	"\told_lines\x18\x03 \x01(\rR\boldLines\x12\x1b\n" +
+	"\tnew_start\x18\x04 \x01(\rR\bnewStart\x12\x1b\n" +
+	"\tnew_lines\x18\x05 \x01(\rR\bnewLines\x12\x19\n" +
+	"\braw_diff\x18\x06 \x01(\tR\arawDiff\x12%\n" +
+	"\x0econtext_before\x18\a \x01(\tR\rcontextBefore\x12#\n" +
+	"\rcontext_after\x18\b \x01(\tR\fcontextAfter\"p\n" +
 	"\fServiceError\x12,\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x18.codewalker.v1.ErrorCodeR\x04code\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x18\n" +
-	"\adetails\x18\x03 \x01(\tR\adetails*\xdd\x01\n" +
+	"\adetails\x18\x03 \x01(\tR\adetails*b\n" +
+	"\vSessionKind\x12\x1c\n" +
+	"\x18SESSION_KIND_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18SESSION_KIND_WALKTHROUGH\x10\x01\x12\x17\n" +
+	"\x13SESSION_KIND_REVIEW\x10\x02*\xf1\x01\n" +
 	"\bStepKind\x12\x19\n" +
 	"\x15STEP_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fSTEP_KIND_ENTRY\x10\x01\x12\x18\n" +
@@ -2041,7 +2756,8 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x0eSTEP_KIND_CALL\x10\x05\x12\x14\n" +
 	"\x10STEP_KIND_RETURN\x10\x06\x12\x1a\n" +
 	"\x16STEP_KIND_ERROR_HANDLE\x10\a\x12\x12\n" +
-	"\x0eSTEP_KIND_EXIT\x10\b*\xed\x01\n" +
+	"\x0eSTEP_KIND_EXIT\x10\b\x12\x12\n" +
+	"\x0eSTEP_KIND_HUNK\x10\t*\xed\x01\n" +
 	"\tEdgeLabel\x12\x1a\n" +
 	"\x16EDGE_LABEL_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fEDGE_LABEL_NEXT\x10\x01\x12\x1a\n" +
@@ -2067,12 +2783,24 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x12TERM_KIND_LANGUAGE\x10\x01\x12\x15\n" +
 	"\x11TERM_KIND_PATTERN\x10\x02\x12\x14\n" +
 	"\x10TERM_KIND_DOMAIN\x10\x03\x12\x15\n" +
-	"\x11TERM_KIND_LIBRARY\x10\x04*\x87\x01\n" +
+	"\x11TERM_KIND_LIBRARY\x10\x04*\x93\x01\n" +
+	"\x10ForgeContextKind\x12\"\n" +
+	"\x1eFORGE_CONTEXT_KIND_UNSPECIFIED\x10\x00\x12\x19\n" +
+	"\x15FORGE_CONTEXT_KIND_PR\x10\x01\x12\x1d\n" +
+	"\x19FORGE_CONTEXT_KIND_COMMIT\x10\x02\x12!\n" +
+	"\x1dFORGE_CONTEXT_KIND_COMPARISON\x10\x03*\x8c\x01\n" +
+	"\n" +
+	"ChangeKind\x12\x1b\n" +
+	"\x17CHANGE_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11CHANGE_KIND_ADDED\x10\x01\x12\x18\n" +
+	"\x14CHANGE_KIND_MODIFIED\x10\x02\x12\x17\n" +
+	"\x13CHANGE_KIND_DELETED\x10\x03\x12\x17\n" +
+	"\x13CHANGE_KIND_RENAMED\x10\x04*\x87\x01\n" +
 	"\x0fExperienceLevel\x12 \n" +
 	"\x1cEXPERIENCE_LEVEL_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17EXPERIENCE_LEVEL_JUNIOR\x10\x01\x12\x18\n" +
 	"\x14EXPERIENCE_LEVEL_MID\x10\x02\x12\x1b\n" +
-	"\x17EXPERIENCE_LEVEL_SENIOR\x10\x03*\xe0\x01\n" +
+	"\x17EXPERIENCE_LEVEL_SENIOR\x10\x03*\xe0\x02\n" +
 	"\tErrorCode\x12\x1a\n" +
 	"\x16ERROR_CODE_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cERROR_CODE_SESSION_NOT_FOUND\x10\x01\x12\x1b\n" +
@@ -2080,10 +2808,16 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x16ERROR_CODE_INVALID_REF\x10\x03\x12\x18\n" +
 	"\x14ERROR_CODE_LLM_ERROR\x10\x04\x12\x1f\n" +
 	"\x1bERROR_CODE_UNSUPPORTED_LANG\x10\x05\x12!\n" +
-	"\x1dERROR_CODE_INVALID_NAVIGATION\x10\x062\xf4\x03\n" +
+	"\x1dERROR_CODE_INVALID_NAVIGATION\x10\x06\x12 \n" +
+	"\x1cERROR_CODE_UNSUPPORTED_FORGE\x10\a\x12 \n" +
+	"\x1cERROR_CODE_FORGE_AUTH_FAILED\x10\b\x12\x1e\n" +
+	"\x1aERROR_CODE_FORGE_NOT_FOUND\x10\t\x12\x1a\n" +
+	"\x16ERROR_CODE_INVALID_URL\x10\n" +
+	"2\xd1\x04\n" +
 	"\n" +
 	"CodeWalker\x12O\n" +
-	"\vOpenSession\x12!.codewalker.v1.OpenSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12I\n" +
+	"\vOpenSession\x12!.codewalker.v1.OpenSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12[\n" +
+	"\x11OpenReviewSession\x12'.codewalker.v1.OpenReviewSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12I\n" +
 	"\bNavigate\x12\x1e.codewalker.v1.NavigateRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12I\n" +
 	"\bRephrase\x12\x1e.codewalker.v1.RephraseRequest\x1a\x1b.codewalker.v1.NarrateEvent0\x01\x12M\n" +
 	"\n" +
@@ -2103,78 +2837,98 @@ func file_codewalker_v1_codewalker_proto_rawDescGZIP() []byte {
 	return file_codewalker_v1_codewalker_proto_rawDescData
 }
 
-var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
+var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_codewalker_v1_codewalker_proto_goTypes = []any{
-	(StepKind)(0),                // 0: codewalker.v1.StepKind
-	(EdgeLabel)(0),               // 1: codewalker.v1.EdgeLabel
-	(SimpleDirection)(0),         // 2: codewalker.v1.SimpleDirection
-	(RephraseMode)(0),            // 3: codewalker.v1.RephraseMode
-	(TermKind)(0),                // 4: codewalker.v1.TermKind
-	(ExperienceLevel)(0),         // 5: codewalker.v1.ExperienceLevel
-	(ErrorCode)(0),               // 6: codewalker.v1.ErrorCode
-	(*OpenSessionRequest)(nil),   // 7: codewalker.v1.OpenSessionRequest
-	(*SessionEvent)(nil),         // 8: codewalker.v1.SessionEvent
-	(*SessionProgress)(nil),      // 9: codewalker.v1.SessionProgress
-	(*SessionReady)(nil),         // 10: codewalker.v1.SessionReady
-	(*CloseSessionRequest)(nil),  // 11: codewalker.v1.CloseSessionRequest
-	(*CloseSessionResponse)(nil), // 12: codewalker.v1.CloseSessionResponse
-	(*ListSessionsRequest)(nil),  // 13: codewalker.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil), // 14: codewalker.v1.ListSessionsResponse
-	(*SessionSummary)(nil),       // 15: codewalker.v1.SessionSummary
-	(*Step)(nil),                 // 16: codewalker.v1.Step
-	(*StepEdge)(nil),             // 17: codewalker.v1.StepEdge
-	(*ExternalCallInfo)(nil),     // 18: codewalker.v1.ExternalCallInfo
-	(*SourceSpan)(nil),           // 19: codewalker.v1.SourceSpan
-	(*NavigateRequest)(nil),      // 20: codewalker.v1.NavigateRequest
-	(*NarrateEvent)(nil),         // 21: codewalker.v1.NarrateEvent
-	(*NarrateToken)(nil),         // 22: codewalker.v1.NarrateToken
-	(*StepComplete)(nil),         // 23: codewalker.v1.StepComplete
-	(*RephraseRequest)(nil),      // 24: codewalker.v1.RephraseRequest
-	(*GlossaryTerm)(nil),         // 25: codewalker.v1.GlossaryTerm
-	(*ExpandTermRequest)(nil),    // 26: codewalker.v1.ExpandTermRequest
-	(*ServiceError)(nil),         // 27: codewalker.v1.ServiceError
+	(SessionKind)(0),                 // 0: codewalker.v1.SessionKind
+	(StepKind)(0),                    // 1: codewalker.v1.StepKind
+	(EdgeLabel)(0),                   // 2: codewalker.v1.EdgeLabel
+	(SimpleDirection)(0),             // 3: codewalker.v1.SimpleDirection
+	(RephraseMode)(0),                // 4: codewalker.v1.RephraseMode
+	(TermKind)(0),                    // 5: codewalker.v1.TermKind
+	(ForgeContextKind)(0),            // 6: codewalker.v1.ForgeContextKind
+	(ChangeKind)(0),                  // 7: codewalker.v1.ChangeKind
+	(ExperienceLevel)(0),             // 8: codewalker.v1.ExperienceLevel
+	(ErrorCode)(0),                   // 9: codewalker.v1.ErrorCode
+	(*OpenSessionRequest)(nil),       // 10: codewalker.v1.OpenSessionRequest
+	(*SessionEvent)(nil),             // 11: codewalker.v1.SessionEvent
+	(*SessionProgress)(nil),          // 12: codewalker.v1.SessionProgress
+	(*SessionReady)(nil),             // 13: codewalker.v1.SessionReady
+	(*CloseSessionRequest)(nil),      // 14: codewalker.v1.CloseSessionRequest
+	(*CloseSessionResponse)(nil),     // 15: codewalker.v1.CloseSessionResponse
+	(*ListSessionsRequest)(nil),      // 16: codewalker.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),     // 17: codewalker.v1.ListSessionsResponse
+	(*SessionSummary)(nil),           // 18: codewalker.v1.SessionSummary
+	(*Step)(nil),                     // 19: codewalker.v1.Step
+	(*StepEdge)(nil),                 // 20: codewalker.v1.StepEdge
+	(*ExternalCallInfo)(nil),         // 21: codewalker.v1.ExternalCallInfo
+	(*SourceSpan)(nil),               // 22: codewalker.v1.SourceSpan
+	(*NavigateRequest)(nil),          // 23: codewalker.v1.NavigateRequest
+	(*NarrateEvent)(nil),             // 24: codewalker.v1.NarrateEvent
+	(*NarrateToken)(nil),             // 25: codewalker.v1.NarrateToken
+	(*StepComplete)(nil),             // 26: codewalker.v1.StepComplete
+	(*RephraseRequest)(nil),          // 27: codewalker.v1.RephraseRequest
+	(*GlossaryTerm)(nil),             // 28: codewalker.v1.GlossaryTerm
+	(*ExpandTermRequest)(nil),        // 29: codewalker.v1.ExpandTermRequest
+	(*OpenReviewSessionRequest)(nil), // 30: codewalker.v1.OpenReviewSessionRequest
+	(*ReviewReady)(nil),              // 31: codewalker.v1.ReviewReady
+	(*ForgeContext)(nil),             // 32: codewalker.v1.ForgeContext
+	(*ReviewFile)(nil),               // 33: codewalker.v1.ReviewFile
+	(*HunkSpan)(nil),                 // 34: codewalker.v1.HunkSpan
+	(*ServiceError)(nil),             // 35: codewalker.v1.ServiceError
 }
 var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
-	5,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
-	9,  // 1: codewalker.v1.SessionEvent.progress:type_name -> codewalker.v1.SessionProgress
-	10, // 2: codewalker.v1.SessionEvent.ready:type_name -> codewalker.v1.SessionReady
-	27, // 3: codewalker.v1.SessionEvent.error:type_name -> codewalker.v1.ServiceError
-	16, // 4: codewalker.v1.SessionReady.steps:type_name -> codewalker.v1.Step
-	25, // 5: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
-	15, // 6: codewalker.v1.ListSessionsResponse.sessions:type_name -> codewalker.v1.SessionSummary
-	19, // 7: codewalker.v1.Step.span:type_name -> codewalker.v1.SourceSpan
-	17, // 8: codewalker.v1.Step.edges:type_name -> codewalker.v1.StepEdge
-	0,  // 9: codewalker.v1.Step.kind:type_name -> codewalker.v1.StepKind
-	1,  // 10: codewalker.v1.StepEdge.label:type_name -> codewalker.v1.EdgeLabel
-	18, // 11: codewalker.v1.StepEdge.external_call_info:type_name -> codewalker.v1.ExternalCallInfo
-	2,  // 12: codewalker.v1.NavigateRequest.direction:type_name -> codewalker.v1.SimpleDirection
-	1,  // 13: codewalker.v1.NavigateRequest.follow_edge:type_name -> codewalker.v1.EdgeLabel
-	22, // 14: codewalker.v1.NarrateEvent.token:type_name -> codewalker.v1.NarrateToken
-	23, // 15: codewalker.v1.NarrateEvent.complete:type_name -> codewalker.v1.StepComplete
-	27, // 16: codewalker.v1.NarrateEvent.error:type_name -> codewalker.v1.ServiceError
-	25, // 17: codewalker.v1.StepComplete.new_terms:type_name -> codewalker.v1.GlossaryTerm
-	17, // 18: codewalker.v1.StepComplete.available_edges:type_name -> codewalker.v1.StepEdge
-	3,  // 19: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
-	4,  // 20: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
-	6,  // 21: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
-	7,  // 22: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
-	20, // 23: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
-	24, // 24: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
-	26, // 25: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
-	11, // 26: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
-	13, // 27: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
-	8,  // 28: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
-	21, // 29: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
-	21, // 30: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	21, // 31: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	12, // 32: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
-	14, // 33: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
-	28, // [28:34] is the sub-list for method output_type
-	22, // [22:28] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	8,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
+	12, // 1: codewalker.v1.SessionEvent.progress:type_name -> codewalker.v1.SessionProgress
+	13, // 2: codewalker.v1.SessionEvent.ready:type_name -> codewalker.v1.SessionReady
+	35, // 3: codewalker.v1.SessionEvent.error:type_name -> codewalker.v1.ServiceError
+	31, // 4: codewalker.v1.SessionEvent.review_ready:type_name -> codewalker.v1.ReviewReady
+	19, // 5: codewalker.v1.SessionReady.steps:type_name -> codewalker.v1.Step
+	28, // 6: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
+	18, // 7: codewalker.v1.ListSessionsResponse.sessions:type_name -> codewalker.v1.SessionSummary
+	0,  // 8: codewalker.v1.SessionSummary.kind:type_name -> codewalker.v1.SessionKind
+	22, // 9: codewalker.v1.Step.span:type_name -> codewalker.v1.SourceSpan
+	20, // 10: codewalker.v1.Step.edges:type_name -> codewalker.v1.StepEdge
+	1,  // 11: codewalker.v1.Step.kind:type_name -> codewalker.v1.StepKind
+	34, // 12: codewalker.v1.Step.hunk_span:type_name -> codewalker.v1.HunkSpan
+	2,  // 13: codewalker.v1.StepEdge.label:type_name -> codewalker.v1.EdgeLabel
+	21, // 14: codewalker.v1.StepEdge.external_call_info:type_name -> codewalker.v1.ExternalCallInfo
+	3,  // 15: codewalker.v1.NavigateRequest.direction:type_name -> codewalker.v1.SimpleDirection
+	2,  // 16: codewalker.v1.NavigateRequest.follow_edge:type_name -> codewalker.v1.EdgeLabel
+	25, // 17: codewalker.v1.NarrateEvent.token:type_name -> codewalker.v1.NarrateToken
+	26, // 18: codewalker.v1.NarrateEvent.complete:type_name -> codewalker.v1.StepComplete
+	35, // 19: codewalker.v1.NarrateEvent.error:type_name -> codewalker.v1.ServiceError
+	28, // 20: codewalker.v1.StepComplete.new_terms:type_name -> codewalker.v1.GlossaryTerm
+	20, // 21: codewalker.v1.StepComplete.available_edges:type_name -> codewalker.v1.StepEdge
+	4,  // 22: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
+	5,  // 23: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
+	8,  // 24: codewalker.v1.OpenReviewSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
+	32, // 25: codewalker.v1.ReviewReady.forge_context:type_name -> codewalker.v1.ForgeContext
+	19, // 26: codewalker.v1.ReviewReady.steps:type_name -> codewalker.v1.Step
+	28, // 27: codewalker.v1.ReviewReady.glossary:type_name -> codewalker.v1.GlossaryTerm
+	6,  // 28: codewalker.v1.ForgeContext.kind:type_name -> codewalker.v1.ForgeContextKind
+	33, // 29: codewalker.v1.ForgeContext.files:type_name -> codewalker.v1.ReviewFile
+	7,  // 30: codewalker.v1.ReviewFile.change_kind:type_name -> codewalker.v1.ChangeKind
+	9,  // 31: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
+	10, // 32: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
+	30, // 33: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
+	23, // 34: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
+	27, // 35: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
+	29, // 36: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
+	14, // 37: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
+	16, // 38: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	11, // 39: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
+	11, // 40: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
+	24, // 41: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	24, // 42: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	24, // 43: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	15, // 44: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	17, // 45: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	39, // [39:46] is the sub-list for method output_type
+	32, // [32:39] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_codewalker_v1_codewalker_proto_init() }
@@ -2186,6 +2940,7 @@ func file_codewalker_v1_codewalker_proto_init() {
 		(*SessionEvent_Progress)(nil),
 		(*SessionEvent_Ready)(nil),
 		(*SessionEvent_Error)(nil),
+		(*SessionEvent_ReviewReady)(nil),
 	}
 	file_codewalker_v1_codewalker_proto_msgTypes[13].OneofWrappers = []any{
 		(*NavigateRequest_Direction)(nil),
@@ -2202,8 +2957,8 @@ func file_codewalker_v1_codewalker_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_codewalker_v1_codewalker_proto_rawDesc), len(file_codewalker_v1_codewalker_proto_rawDesc)),
-			NumEnums:      7,
-			NumMessages:   21,
+			NumEnums:      10,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
