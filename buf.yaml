@@ -4,6 +4,10 @@ modules:
 lint:
   use:
     - DEFAULT
+  except:
+    - SERVICE_SUFFIX              # intentionally named CodeWalker, not CodeWalkerService
+    - RPC_RESPONSE_STANDARD_NAME  # NarrateEvent is a shared streaming envelope; SessionEvent wraps progress+ready
+    - RPC_REQUEST_RESPONSE_UNIQUE # NarrateEvent is intentionally reused across Navigate/Rephrase/ExpandTerm
 breaking:
   use:
     - FILE
