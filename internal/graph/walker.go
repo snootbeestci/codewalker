@@ -16,12 +16,13 @@ type Graph struct {
 
 // Step is the server-side representation of a single narration step.
 type Step struct {
-	ID      string
-	Label   string
-	Kind    v1.StepKind
-	Source  *v1.SourceSpan
-	Edges   []*v1.StepEdge
-	Visited bool
+	ID       string
+	Label    string
+	Kind     v1.StepKind
+	Source   *v1.SourceSpan
+	HunkSpan *v1.HunkSpan
+	Edges    []*v1.StepEdge
+	Visited  bool
 }
 
 // NewGraph creates an empty Graph.

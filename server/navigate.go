@@ -64,11 +64,13 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	}
 
 	code := ""
-	if step.Source != nil {
+	if step.HunkSpan != nil {
+		code = step.HunkSpan.RawDiff
+	} else if step.Source != nil {
 		code = step.Source.RawSource
-	}
-	if code == "" && len(sess.Source) > 0 && step.Source != nil {
-		code = sliceSource(sess.Source, int(step.Source.StartLine), int(step.Source.EndLine))
+		if code == "" && len(sess.Source) > 0 {
+			code = sliceSource(sess.Source, int(step.Source.StartLine), int(step.Source.EndLine))
+		}
 	}
 	slog.Debug("source resolved", "step_id", step.ID, "code_len", len(code))
 

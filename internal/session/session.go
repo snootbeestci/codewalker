@@ -17,6 +17,7 @@ type Session struct {
 	Walker        *graph.Walker
 	EffLevel      int // 1–10, from adaptation.go
 	Language      string
+	Kind          v1.SessionKind
 	Glossary      map[string]*v1.GlossaryTerm
 	OmitRawSource bool
 	Source        []byte
@@ -95,5 +96,6 @@ func (s *Session) Summary() *v1.SessionSummary {
 		Language:       s.Language,
 		CurrentStepId:  s.Walker.CurrentID(),
 		EffectiveLevel: uint32(s.EffLevel),
+		Kind:           s.Kind,
 	}
 }
