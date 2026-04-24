@@ -1,5 +1,5 @@
 # Stage 1 — build a fully static binary (CGO required for tree-sitter).
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 RUN apk add --no-cache gcc musl-dev
 
