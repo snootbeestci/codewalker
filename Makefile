@@ -5,7 +5,7 @@ CMD      := ./cmd/codewalker
 BIN_DIR  := bin
 IMAGE    := codewalker:latest
 
-.PHONY: proto build test lint clean docker/build docker/run
+.PHONY: proto build test lint clean docker/build docker/run ci
 
 ## Generate protobuf/gRPC code from proto/
 proto:
@@ -35,3 +35,8 @@ docker/build:
 ## Start the stack via docker-compose
 docker/run:
 	docker-compose -f deploy/docker-compose.yml up
+
+## Run the same checks as CI (no API calls, no container required)
+ci: lint
+	CGO_ENABLED=1 go build ./...
+	CGO_ENABLED=1 go test ./...
