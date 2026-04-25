@@ -203,6 +203,7 @@ codewalker/
 │   ├── rephrase.go
 │   ├── expand_term.go
 │   ├── open_review_session.go
+│   ├── version.go
 │   └── middleware/
 │       ├── logging.go
 │       └── recovery.go
@@ -335,3 +336,17 @@ Read from environment variables. No config files in v1.
   never need to manage prompt history.
 - When in doubt about a design decision, check this document before asking
   the user. If it's not covered here, ask.
+
+---
+
+## Versioning
+
+- Server version and proto major version are injected at build time via ldflags
+  into `server.Version` and `server.ProtoMajor`
+- `GetVersion` RPC returns these values — clients call it on connect to detect
+  incompatible backend versions
+- `min_compatible_proto_major` lets the server declare backwards compatibility
+  explicitly — increment `ProtoMajor` on breaking proto changes only
+- When adding a new RPC or message (non-breaking), bump the minor version tag
+- When making a breaking proto change, bump `ProtoMajor` in the Dockerfile
+  ldflags AND in the default value in `server/version.go`
