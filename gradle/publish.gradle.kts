@@ -14,7 +14,7 @@ dependencies {
 
 sourceSets {
     main {
-        kotlin.srcDirs("gen/kotlin")
+        kotlin.srcDirs("../gen/kotlin")
     }
 }
 
