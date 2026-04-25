@@ -324,21 +324,6 @@ Read from environment variables. No config files in v1.
 
 ---
 
-## Notes for Claude Code
-
-- Prefer table-driven tests in Go — this codebase will need them for the
-  parser and graph packages especially.
-- The `gen/` directory is always derived from `proto/` — never edit generated
-  files, always regenerate via `make proto`.
-- gRPC streaming handlers must handle client disconnection gracefully —
-  check `ctx.Done()` in all streaming loops.
-- The LLM context window is the server's responsibility — clients should
-  never need to manage prompt history.
-- When in doubt about a design decision, check this document before asking
-  the user. If it's not covered here, ask.
-
----
-
 ## Versioning
 
 - Server version and proto major version are injected at build time via ldflags
@@ -369,6 +354,8 @@ Read from environment variables. No config files in v1.
 - New language handlers go in `internal/parser/languages/` and register via `init()`
 - New forge handlers go in `internal/forge/forges/` and register via `init()`
 - Mock implementations for testing go in `internal/llm/llmtest/` — never in production packages
+- The LLM context window is the server's responsibility — clients should never need to manage prompt history
+- When in doubt about a design decision, check this document before asking. If it is not covered here, ask the user
 
 ### Tooling
 - `make ci` — runs buf lint, go vet, go build, go test. Must pass before any PR

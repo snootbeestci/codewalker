@@ -31,11 +31,20 @@ When writing GitHub issues, always format them as a single outer code block usin
 
 ## PR review
 
-When reviewing a PR, always fetch and read the key changed files before approving. Flag:
-- Deviations from the proto contract
-- Anything that contradicts `codewalker-briefing.md`
-- Missing tests for new behaviour
-- Anything that would surprise a future developer reading the code
+When reviewing a PR, always fetch and read the key changed files before approving. For every issue found, present it as an explicit choice rather than a comment or inline instruction. Use this format:
+
+**[Blocker]** — must be resolved before merge. Present as a required action.
+**[Suggested]** — worth fixing but not a blocker. Present as a clickable decision: "Should I write a fix instruction for this?"
+**[Note]** — informational only, no action needed.
+
+Categories to check:
+- Deviations from the proto contract → always Blocker
+- Contradictions with `codewalker-briefing.md` → always Blocker
+- Missing tests for new behaviour → Blocker or Suggested depending on severity
+- Code style or minor documentation inconsistencies → always Suggested
+- Anything that would surprise a future developer → Suggested or Note
+
+Never silently skip a Suggested item. If the user declines, acknowledge it and move on. If accepted, produce a ready-to-paste Claude Code instruction.
 
 ## Continuity
 
