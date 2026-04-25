@@ -134,6 +134,17 @@ rpc GetVersion(GetVersionRequest) returns (GetVersionResponse)
 
 ---
 
+## Contributing
+
+Two prompts are available to streamline AI-assisted development on this project:
+
+- [Design session prompt](docs/DESIGN_PROMPT.md) — use this to start a Claude design session for planning features and reviewing PRs
+- [Claude Code prompt](docs/CLAUDE_CODE_PROMPT.md) — paste this before an issue body when starting a Claude Code implementation session
+
+The [briefing document](codewalker-briefing.md) is the source of truth for architectural decisions. Read it before making any structural changes.
+
+---
+
 ## Licence
 
 TBD
