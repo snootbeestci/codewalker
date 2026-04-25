@@ -1,9 +1,4 @@
-   _____          _                    _ _             
-  / ____|        | |                  | | |            
- | |     ___   __| | _____      ____ _| | | _____ _ __ 
- | |    / _ \ / _` |/ _ \ \ /\ / / _` | | |/ / _ \ '__|
- | |___| (_) | (_| |  __/\ V  V / (_| | |   <  __/ |   
-  \_____\___/ \__,_|\___| \_/\_/ \__,_|_|_|\_\___|_|   
+# Codewalker
 
 An AI-powered code walkthrough service. Codewalker explains code by guiding
 you through it step by step — like a debugger with narration. Navigate
