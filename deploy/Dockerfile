@@ -10,8 +10,11 @@ RUN go mod download
 RUN GOBIN=/usr/local/bin go install github.com/grpc-ecosystem/grpc-health-probe@latest
 
 COPY . .
+ARG VERSION=dev
 RUN CGO_ENABLED=1 go build \
-    -ldflags="-s -w -linkmode external -extldflags '-static'" \
+    -ldflags="-s -w -linkmode external -extldflags '-static' \
+              -X 'github.com/yourorg/codewalker/server.Version=${VERSION}' \
+              -X 'github.com/yourorg/codewalker/server.ProtoMajor=1'" \
     -o codewalker ./cmd/codewalker
 
 # Stage 2 — minimal runtime (static binary runs on distroless/static).
