@@ -350,3 +350,27 @@ Read from environment variables. No config files in v1.
 - When adding a new RPC or message (non-breaking), bump the minor version tag
 - When making a breaking proto change, bump `ProtoMajor` in the Dockerfile
   ldflags AND in the default value in `server/version.go`
+
+---
+
+## Development rules
+
+### Proto
+- Never run `protoc` directly — always use `make proto` to regenerate
+- Never edit files in `gen/` — they are always derived from `proto/`
+- `buf lint` must pass before submitting a PR
+- When adding a new RPC or message (non-breaking), bump the minor version tag
+- When making a breaking proto change, increment `ProtoMajor` in both `deploy/Dockerfile` ldflags and the default in `server/version.go`
+
+### Code
+- Prefer table-driven tests
+- All gRPC streaming handlers must check `ctx.Done()` in their token loops
+- Never log sensitive values — `forge_token` and `ANTHROPIC_API_KEY` must never appear in logs
+- New language handlers go in `internal/parser/languages/` and register via `init()`
+- New forge handlers go in `internal/forge/forges/` and register via `init()`
+- Mock implementations for testing go in `internal/llm/llmtest/` — never in production packages
+
+### Tooling
+- `make ci` — runs buf lint, go vet, go build, go test. Must pass before any PR
+- `make smoke-test` — runs a live end-to-end test against a running container. Requires `ANTHROPIC_API_KEY` and `REPO_PATH`. Do not run in CI
+- `make proto` — regenerates all Go stubs from proto. Run after any proto change
