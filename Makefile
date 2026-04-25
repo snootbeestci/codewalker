@@ -7,6 +7,10 @@ IMAGE    := codewalker:latest
 
 .PHONY: proto build test lint clean docker/build docker/run ci
 
+## Print the current version
+version:
+	@git describe --tags --always --dirty 2>/dev/null || echo "dev"
+
 ## Generate protobuf/gRPC code from proto/
 proto:
 	buf generate

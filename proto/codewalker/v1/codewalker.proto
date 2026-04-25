@@ -9,6 +9,11 @@ option go_package = "github.com/yourorg/codewalker/gen/codewalker/v1";
 // ─────────────────────────────────────────────
 
 service CodeWalker {
+  // Returns the server's version information.
+  // Clients should call this on connect and warn the user if the
+  // proto major version does not match the version they were built against.
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse);
+
   // Open a session against a file at a specific ref.
   // Server parses the AST, builds the step graph, and streams back
   // progress before emitting a final SessionReady event.
@@ -429,4 +434,20 @@ enum ErrorCode {
   ERROR_CODE_FORGE_AUTH_FAILED  = 8;
   ERROR_CODE_FORGE_NOT_FOUND    = 9;
   ERROR_CODE_INVALID_URL        = 10;
+}
+
+message GetVersionRequest {}
+
+message GetVersionResponse {
+  // Semantic version of the server binary e.g. "1.2.0"
+  string version = 1;
+
+  // Proto contract major version — the only part clients need to check.
+  // Increment this when breaking proto changes are made.
+  uint32 proto_major = 2;
+
+  // Minimum plugin proto_major this server is compatible with.
+  // Allows the server to declare backwards compatibility explicitly.
+  // e.g. proto_major=2, min_compatible_proto_major=1 means v1 clients still work.
+  uint32 min_compatible_proto_major = 3;
 }
