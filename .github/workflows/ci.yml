@@ -58,6 +58,14 @@ jobs:
       - name: Generate Kotlin stubs
         run: buf generate --template buf.gen.kotlin.yaml
 
+      - name: Show generated Kotlin file headers (debug)
+        run: |
+          for f in gen/kotlin/codewalker/v1/*.kt; do
+            echo "=== $f (first 20 lines) ==="
+            head -20 "$f"
+            echo ""
+          done
+
       - name: Gradle publish dry run
         env:
           RELEASE_VERSION: dry-run

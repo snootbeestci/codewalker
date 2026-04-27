@@ -12,10 +12,10 @@ group = "com.github.snootbeestci"
 version = System.getenv("RELEASE_VERSION") ?: "dev"
 
 dependencies {
-    implementation("com.google.protobuf:protobuf-java:3.25.1")
-    implementation("com.google.protobuf:protobuf-kotlin:3.25.1")
-    implementation("io.grpc:grpc-stub:1.60.0")
-    implementation("io.grpc:grpc-protobuf:1.60.0")
+    implementation("com.google.protobuf:protobuf-java:4.28.3")
+    implementation("com.google.protobuf:protobuf-kotlin:4.28.3")
+    implementation("io.grpc:grpc-stub:1.68.1")
+    implementation("io.grpc:grpc-protobuf:1.68.1")
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
@@ -23,7 +23,7 @@ dependencies {
 
 sourceSets {
     main {
-        kotlin.srcDirs("../gen/kotlin")
+        kotlin.srcDirs("../gen/kotlin", "src/main/kotlin")
         java.srcDirs("../gen/java")
     }
 }
