@@ -3,6 +3,11 @@ plugins {
     `maven-publish`
 }
 
+repositories {
+    mavenCentral()
+    google()
+}
+
 group = "com.github.snootbeestci"
 version = System.getenv("RELEASE_VERSION") ?: "dev"
 
