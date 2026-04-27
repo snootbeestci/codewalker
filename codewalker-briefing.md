@@ -338,6 +338,14 @@ Read from environment variables. No config files in v1.
 
 ---
 
+## Release process
+
+- Before tagging a release, run `make release-dry-run` to validate the Gradle
+  publish setup locally. This catches build script issues without burning
+  version numbers.
+
+---
+
 ## Development rules
 
 ### Proto
