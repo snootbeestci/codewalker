@@ -48,14 +48,13 @@ ci: lint
 ## Validate the Gradle publish setup locally without publishing anything.
 ## Requires: buf, JDK 17+, GITHUB_ACTOR and GITHUB_TOKEN env vars (can be dummy values for dry run).
 release-dry-run:
-	@command -v buf    >/dev/null 2>&1 || { echo "buf not found"; exit 1; }
-	@command -v gradle >/dev/null 2>&1 || { echo "gradle not found"; exit 1; }
+	@command -v buf >/dev/null 2>&1 || { echo "buf not found"; exit 1; }
 	@echo "--- generating Kotlin stubs..."
 	buf generate --template buf.gen.kotlin.yaml
 	@echo "--- validating Gradle publish configuration..."
 	RELEASE_VERSION=dry-run \
 	GITHUB_ACTOR=$${GITHUB_ACTOR:-dry-run} \
 	GITHUB_TOKEN=$${GITHUB_TOKEN:-dry-run} \
-	gradle -p gradle publishToMavenLocal
+	./gradle/gradlew -p gradle publishToMavenLocal
 	@echo "--- dry run complete. Stubs published to local Maven cache."
 	@echo "--- check ~/.m2/repository/com/github/snootbeestci/codewalker-proto/"

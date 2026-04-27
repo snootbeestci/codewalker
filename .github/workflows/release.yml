@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           RELEASE_VERSION: ${{ github.ref_name }}
-        run: gradle publish -p gradle
+        run: ./gradle/gradlew -p gradle publish
 
   build-and-push-docker:
     runs-on: ubuntu-latest

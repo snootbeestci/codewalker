@@ -63,4 +63,4 @@ jobs:
           RELEASE_VERSION: dry-run
           GITHUB_ACTOR: dry-run
           GITHUB_TOKEN: dry-run
-        run: gradle -p gradle publishToMavenLocal
+        run: ./gradle/gradlew -p gradle publishToMavenLocal
