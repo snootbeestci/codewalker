@@ -3,3 +3,6 @@
 build/
 gradle/.gradle/
 gradle/build/
+
+# Generated Java protobuf/gRPC stubs (produced by buf generate --template buf.gen.kotlin.yaml)
+gen/java/
