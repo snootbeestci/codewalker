@@ -53,6 +53,14 @@ make smoke-test
 | VS Code extension | Planned |
 | Browser extension | Planned |
 
+The PhpStorm plugin source lives in `plugin/`. To build it:
+
+```bash
+cd plugin
+# Requires GITHUB_ACTOR and GITHUB_TOKEN for proto stub resolution
+./gradlew buildPlugin
+```
+
 ---
 
 ## Development

@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>com.snootbeestci.codewalker</id>
+    <name>Codewalker</name>
+    <vendor>snootbeestci</vendor>
+    <description>AI-powered code walkthrough for PhpStorm. Explains code step by step with narration, navigation, and glossary support.</description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService
+            serviceImplementation="com.snootbeestci.codewalker.settings.CodewalkerSettings"/>
+        <applicationConfigurable
+            parentId="tools"
+            instance="com.snootbeestci.codewalker.settings.CodewalkerSettingsConfigurable"
+            id="com.snootbeestci.codewalker.settings"
+            displayName="Codewalker"/>
+        <applicationService
+            serviceImplementation="com.snootbeestci.codewalker.grpc.CodewalkerClient"/>
+        <postStartupActivity
+            implementation="com.snootbeestci.codewalker.grpc.CodewalkerStartupActivity"/>
+    </extensions>
+</idea-plugin>
