@@ -12,8 +12,8 @@ group = "com.github.snootbeestci"
 version = System.getenv("RELEASE_VERSION") ?: "dev"
 
 dependencies {
-    implementation("com.google.protobuf:protobuf-java:3.25.3")
-    implementation("com.google.protobuf:protobuf-kotlin:3.25.3")
+    implementation("com.google.protobuf:protobuf-java:4.28.3")
+    implementation("com.google.protobuf:protobuf-kotlin:4.28.3")
     implementation("io.grpc:grpc-stub:1.68.1")
     implementation("io.grpc:grpc-protobuf:1.68.1")
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
