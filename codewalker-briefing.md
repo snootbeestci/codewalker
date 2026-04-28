@@ -302,6 +302,20 @@ existing code.
 
 ---
 
+## File ordering
+
+Review sessions present changed files in an order chosen by a `FileOrderer`
+implementation. The strategy is selected per-session via
+`OpenReviewSessionRequest.file_ordering`. Default is `entry-points-first`.
+
+- Implementations live in `internal/forge/orderers/` and register via init()
+- `ListFileOrderers` RPC lets clients discover available strategies at runtime
+- Adding a new orderer must not require changes outside `internal/forge/orderers/`
+- File ordering is applied before the step graph is built, so step order
+  matches file order automatically
+
+---
+
 ## What to build first
 
 The initial implementation is complete, including review session support

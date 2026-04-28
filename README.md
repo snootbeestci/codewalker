@@ -97,6 +97,21 @@ Supported URL patterns (GitHub):
 
 ---
 
+## Adding a file orderer
+
+Review sessions present changed files in an order chosen by a `FileOrderer`.
+Implement the interface in `internal/forge/orderers/` and register it via
+`init()`. Clients select a strategy per-session via
+`OpenReviewSessionRequest.file_ordering` and discover the available strategies
+at runtime via the `ListFileOrderers` RPC.
+
+Built-in strategies:
+- `entry-points-first` (default) — entry points, then domain logic, infrastructure, tests last
+- `alphabetical` — sorted by file path
+- `as-fetched` — preserves the order returned by the forge
+
+---
+
 ## Architecture
 
 ```
