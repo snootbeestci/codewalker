@@ -357,6 +357,13 @@ Read from environment variables. No config files in v1.
 - Before tagging a release, run `make release-dry-run` to validate the Gradle
   publish setup locally. This catches build script issues without burning
   version numbers.
+- The `codewalker-proto` repo is derived. The release workflow syncs the
+  proto file and regenerated Kotlin stubs to it on each tagged release,
+  then tags the proto repo with the same version
+- Authentication uses the `PROTO_REPO_TOKEN` secret — a fine-grained PAT
+  with write access to `codewalker-proto` only
+- Never edit `codewalker-proto` directly. All proto changes happen in this
+  repo and propagate via the release workflow
 
 ---
 
