@@ -70,9 +70,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Only commit if proto or stubs actually changed.
-          if ! git diff --quiet || ! git diff --cached --quiet; then
-            git add proto/codewalker/v1/codewalker.proto gen/kotlin
+          # Stage everything first so untracked new files are visible to the change check.
+          git add proto/codewalker/v1/codewalker.proto gen/kotlin
+
+          # Only commit if anything actually differs from HEAD.
+          if [ -n "$(git status --porcelain)" ]; then
             git commit -m "chore: sync from codewalker ${{ github.ref_name }}"
             git push origin main
           fi
