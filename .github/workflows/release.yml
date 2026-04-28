@@ -72,3 +72,47 @@ jobs:
           tags: |
             ghcr.io/snootbeestci/codewalker:${{ github.ref_name }}
             ghcr.io/snootbeestci/codewalker:latest
+
+  sync-proto-repo:
+    runs-on: ubuntu-latest
+    needs: [publish-proto-stubs, build-and-push-docker]
+
+    steps:
+      - name: Checkout codewalker (this repo)
+        uses: actions/checkout@v4
+
+      - name: Set up buf
+        uses: bufbuild/buf-setup-action@v1
+
+      - name: Generate Kotlin stubs
+        run: buf generate --template buf.gen.kotlin.yaml
+
+      - name: Checkout codewalker-proto
+        uses: actions/checkout@v4
+        with:
+          repository: snootbeestci/codewalker-proto
+          token: ${{ secrets.PROTO_REPO_TOKEN }}
+          path: proto-repo
+
+      - name: Sync proto and stubs to codewalker-proto
+        run: |
+          cd proto-repo
+
+          mkdir -p proto/codewalker/v1
+          cp ../proto/codewalker/v1/codewalker.proto proto/codewalker/v1/codewalker.proto
+
+          rm -rf gen/kotlin
+          mkdir -p gen
+          cp -r ../gen/kotlin gen/kotlin
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git add proto/codewalker/v1/codewalker.proto gen/kotlin
+            git commit -m "chore: sync from codewalker ${{ github.ref_name }}"
+            git push origin main
+          fi
+
+          git tag ${{ github.ref_name }}
+          git push origin ${{ github.ref_name }}
