@@ -39,6 +39,10 @@ service CodeWalker {
   // Server parses the URL, fetches the diff via the appropriate ForgeHandler,
   // and streams back progress before emitting a final ReviewReady event.
   rpc OpenReviewSession(OpenReviewSessionRequest) returns (stream SessionEvent);
+
+  // List available file ordering strategies. Clients can use this to
+  // populate user-facing pickers without hardcoding the strategy names.
+  rpc ListFileOrderers(ListFileOrderersRequest) returns (ListFileOrderersResponse);
 }
 
 // ─────────────────────────────────────────────
@@ -332,6 +336,11 @@ message OpenReviewSessionRequest {
 
   // If true, raw_source / raw_diff will be omitted from span messages.
   bool omit_raw_source = 4;
+
+  // Optional ordering strategy name for the file list.
+  // Defaults to "entry-points-first".
+  // Use ListFileOrderers to discover available strategies.
+  string file_ordering = 5;
 }
 
 message ReviewReady {
@@ -450,4 +459,15 @@ message GetVersionResponse {
   // Allows the server to declare backwards compatibility explicitly.
   // e.g. proto_major=2, min_compatible_proto_major=1 means v1 clients still work.
   uint32 min_compatible_proto_major = 3;
+}
+
+message ListFileOrderersRequest {}
+
+message ListFileOrderersResponse {
+  repeated FileOrderer orderers = 1;
+}
+
+message FileOrderer {
+  string name        = 1;
+  string description = 2;
 }

@@ -10,6 +10,7 @@ import (
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	"github.com/yourorg/codewalker/internal/forge"
 	_ "github.com/yourorg/codewalker/internal/forge/forges"
+	_ "github.com/yourorg/codewalker/internal/forge/orderers"
 	"github.com/yourorg/codewalker/internal/graph"
 	"github.com/yourorg/codewalker/internal/llm"
 	"github.com/yourorg/codewalker/internal/session"
@@ -68,6 +69,12 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 		return forgeErrToStatus(err, "fetch diff")
 	}
 	slog.Debug("diff fetched", "file_count", len(payload.Files))
+
+	orderer, err := forge.ResolveOrderer(req.FileOrdering)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	payload.Files = orderer.Order(payload.Files)
 
 	// Fetch file contents for hunk context (best-effort; errors are non-fatal).
 	fileLines := make(map[string][]string)
