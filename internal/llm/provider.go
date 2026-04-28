@@ -21,6 +21,10 @@ type Provider interface {
 
 	// ExpandTerm streams an expanded definition of a glossary term.
 	ExpandTerm(ctx context.Context, req ExpandTermRequest) (<-chan string, error)
+
+	// GenerateStepSummary returns a structured key/value summary for a single
+	// review hunk. Non-streaming — the response is short and arrives as a block.
+	GenerateStepSummary(ctx context.Context, req SummaryRequest) (*StepSummary, error)
 }
 
 // NarrateRequest carries everything needed to narrate a single step.
@@ -62,4 +66,26 @@ type ExpandTermRequest struct {
 	Context  string
 	Language string
 	Level    int
+}
+
+// SummaryRequest carries everything needed to produce a structured triage
+// summary for a single review hunk.
+type SummaryRequest struct {
+	Language      string
+	HunkDiff      string
+	ContextBefore string
+	ContextAfter  string
+}
+
+// StepSummary is the structured triage payload returned alongside narration
+// for review session steps. Every field is populated — empty values are "—".
+type StepSummary struct {
+	Breaking      string
+	Risk          string
+	WhatChanged   string
+	SideEffects   string
+	Tests         string
+	ReviewerFocus string
+	Suggestion    string
+	Confidence    string
 }

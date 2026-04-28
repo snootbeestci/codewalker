@@ -31,6 +31,19 @@ func (m *MockProvider) ExpandTerm(_ context.Context, _ llm.ExpandTermRequest) (<
 	return chanOf("mock term expansion"), nil
 }
 
+func (m *MockProvider) GenerateStepSummary(_ context.Context, _ llm.SummaryRequest) (*llm.StepSummary, error) {
+	return &llm.StepSummary{
+		Breaking:      "No",
+		Risk:          "Low — mock summary",
+		WhatChanged:   "Mock change description",
+		SideEffects:   "—",
+		Tests:         "Modified",
+		ReviewerFocus: "—",
+		Suggestion:    "—",
+		Confidence:    "High — —",
+	}, nil
+}
+
 // chanOf returns a channel that emits a single string then closes.
 func chanOf(s string) <-chan string {
 	ch := make(chan string, 1)

@@ -1821,7 +1821,10 @@ type StepComplete struct {
 	// Navigation options available from this step (for UI rendering).
 	AvailableEdges []*StepEdge `protobuf:"bytes,3,rep,name=available_edges,json=availableEdges,proto3" json:"available_edges,omitempty"`
 	// Breadcrumb trail of step IDs visited so far this session.
-	Breadcrumb    []string `protobuf:"bytes,4,rep,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
+	Breadcrumb []string `protobuf:"bytes,4,rep,name=breadcrumb,proto3" json:"breadcrumb,omitempty"`
+	// Structured key/value summary for fast triage. Populated for review session
+	// steps; may be unset for walkthrough steps in v1.
+	Summary       *StepSummary `protobuf:"bytes,5,opt,name=summary,proto3" json:"summary,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1884,6 +1887,125 @@ func (x *StepComplete) GetBreadcrumb() []string {
 	return nil
 }
 
+func (x *StepComplete) GetSummary() *StepSummary {
+	if x != nil {
+		return x.Summary
+	}
+	return nil
+}
+
+// Structured summary of a hunk for code review triage.
+// All fields are populated on every review step — empty fields use "—"
+// rather than being absent, so clients can render a consistent layout.
+type StepSummary struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Yes/No — whether this change breaks an existing API or contract.
+	Breaking string `protobuf:"bytes,1,opt,name=breaking,proto3" json:"breaking,omitempty"`
+	// Low/Medium/High with a brief reason, e.g. "Medium — touches payment flow".
+	Risk string `protobuf:"bytes,2,opt,name=risk,proto3" json:"risk,omitempty"`
+	// One-line summary of what this hunk does, e.g. "Adds retry logic to payment validation".
+	WhatChanged string `protobuf:"bytes,3,opt,name=what_changed,json=whatChanged,proto3" json:"what_changed,omitempty"`
+	// What else in the codebase this change might affect.
+	SideEffects string `protobuf:"bytes,4,opt,name=side_effects,json=sideEffects,proto3" json:"side_effects,omitempty"`
+	// Added/Modified/Missing — whether tests accompany this change.
+	Tests string `protobuf:"bytes,5,opt,name=tests,proto3" json:"tests,omitempty"`
+	// What the reviewer should pay particular attention to.
+	ReviewerFocus string `protobuf:"bytes,6,opt,name=reviewer_focus,json=reviewerFocus,proto3" json:"reviewer_focus,omitempty"`
+	// Any concern the LLM thinks is worth raising. Empty if no concerns.
+	Suggestion string `protobuf:"bytes,7,opt,name=suggestion,proto3" json:"suggestion,omitempty"`
+	// How confident the LLM is about its analysis.
+	// Low/Medium/High with a brief reason if Low.
+	Confidence    string `protobuf:"bytes,8,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StepSummary) Reset() {
+	*x = StepSummary{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StepSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StepSummary) ProtoMessage() {}
+
+func (x *StepSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StepSummary.ProtoReflect.Descriptor instead.
+func (*StepSummary) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *StepSummary) GetBreaking() string {
+	if x != nil {
+		return x.Breaking
+	}
+	return ""
+}
+
+func (x *StepSummary) GetRisk() string {
+	if x != nil {
+		return x.Risk
+	}
+	return ""
+}
+
+func (x *StepSummary) GetWhatChanged() string {
+	if x != nil {
+		return x.WhatChanged
+	}
+	return ""
+}
+
+func (x *StepSummary) GetSideEffects() string {
+	if x != nil {
+		return x.SideEffects
+	}
+	return ""
+}
+
+func (x *StepSummary) GetTests() string {
+	if x != nil {
+		return x.Tests
+	}
+	return ""
+}
+
+func (x *StepSummary) GetReviewerFocus() string {
+	if x != nil {
+		return x.ReviewerFocus
+	}
+	return ""
+}
+
+func (x *StepSummary) GetSuggestion() string {
+	if x != nil {
+		return x.Suggestion
+	}
+	return ""
+}
+
+func (x *StepSummary) GetConfidence() string {
+	if x != nil {
+		return x.Confidence
+	}
+	return ""
+}
+
 type RephraseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -1894,7 +2016,7 @@ type RephraseRequest struct {
 
 func (x *RephraseRequest) Reset() {
 	*x = RephraseRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1906,7 +2028,7 @@ func (x *RephraseRequest) String() string {
 func (*RephraseRequest) ProtoMessage() {}
 
 func (x *RephraseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[17]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1919,7 +2041,7 @@ func (x *RephraseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RephraseRequest.ProtoReflect.Descriptor instead.
 func (*RephraseRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{17}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RephraseRequest) GetSessionId() string {
@@ -1948,7 +2070,7 @@ type GlossaryTerm struct {
 
 func (x *GlossaryTerm) Reset() {
 	*x = GlossaryTerm{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1960,7 +2082,7 @@ func (x *GlossaryTerm) String() string {
 func (*GlossaryTerm) ProtoMessage() {}
 
 func (x *GlossaryTerm) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[18]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1973,7 +2095,7 @@ func (x *GlossaryTerm) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GlossaryTerm.ProtoReflect.Descriptor instead.
 func (*GlossaryTerm) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{18}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GlossaryTerm) GetTerm() string {
@@ -2014,7 +2136,7 @@ type ExpandTermRequest struct {
 
 func (x *ExpandTermRequest) Reset() {
 	*x = ExpandTermRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2026,7 +2148,7 @@ func (x *ExpandTermRequest) String() string {
 func (*ExpandTermRequest) ProtoMessage() {}
 
 func (x *ExpandTermRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[19]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2039,7 +2161,7 @@ func (x *ExpandTermRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExpandTermRequest.ProtoReflect.Descriptor instead.
 func (*ExpandTermRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{19}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ExpandTermRequest) GetSessionId() string {
@@ -2075,7 +2197,7 @@ type OpenReviewSessionRequest struct {
 
 func (x *OpenReviewSessionRequest) Reset() {
 	*x = OpenReviewSessionRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2087,7 +2209,7 @@ func (x *OpenReviewSessionRequest) String() string {
 func (*OpenReviewSessionRequest) ProtoMessage() {}
 
 func (x *OpenReviewSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[20]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2100,7 +2222,7 @@ func (x *OpenReviewSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OpenReviewSessionRequest.ProtoReflect.Descriptor instead.
 func (*OpenReviewSessionRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{20}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *OpenReviewSessionRequest) GetUrl() string {
@@ -2155,7 +2277,7 @@ type ReviewReady struct {
 
 func (x *ReviewReady) Reset() {
 	*x = ReviewReady{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2167,7 +2289,7 @@ func (x *ReviewReady) String() string {
 func (*ReviewReady) ProtoMessage() {}
 
 func (x *ReviewReady) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[21]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2180,7 +2302,7 @@ func (x *ReviewReady) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReviewReady.ProtoReflect.Descriptor instead.
 func (*ReviewReady) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{21}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ReviewReady) GetSessionId() string {
@@ -2253,7 +2375,7 @@ type ForgeContext struct {
 
 func (x *ForgeContext) Reset() {
 	*x = ForgeContext{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2265,7 +2387,7 @@ func (x *ForgeContext) String() string {
 func (*ForgeContext) ProtoMessage() {}
 
 func (x *ForgeContext) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[22]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2278,7 +2400,7 @@ func (x *ForgeContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForgeContext.ProtoReflect.Descriptor instead.
 func (*ForgeContext) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{22}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ForgeContext) GetKind() ForgeContextKind {
@@ -2380,7 +2502,7 @@ type ReviewFile struct {
 
 func (x *ReviewFile) Reset() {
 	*x = ReviewFile{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2392,7 +2514,7 @@ func (x *ReviewFile) String() string {
 func (*ReviewFile) ProtoMessage() {}
 
 func (x *ReviewFile) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[23]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2405,7 +2527,7 @@ func (x *ReviewFile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReviewFile.ProtoReflect.Descriptor instead.
 func (*ReviewFile) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{23}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ReviewFile) GetFilePath() string {
@@ -2473,7 +2595,7 @@ type HunkSpan struct {
 
 func (x *HunkSpan) Reset() {
 	*x = HunkSpan{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2485,7 +2607,7 @@ func (x *HunkSpan) String() string {
 func (*HunkSpan) ProtoMessage() {}
 
 func (x *HunkSpan) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[24]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2498,7 +2620,7 @@ func (x *HunkSpan) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HunkSpan.ProtoReflect.Descriptor instead.
 func (*HunkSpan) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{24}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *HunkSpan) GetFilePath() string {
@@ -2568,7 +2690,7 @@ type ServiceError struct {
 
 func (x *ServiceError) Reset() {
 	*x = ServiceError{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2580,7 +2702,7 @@ func (x *ServiceError) String() string {
 func (*ServiceError) ProtoMessage() {}
 
 func (x *ServiceError) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[25]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2593,7 +2715,7 @@ func (x *ServiceError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceError.ProtoReflect.Descriptor instead.
 func (*ServiceError) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{25}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ServiceError) GetCode() ErrorCode {
@@ -2625,7 +2747,7 @@ type GetVersionRequest struct {
 
 func (x *GetVersionRequest) Reset() {
 	*x = GetVersionRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[26]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2637,7 +2759,7 @@ func (x *GetVersionRequest) String() string {
 func (*GetVersionRequest) ProtoMessage() {}
 
 func (x *GetVersionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[26]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2650,7 +2772,7 @@ func (x *GetVersionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVersionRequest.ProtoReflect.Descriptor instead.
 func (*GetVersionRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{26}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{27}
 }
 
 type GetVersionResponse struct {
@@ -2670,7 +2792,7 @@ type GetVersionResponse struct {
 
 func (x *GetVersionResponse) Reset() {
 	*x = GetVersionResponse{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[27]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2682,7 +2804,7 @@ func (x *GetVersionResponse) String() string {
 func (*GetVersionResponse) ProtoMessage() {}
 
 func (x *GetVersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[27]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2695,7 +2817,7 @@ func (x *GetVersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVersionResponse.ProtoReflect.Descriptor instead.
 func (*GetVersionResponse) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{27}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetVersionResponse) GetVersion() string {
@@ -2727,7 +2849,7 @@ type ListFileOrderersRequest struct {
 
 func (x *ListFileOrderersRequest) Reset() {
 	*x = ListFileOrderersRequest{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[28]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2739,7 +2861,7 @@ func (x *ListFileOrderersRequest) String() string {
 func (*ListFileOrderersRequest) ProtoMessage() {}
 
 func (x *ListFileOrderersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[28]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2752,7 +2874,7 @@ func (x *ListFileOrderersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFileOrderersRequest.ProtoReflect.Descriptor instead.
 func (*ListFileOrderersRequest) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{28}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{29}
 }
 
 type ListFileOrderersResponse struct {
@@ -2764,7 +2886,7 @@ type ListFileOrderersResponse struct {
 
 func (x *ListFileOrderersResponse) Reset() {
 	*x = ListFileOrderersResponse{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[29]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2776,7 +2898,7 @@ func (x *ListFileOrderersResponse) String() string {
 func (*ListFileOrderersResponse) ProtoMessage() {}
 
 func (x *ListFileOrderersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[29]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2789,7 +2911,7 @@ func (x *ListFileOrderersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFileOrderersResponse.ProtoReflect.Descriptor instead.
 func (*ListFileOrderersResponse) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{29}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListFileOrderersResponse) GetOrderers() []*FileOrderer {
@@ -2809,7 +2931,7 @@ type FileOrderer struct {
 
 func (x *FileOrderer) Reset() {
 	*x = FileOrderer{}
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[30]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2821,7 +2943,7 @@ func (x *FileOrderer) String() string {
 func (*FileOrderer) ProtoMessage() {}
 
 func (x *FileOrderer) ProtoReflect() protoreflect.Message {
-	mi := &file_codewalker_v1_codewalker_proto_msgTypes[30]
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2834,7 +2956,7 @@ func (x *FileOrderer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileOrderer.ProtoReflect.Descriptor instead.
 func (*FileOrderer) Descriptor() ([]byte, []int) {
-	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{30}
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *FileOrderer) GetName() string {
@@ -2947,14 +3069,28 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x05error\x18\x03 \x01(\v2\x1b.codewalker.v1.ServiceErrorH\x00R\x05errorB\a\n" +
 	"\x05event\"\"\n" +
 	"\fNarrateToken\x12\x12\n" +
-	"\x04text\x18\x01 \x01(\tR\x04text\"\xc3\x01\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\"\xf9\x01\n" +
 	"\fStepComplete\x12\x17\n" +
 	"\astep_id\x18\x01 \x01(\tR\x06stepId\x128\n" +
 	"\tnew_terms\x18\x02 \x03(\v2\x1b.codewalker.v1.GlossaryTermR\bnewTerms\x12@\n" +
 	"\x0favailable_edges\x18\x03 \x03(\v2\x17.codewalker.v1.StepEdgeR\x0eavailableEdges\x12\x1e\n" +
 	"\n" +
 	"breadcrumb\x18\x04 \x03(\tR\n" +
-	"breadcrumb\"a\n" +
+	"breadcrumb\x124\n" +
+	"\asummary\x18\x05 \x01(\v2\x1a.codewalker.v1.StepSummaryR\asummary\"\x80\x02\n" +
+	"\vStepSummary\x12\x1a\n" +
+	"\bbreaking\x18\x01 \x01(\tR\bbreaking\x12\x12\n" +
+	"\x04risk\x18\x02 \x01(\tR\x04risk\x12!\n" +
+	"\fwhat_changed\x18\x03 \x01(\tR\vwhatChanged\x12!\n" +
+	"\fside_effects\x18\x04 \x01(\tR\vsideEffects\x12\x14\n" +
+	"\x05tests\x18\x05 \x01(\tR\x05tests\x12%\n" +
+	"\x0ereviewer_focus\x18\x06 \x01(\tR\rreviewerFocus\x12\x1e\n" +
+	"\n" +
+	"suggestion\x18\a \x01(\tR\n" +
+	"suggestion\x12\x1e\n" +
+	"\n" +
+	"confidence\x18\b \x01(\tR\n" +
+	"confidence\"a\n" +
 	"\x0fRephraseRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12/\n" +
@@ -3135,7 +3271,7 @@ func file_codewalker_v1_codewalker_proto_rawDescGZIP() []byte {
 }
 
 var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
-var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(SessionKind)(0),                 // 0: codewalker.v1.SessionKind
 	(StepKind)(0),                    // 1: codewalker.v1.StepKind
@@ -3164,78 +3300,80 @@ var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(*NarrateEvent)(nil),             // 24: codewalker.v1.NarrateEvent
 	(*NarrateToken)(nil),             // 25: codewalker.v1.NarrateToken
 	(*StepComplete)(nil),             // 26: codewalker.v1.StepComplete
-	(*RephraseRequest)(nil),          // 27: codewalker.v1.RephraseRequest
-	(*GlossaryTerm)(nil),             // 28: codewalker.v1.GlossaryTerm
-	(*ExpandTermRequest)(nil),        // 29: codewalker.v1.ExpandTermRequest
-	(*OpenReviewSessionRequest)(nil), // 30: codewalker.v1.OpenReviewSessionRequest
-	(*ReviewReady)(nil),              // 31: codewalker.v1.ReviewReady
-	(*ForgeContext)(nil),             // 32: codewalker.v1.ForgeContext
-	(*ReviewFile)(nil),               // 33: codewalker.v1.ReviewFile
-	(*HunkSpan)(nil),                 // 34: codewalker.v1.HunkSpan
-	(*ServiceError)(nil),             // 35: codewalker.v1.ServiceError
-	(*GetVersionRequest)(nil),        // 36: codewalker.v1.GetVersionRequest
-	(*GetVersionResponse)(nil),       // 37: codewalker.v1.GetVersionResponse
-	(*ListFileOrderersRequest)(nil),  // 38: codewalker.v1.ListFileOrderersRequest
-	(*ListFileOrderersResponse)(nil), // 39: codewalker.v1.ListFileOrderersResponse
-	(*FileOrderer)(nil),              // 40: codewalker.v1.FileOrderer
+	(*StepSummary)(nil),              // 27: codewalker.v1.StepSummary
+	(*RephraseRequest)(nil),          // 28: codewalker.v1.RephraseRequest
+	(*GlossaryTerm)(nil),             // 29: codewalker.v1.GlossaryTerm
+	(*ExpandTermRequest)(nil),        // 30: codewalker.v1.ExpandTermRequest
+	(*OpenReviewSessionRequest)(nil), // 31: codewalker.v1.OpenReviewSessionRequest
+	(*ReviewReady)(nil),              // 32: codewalker.v1.ReviewReady
+	(*ForgeContext)(nil),             // 33: codewalker.v1.ForgeContext
+	(*ReviewFile)(nil),               // 34: codewalker.v1.ReviewFile
+	(*HunkSpan)(nil),                 // 35: codewalker.v1.HunkSpan
+	(*ServiceError)(nil),             // 36: codewalker.v1.ServiceError
+	(*GetVersionRequest)(nil),        // 37: codewalker.v1.GetVersionRequest
+	(*GetVersionResponse)(nil),       // 38: codewalker.v1.GetVersionResponse
+	(*ListFileOrderersRequest)(nil),  // 39: codewalker.v1.ListFileOrderersRequest
+	(*ListFileOrderersResponse)(nil), // 40: codewalker.v1.ListFileOrderersResponse
+	(*FileOrderer)(nil),              // 41: codewalker.v1.FileOrderer
 }
 var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	8,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
 	12, // 1: codewalker.v1.SessionEvent.progress:type_name -> codewalker.v1.SessionProgress
 	13, // 2: codewalker.v1.SessionEvent.ready:type_name -> codewalker.v1.SessionReady
-	35, // 3: codewalker.v1.SessionEvent.error:type_name -> codewalker.v1.ServiceError
-	31, // 4: codewalker.v1.SessionEvent.review_ready:type_name -> codewalker.v1.ReviewReady
+	36, // 3: codewalker.v1.SessionEvent.error:type_name -> codewalker.v1.ServiceError
+	32, // 4: codewalker.v1.SessionEvent.review_ready:type_name -> codewalker.v1.ReviewReady
 	19, // 5: codewalker.v1.SessionReady.steps:type_name -> codewalker.v1.Step
-	28, // 6: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
+	29, // 6: codewalker.v1.SessionReady.glossary:type_name -> codewalker.v1.GlossaryTerm
 	18, // 7: codewalker.v1.ListSessionsResponse.sessions:type_name -> codewalker.v1.SessionSummary
 	0,  // 8: codewalker.v1.SessionSummary.kind:type_name -> codewalker.v1.SessionKind
 	22, // 9: codewalker.v1.Step.span:type_name -> codewalker.v1.SourceSpan
 	20, // 10: codewalker.v1.Step.edges:type_name -> codewalker.v1.StepEdge
 	1,  // 11: codewalker.v1.Step.kind:type_name -> codewalker.v1.StepKind
-	34, // 12: codewalker.v1.Step.hunk_span:type_name -> codewalker.v1.HunkSpan
+	35, // 12: codewalker.v1.Step.hunk_span:type_name -> codewalker.v1.HunkSpan
 	2,  // 13: codewalker.v1.StepEdge.label:type_name -> codewalker.v1.EdgeLabel
 	21, // 14: codewalker.v1.StepEdge.external_call_info:type_name -> codewalker.v1.ExternalCallInfo
 	3,  // 15: codewalker.v1.NavigateRequest.direction:type_name -> codewalker.v1.SimpleDirection
 	2,  // 16: codewalker.v1.NavigateRequest.follow_edge:type_name -> codewalker.v1.EdgeLabel
 	25, // 17: codewalker.v1.NarrateEvent.token:type_name -> codewalker.v1.NarrateToken
 	26, // 18: codewalker.v1.NarrateEvent.complete:type_name -> codewalker.v1.StepComplete
-	35, // 19: codewalker.v1.NarrateEvent.error:type_name -> codewalker.v1.ServiceError
-	28, // 20: codewalker.v1.StepComplete.new_terms:type_name -> codewalker.v1.GlossaryTerm
+	36, // 19: codewalker.v1.NarrateEvent.error:type_name -> codewalker.v1.ServiceError
+	29, // 20: codewalker.v1.StepComplete.new_terms:type_name -> codewalker.v1.GlossaryTerm
 	20, // 21: codewalker.v1.StepComplete.available_edges:type_name -> codewalker.v1.StepEdge
-	4,  // 22: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
-	5,  // 23: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
-	8,  // 24: codewalker.v1.OpenReviewSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
-	32, // 25: codewalker.v1.ReviewReady.forge_context:type_name -> codewalker.v1.ForgeContext
-	19, // 26: codewalker.v1.ReviewReady.steps:type_name -> codewalker.v1.Step
-	28, // 27: codewalker.v1.ReviewReady.glossary:type_name -> codewalker.v1.GlossaryTerm
-	6,  // 28: codewalker.v1.ForgeContext.kind:type_name -> codewalker.v1.ForgeContextKind
-	33, // 29: codewalker.v1.ForgeContext.files:type_name -> codewalker.v1.ReviewFile
-	7,  // 30: codewalker.v1.ReviewFile.change:type_name -> codewalker.v1.ChangeKind
-	9,  // 31: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
-	40, // 32: codewalker.v1.ListFileOrderersResponse.orderers:type_name -> codewalker.v1.FileOrderer
-	36, // 33: codewalker.v1.CodeWalker.GetVersion:input_type -> codewalker.v1.GetVersionRequest
-	10, // 34: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
-	23, // 35: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
-	27, // 36: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
-	29, // 37: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
-	14, // 38: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
-	16, // 39: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
-	30, // 40: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
-	38, // 41: codewalker.v1.CodeWalker.ListFileOrderers:input_type -> codewalker.v1.ListFileOrderersRequest
-	37, // 42: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
-	11, // 43: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
-	24, // 44: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
-	24, // 45: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	24, // 46: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	15, // 47: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
-	17, // 48: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
-	11, // 49: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
-	39, // 50: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
-	42, // [42:51] is the sub-list for method output_type
-	33, // [33:42] is the sub-list for method input_type
-	33, // [33:33] is the sub-list for extension type_name
-	33, // [33:33] is the sub-list for extension extendee
-	0,  // [0:33] is the sub-list for field type_name
+	27, // 22: codewalker.v1.StepComplete.summary:type_name -> codewalker.v1.StepSummary
+	4,  // 23: codewalker.v1.RephraseRequest.mode:type_name -> codewalker.v1.RephraseMode
+	5,  // 24: codewalker.v1.GlossaryTerm.kind:type_name -> codewalker.v1.TermKind
+	8,  // 25: codewalker.v1.OpenReviewSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
+	33, // 26: codewalker.v1.ReviewReady.forge_context:type_name -> codewalker.v1.ForgeContext
+	19, // 27: codewalker.v1.ReviewReady.steps:type_name -> codewalker.v1.Step
+	29, // 28: codewalker.v1.ReviewReady.glossary:type_name -> codewalker.v1.GlossaryTerm
+	6,  // 29: codewalker.v1.ForgeContext.kind:type_name -> codewalker.v1.ForgeContextKind
+	34, // 30: codewalker.v1.ForgeContext.files:type_name -> codewalker.v1.ReviewFile
+	7,  // 31: codewalker.v1.ReviewFile.change:type_name -> codewalker.v1.ChangeKind
+	9,  // 32: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
+	41, // 33: codewalker.v1.ListFileOrderersResponse.orderers:type_name -> codewalker.v1.FileOrderer
+	37, // 34: codewalker.v1.CodeWalker.GetVersion:input_type -> codewalker.v1.GetVersionRequest
+	10, // 35: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
+	23, // 36: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
+	28, // 37: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
+	30, // 38: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
+	14, // 39: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
+	16, // 40: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	31, // 41: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
+	39, // 42: codewalker.v1.CodeWalker.ListFileOrderers:input_type -> codewalker.v1.ListFileOrderersRequest
+	38, // 43: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
+	11, // 44: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
+	24, // 45: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	24, // 46: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	24, // 47: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	15, // 48: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	17, // 49: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	11, // 50: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
+	40, // 51: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
+	43, // [43:52] is the sub-list for method output_type
+	34, // [34:43] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_codewalker_v1_codewalker_proto_init() }
@@ -3265,7 +3403,7 @@ func file_codewalker_v1_codewalker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_codewalker_v1_codewalker_proto_rawDesc), len(file_codewalker_v1_codewalker_proto_rawDesc)),
 			NumEnums:      10,
-			NumMessages:   31,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
