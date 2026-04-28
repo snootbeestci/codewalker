@@ -354,16 +354,20 @@ Read from environment variables. No config files in v1.
 
 ## Release process
 
-- Before tagging a release, run `make release-dry-run` to validate the Gradle
-  publish setup locally. This catches build script issues without burning
-  version numbers.
-- The `codewalker-proto` repo is derived. The release workflow syncs the
-  proto file and regenerated Kotlin stubs to it on each tagged release,
-  then tags the proto repo with the same version
-- Authentication uses the `PROTO_REPO_TOKEN` secret — a fine-grained PAT
-  with write access to `codewalker-proto` only
+- Kotlin proto stubs are distributed via JitPack from the derived
+  `codewalker-proto` repo. Clients depend on
+  `com.github.snootbeestci:codewalker-proto:vX.Y.Z` and JitPack builds the
+  artefact on demand from the matching tag in the proto repo.
+- The release workflow has two jobs: build and push the Docker image to GHCR,
+  then sync the proto file and regenerated Kotlin stubs to `codewalker-proto`
+  and tag the proto repo with the same version. JitPack picks up that tag.
+- Authentication for the proto repo sync uses the `PROTO_REPO_TOKEN`
+  secret — a fine-grained PAT with write access to `codewalker-proto` only
 - Never edit `codewalker-proto` directly. All proto changes happen in this
   repo and propagate via the release workflow
+- The repo does not publish to GitHub Packages. JitPack is the single
+  distribution channel for Kotlin stubs — do not reintroduce a parallel
+  Gradle publish job
 
 ---
 
