@@ -278,6 +278,40 @@ message StepComplete {
 
   // Breadcrumb trail of step IDs visited so far this session.
   repeated string breadcrumb = 4;
+
+  // Structured key/value summary for fast triage. Populated for review session
+  // steps; may be unset for walkthrough steps in v1.
+  StepSummary summary = 5;
+}
+
+// Structured summary of a hunk for code review triage.
+// All fields are populated on every review step — empty fields use "—"
+// rather than being absent, so clients can render a consistent layout.
+message StepSummary {
+  // Yes/No — whether this change breaks an existing API or contract.
+  string breaking = 1;
+
+  // Low/Medium/High with a brief reason, e.g. "Medium — touches payment flow".
+  string risk = 2;
+
+  // One-line summary of what this hunk does, e.g. "Adds retry logic to payment validation".
+  string what_changed = 3;
+
+  // What else in the codebase this change might affect.
+  string side_effects = 4;
+
+  // Added/Modified/Missing — whether tests accompany this change.
+  string tests = 5;
+
+  // What the reviewer should pay particular attention to.
+  string reviewer_focus = 6;
+
+  // Any concern the LLM thinks is worth raising. Empty if no concerns.
+  string suggestion = 7;
+
+  // How confident the LLM is about its analysis.
+  // Low/Medium/High with a brief reason if Low.
+  string confidence = 8;
 }
 
 // ─────────────────────────────────────────────

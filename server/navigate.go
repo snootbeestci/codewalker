@@ -74,6 +74,27 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	}
 	slog.Debug("source resolved", "step_id", step.ID, "code_len", len(code))
 
+	// Review steps get a structured summary in parallel with narration.
+	// Walkthrough steps leave summary unset.
+	var summaryCh chan *llm.StepSummary
+	if step.HunkSpan != nil {
+		summaryCh = make(chan *llm.StepSummary, 1)
+		go func() {
+			summary, err := s.provider.GenerateStepSummary(ctx, llm.SummaryRequest{
+				Language:      sess.Language,
+				HunkDiff:      step.HunkSpan.RawDiff,
+				ContextBefore: step.HunkSpan.ContextBefore,
+				ContextAfter:  step.HunkSpan.ContextAfter,
+			})
+			if err != nil {
+				slog.Debug("summary generation failed", "step_id", step.ID, "error", err)
+				summaryCh <- nil
+				return
+			}
+			summaryCh <- summary
+		}()
+	}
+
 	tokens, err := s.provider.Narrate(ctx, llm.NarrateRequest{
 		Code:      code,
 		Language:  sess.Language,
@@ -103,12 +124,29 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	}
 	slog.Debug("narration complete", "step_id", step.ID, "token_count", tokenCount)
 
+	var summaryProto *v1.StepSummary
+	if summaryCh != nil {
+		if summary := <-summaryCh; summary != nil {
+			summaryProto = &v1.StepSummary{
+				Breaking:      summary.Breaking,
+				Risk:          summary.Risk,
+				WhatChanged:   summary.WhatChanged,
+				SideEffects:   summary.SideEffects,
+				Tests:         summary.Tests,
+				ReviewerFocus: summary.ReviewerFocus,
+				Suggestion:    summary.Suggestion,
+				Confidence:    summary.Confidence,
+			}
+		}
+	}
+
 	return stream.Send(&v1.NarrateEvent{
 		Event: &v1.NarrateEvent_Complete{
 			Complete: &v1.StepComplete{
 				StepId:         step.ID,
 				AvailableEdges: availableEdges,
 				Breadcrumb:     crumbLabels,
+				Summary:        summaryProto,
 			},
 		},
 	})

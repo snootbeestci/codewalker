@@ -103,6 +103,75 @@ func (p *AnthropicProvider) ExpandTerm(ctx context.Context, req ExpandTermReques
 	return p.stream(ctx, system, oneMessage(user))
 }
 
+// GenerateStepSummary returns a structured triage summary for a review hunk.
+// The Anthropic call is non-streaming — the output is short and parsed by
+// matching the eight prefixed lines defined in prompts.StepSummary.
+func (p *AnthropicProvider) GenerateStepSummary(ctx context.Context, req SummaryRequest) (*StepSummary, error) {
+	system, user := prompts.StepSummary(req.Language, req.HunkDiff, req.ContextBefore, req.ContextAfter)
+	msg, err := p.client.Messages.New(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.Model(model),
+		MaxTokens: 512,
+		System:    []anthropic.TextBlockParam{{Text: system}},
+		Messages:  oneMessage(user),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("anthropic: generate step summary: %w", err)
+	}
+	if len(msg.Content) == 0 {
+		return nil, fmt.Errorf("anthropic: empty summary response")
+	}
+	return parseStepSummary(msg.Content[0].Text), nil
+}
+
+// parseStepSummary turns the LLM's prefixed-line output into a StepSummary.
+// Missing fields fall back to "—" so clients always render a consistent layout.
+func parseStepSummary(raw string) *StepSummary {
+	const placeholder = "—"
+	out := &StepSummary{
+		Breaking:      placeholder,
+		Risk:          placeholder,
+		WhatChanged:   placeholder,
+		SideEffects:   placeholder,
+		Tests:         placeholder,
+		ReviewerFocus: placeholder,
+		Suggestion:    placeholder,
+		Confidence:    placeholder,
+	}
+	for _, line := range strings.Split(raw, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		key, value, ok := strings.Cut(line, ":")
+		if !ok {
+			continue
+		}
+		value = strings.TrimSpace(value)
+		if value == "" {
+			value = placeholder
+		}
+		switch strings.TrimSpace(key) {
+		case "Breaking":
+			out.Breaking = value
+		case "Risk":
+			out.Risk = value
+		case "WhatChanged":
+			out.WhatChanged = value
+		case "SideEffects":
+			out.SideEffects = value
+		case "Tests":
+			out.Tests = value
+		case "ReviewerFocus":
+			out.ReviewerFocus = value
+		case "Suggestion":
+			out.Suggestion = value
+		case "Confidence":
+			out.Confidence = value
+		}
+	}
+	return out
+}
+
 // stream creates a streaming Messages request and returns a channel of tokens.
 // The channel is closed when the stream ends or the context is cancelled.
 func (p *AnthropicProvider) stream(ctx context.Context, system string, messages []anthropic.MessageParam) (<-chan string, error) {

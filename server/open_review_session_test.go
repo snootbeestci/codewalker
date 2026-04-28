@@ -106,6 +106,19 @@ func (m *mockProvider) ExpandTerm(_ context.Context, _ llm.ExpandTermRequest) (<
 	return ch, nil
 }
 
+func (m *mockProvider) GenerateStepSummary(_ context.Context, _ llm.SummaryRequest) (*llm.StepSummary, error) {
+	return &llm.StepSummary{
+		Breaking:      "No",
+		Risk:          "Low — mock summary",
+		WhatChanged:   "Mock change description",
+		SideEffects:   "—",
+		Tests:         "Modified",
+		ReviewerFocus: "—",
+		Suggestion:    "—",
+		Confidence:    "High — —",
+	}, nil
+}
+
 // --- mock gRPC stream for SessionEvent ---
 
 type mockSessionStream struct {
