@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"os/exec"
 	"strconv"
 	"strings"
 
@@ -114,14 +114,6 @@ func (g *githubHandler) FetchFile(ctx context.Context, fc *forge.ForgeContext, p
 	return data, nil
 }
 
-func (g *githubHandler) ResolveToken(ctx context.Context) (string, error) {
-	out, err := exec.CommandContext(ctx, "gh", "auth", "token").Output()
-	if err != nil {
-		return "", nil
-	}
-	return strings.TrimSpace(string(out)), nil
-}
-
 // --- GitHub API types ---
 
 type ghPR struct {
@@ -171,12 +163,23 @@ func (g *githubHandler) apiDo(ctx context.Context, apiURL, token string) (*http.
 	return http.DefaultClient.Do(req)
 }
 
+// errBodyMaxBytes caps how much of a forge response body we propagate into the
+// gRPC status detail. GitHub Enterprise SSO error bodies are short prose;
+// 500 bytes is enough to convey the cause without leaking large payloads.
+const errBodyMaxBytes = 500
+
 func checkStatus(resp *http.Response) error {
 	switch resp.StatusCode {
-	case http.StatusUnauthorized, http.StatusForbidden:
+	case http.StatusUnauthorized:
 		return &forge.Error{
 			Code: forge.ErrCodeAuthFailed,
 			Msg:  fmt.Sprintf("GitHub API auth failed (%s)", resp.Status),
+		}
+	case http.StatusForbidden:
+		return &forge.Error{
+			Code:   forge.ErrCodeAuthFailed,
+			Msg:    fmt.Sprintf("GitHub API auth failed (%s)", resp.Status),
+			Detail: readBodySnippet(resp.Body),
 		}
 	case http.StatusNotFound:
 		return &forge.Error{
@@ -188,6 +191,16 @@ func checkStatus(resp *http.Response) error {
 		return fmt.Errorf("GitHub API error: %s", resp.Status)
 	}
 	return nil
+}
+
+// readBodySnippet reads up to errBodyMaxBytes from r and returns the result
+// as a trimmed string. Errors are swallowed — a missing body is acceptable.
+func readBodySnippet(r io.Reader) string {
+	buf, err := io.ReadAll(io.LimitReader(r, errBodyMaxBytes))
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(buf))
 }
 
 func (g *githubHandler) fetchPRReview(ctx context.Context, fc *forge.ForgeContext, token string) (*forge.ReviewPayload, error) {

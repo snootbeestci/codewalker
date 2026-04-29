@@ -35,6 +35,7 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "invalid URL: %v", err)
 	}
+	host = forge.NormalizeHost(host)
 
 	handler, err := forge.Resolve(host)
 	if err != nil {
@@ -47,19 +48,11 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 	}
 	slog.Debug("URL parsed", "forge", fc.Forge, "owner", fc.Owner, "repo", fc.Repo)
 
-	// --- Step 2: resolve token ---
-	if err := send(stream, progress("resolving token", 10)); err != nil {
-		return err
-	}
-
+	// Token is the caller's responsibility. Empty means unauthenticated; the
+	// forge will return PermissionDenied for private resources.
 	token := req.ForgeToken
-	if token == "" {
-		if resolved, resolveErr := handler.ResolveToken(ctx); resolveErr == nil {
-			token = resolved
-		}
-	}
 
-	// --- Step 3: fetch diff ---
+	// --- Step 2: fetch diff ---
 	if err := send(stream, progress("fetching diff", 20)); err != nil {
 		return err
 	}
@@ -92,7 +85,7 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 		}
 	}
 
-	// --- Step 4: build step graph ---
+	// --- Step 3: build step graph ---
 	if err := send(stream, progress("building step graph", 50)); err != nil {
 		return err
 	}
@@ -100,7 +93,7 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 	g, fileEntryStepIDs := buildHunkGraph(payload.Files, fileLines, req.OmitRawSource)
 	slog.Debug("hunk graph built", "step_count", g.Len(), "entry_step_id", g.EntryID)
 
-	// --- Step 5: extract glossary ---
+	// --- Step 4: extract glossary ---
 	if err := send(stream, progress("extracting glossary", 75)); err != nil {
 		return err
 	}
@@ -129,7 +122,7 @@ outer:
 	})
 	slog.Debug("glossary extracted", "term_count", len(glossaryCandidates))
 
-	// --- Step 6: create session ---
+	// --- Step 5: create session ---
 	if err := send(stream, progress("creating session", 90)); err != nil {
 		return err
 	}
@@ -151,7 +144,7 @@ outer:
 
 	s.store.Set(sess)
 
-	// --- Step 7: emit ReviewReady ---
+	// --- Step 6: emit ReviewReady ---
 	forgeCtxProto := toProtoForgeContext(fc, payload.Files, fileEntryStepIDs)
 	steps := protoReviewSteps(g)
 
@@ -317,6 +310,9 @@ func forgeErrToStatus(err error, op string) error {
 	if errors.As(err, &fe) {
 		switch fe.Code {
 		case forge.ErrCodeAuthFailed:
+			if fe.Detail != "" {
+				return status.Errorf(codes.PermissionDenied, "%s: %v: %s", op, err, fe.Detail)
+			}
 			return status.Errorf(codes.PermissionDenied, "%s: %v", op, err)
 		case forge.ErrCodeNotFound:
 			return status.Errorf(codes.NotFound, "%s: %v", op, err)

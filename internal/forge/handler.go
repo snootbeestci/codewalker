@@ -22,9 +22,4 @@ type ForgeHandler interface {
 	// FetchFile fetches raw file content at a specific ref.
 	// Used to populate context_before and context_after on HunkSpan.
 	FetchFile(ctx context.Context, fc *ForgeContext, path, ref, token string) ([]byte, error)
-
-	// ResolveToken attempts to resolve a forge token from local credentials
-	// without user interaction (e.g. `gh auth token` for GitHub).
-	// Returns ("", nil) if no token is found — callers should then prompt the user.
-	ResolveToken(ctx context.Context) (string, error)
 }

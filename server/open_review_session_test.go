@@ -65,10 +65,6 @@ func (m *mockForgeHandler) FetchFile(ctx context.Context, fc *forge.ForgeContext
 	return []byte("line 1\nline 2\nline 3\nline 4\nline 5\n"), nil
 }
 
-func (m *mockForgeHandler) ResolveToken(ctx context.Context) (string, error) {
-	return "mock-token", nil
-}
-
 func init() {
 	forge.Register(&mockForgeHandler{})
 }
