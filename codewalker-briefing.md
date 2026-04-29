@@ -396,10 +396,10 @@ Read from environment variables. No config files in v1.
   request only. Anything that reads ambient credentials (env vars, config
   files, CLI tools) belongs in the client.
 - Host strings on RPC requests are normalised: bare hostname, lowercase,
-  no scheme, no trailing slash. The server applies `forge.NormalizeHost`
-  at handler entry as a defence; clients are expected to send the
-  canonical form so their own keying (e.g. token store keys) matches the
-  wire form.
+  no scheme, no trailing slash, no trailing dot. The server applies
+  `forge.NormalizeHost` at handler entry as a defence; clients are
+  expected to send the canonical form so their own keying (e.g. token
+  store keys) matches the wire form.
 - 401 and 403 responses from forges must preserve the forge's response
   body in the gRPC status detail (truncated to ~500 chars). Clients use
   this to distinguish bad-token errors from SSO-authorization-required

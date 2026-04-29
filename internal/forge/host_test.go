@@ -21,6 +21,9 @@ func TestNormalizeHost(t *testing.T) {
 		{"GHE-style subdomain", "github.mycompany.com", "github.mycompany.com"},
 		{"GHE with scheme and case", "https://GitHub.MyCompany.Com", "github.mycompany.com"},
 		{"non-standard port", "gitea.internal:3000", "gitea.internal:3000"},
+		{"trailing dot", "github.com.", "github.com"},
+		{"scheme and trailing dot", "https://github.com.", "github.com"},
+		{"trailing dot and slash", "github.com./", "github.com"},
 		{"empty", "", ""},
 	}
 
