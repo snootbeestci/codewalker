@@ -29,6 +29,7 @@ const (
 	CodeWalker_OpenReviewSession_FullMethodName = "/codewalker.v1.CodeWalker/OpenReviewSession"
 	CodeWalker_ListFileOrderers_FullMethodName  = "/codewalker.v1.CodeWalker/ListFileOrderers"
 	CodeWalker_ListPullRequests_FullMethodName  = "/codewalker.v1.CodeWalker/ListPullRequests"
+	CodeWalker_FetchFileAtRef_FullMethodName    = "/codewalker.v1.CodeWalker/FetchFileAtRef"
 )
 
 // CodeWalkerClient is the client API for CodeWalker service.
@@ -64,6 +65,10 @@ type CodeWalkerClient interface {
 	// List open pull requests for a repository.
 	// Used by clients to populate a PR picker.
 	ListPullRequests(ctx context.Context, in *ListPullRequestsRequest, opts ...grpc.CallOption) (*ListPullRequestsResponse, error)
+	// Fetch a file's content at a specific ref via the appropriate forge.
+	// Used by clients to display the head-ref version of a file during a
+	// review session, where the working-tree copy may not match.
+	FetchFileAtRef(ctx context.Context, in *FetchFileAtRefRequest, opts ...grpc.CallOption) (*FetchFileAtRefResponse, error)
 }
 
 type codeWalkerClient struct {
@@ -219,6 +224,16 @@ func (c *codeWalkerClient) ListPullRequests(ctx context.Context, in *ListPullReq
 	return out, nil
 }
 
+func (c *codeWalkerClient) FetchFileAtRef(ctx context.Context, in *FetchFileAtRefRequest, opts ...grpc.CallOption) (*FetchFileAtRefResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FetchFileAtRefResponse)
+	err := c.cc.Invoke(ctx, CodeWalker_FetchFileAtRef_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CodeWalkerServer is the server API for CodeWalker service.
 // All implementations should embed UnimplementedCodeWalkerServer
 // for forward compatibility.
@@ -252,6 +267,10 @@ type CodeWalkerServer interface {
 	// List open pull requests for a repository.
 	// Used by clients to populate a PR picker.
 	ListPullRequests(context.Context, *ListPullRequestsRequest) (*ListPullRequestsResponse, error)
+	// Fetch a file's content at a specific ref via the appropriate forge.
+	// Used by clients to display the head-ref version of a file during a
+	// review session, where the working-tree copy may not match.
+	FetchFileAtRef(context.Context, *FetchFileAtRefRequest) (*FetchFileAtRefResponse, error)
 }
 
 // UnimplementedCodeWalkerServer should be embedded to have
@@ -290,6 +309,9 @@ func (UnimplementedCodeWalkerServer) ListFileOrderers(context.Context, *ListFile
 }
 func (UnimplementedCodeWalkerServer) ListPullRequests(context.Context, *ListPullRequestsRequest) (*ListPullRequestsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPullRequests not implemented")
+}
+func (UnimplementedCodeWalkerServer) FetchFileAtRef(context.Context, *FetchFileAtRefRequest) (*FetchFileAtRefResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FetchFileAtRef not implemented")
 }
 func (UnimplementedCodeWalkerServer) testEmbeddedByValue() {}
 
@@ -456,6 +478,24 @@ func _CodeWalker_ListPullRequests_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CodeWalker_FetchFileAtRef_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchFileAtRefRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CodeWalkerServer).FetchFileAtRef(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CodeWalker_FetchFileAtRef_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CodeWalkerServer).FetchFileAtRef(ctx, req.(*FetchFileAtRefRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CodeWalker_ServiceDesc is the grpc.ServiceDesc for CodeWalker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -482,6 +522,10 @@ var CodeWalker_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPullRequests",
 			Handler:    _CodeWalker_ListPullRequests_Handler,
+		},
+		{
+			MethodName: "FetchFileAtRef",
+			Handler:    _CodeWalker_FetchFileAtRef_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

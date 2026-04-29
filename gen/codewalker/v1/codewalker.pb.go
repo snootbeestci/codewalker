@@ -3159,6 +3159,141 @@ func (x *PullRequestSummary) GetUrl() string {
 	return ""
 }
 
+type FetchFileAtRefRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Forge host. Canonical form per forge.NormalizeHost.
+	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	// Repository owner.
+	Owner string `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+	// Repository name.
+	Repo string `protobuf:"bytes,3,opt,name=repo,proto3" json:"repo,omitempty"`
+	// File path relative to the repo root.
+	Path string `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
+	// Git ref (commit SHA, branch, or tag).
+	Ref string `protobuf:"bytes,5,opt,name=ref,proto3" json:"ref,omitempty"`
+	// Optional forge token. Empty means unauthenticated.
+	ForgeToken    string `protobuf:"bytes,6,opt,name=forge_token,json=forgeToken,proto3" json:"forge_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FetchFileAtRefRequest) Reset() {
+	*x = FetchFileAtRefRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FetchFileAtRefRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FetchFileAtRefRequest) ProtoMessage() {}
+
+func (x *FetchFileAtRefRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FetchFileAtRefRequest.ProtoReflect.Descriptor instead.
+func (*FetchFileAtRefRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *FetchFileAtRefRequest) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *FetchFileAtRefRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *FetchFileAtRefRequest) GetRepo() string {
+	if x != nil {
+		return x.Repo
+	}
+	return ""
+}
+
+func (x *FetchFileAtRefRequest) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *FetchFileAtRefRequest) GetRef() string {
+	if x != nil {
+		return x.Ref
+	}
+	return ""
+}
+
+func (x *FetchFileAtRefRequest) GetForgeToken() string {
+	if x != nil {
+		return x.ForgeToken
+	}
+	return ""
+}
+
+type FetchFileAtRefResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Raw file content as returned by the forge.
+	Content       []byte `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FetchFileAtRefResponse) Reset() {
+	*x = FetchFileAtRefResponse{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FetchFileAtRefResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FetchFileAtRefResponse) ProtoMessage() {}
+
+func (x *FetchFileAtRefResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FetchFileAtRefResponse.ProtoReflect.Descriptor instead.
+func (*FetchFileAtRefResponse) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *FetchFileAtRefResponse) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
 var File_codewalker_v1_codewalker_proto protoreflect.FileDescriptor
 
 const file_codewalker_v1_codewalker_proto_rawDesc = "" +
@@ -3371,7 +3506,17 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x06number\x18\x01 \x01(\x05R\x06number\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x03 \x01(\tR\x06author\x12\x10\n" +
-	"\x03url\x18\x04 \x01(\tR\x03url*b\n" +
+	"\x03url\x18\x04 \x01(\tR\x03url\"\x9c\x01\n" +
+	"\x15FetchFileAtRefRequest\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x14\n" +
+	"\x05owner\x18\x02 \x01(\tR\x05owner\x12\x12\n" +
+	"\x04repo\x18\x03 \x01(\tR\x04repo\x12\x12\n" +
+	"\x04path\x18\x04 \x01(\tR\x04path\x12\x10\n" +
+	"\x03ref\x18\x05 \x01(\tR\x03ref\x12\x1f\n" +
+	"\vforge_token\x18\x06 \x01(\tR\n" +
+	"forgeToken\"2\n" +
+	"\x16FetchFileAtRefResponse\x12\x18\n" +
+	"\acontent\x18\x01 \x01(\fR\acontent*b\n" +
 	"\vSessionKind\x12\x1c\n" +
 	"\x18SESSION_KIND_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SESSION_KIND_WALKTHROUGH\x10\x01\x12\x17\n" +
@@ -3442,7 +3587,7 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x1cERROR_CODE_FORGE_AUTH_FAILED\x10\b\x12\x1e\n" +
 	"\x1aERROR_CODE_FORGE_NOT_FOUND\x10\t\x12\x1a\n" +
 	"\x16ERROR_CODE_INVALID_URL\x10\n" +
-	"2\xee\x06\n" +
+	"2\xcd\a\n" +
 	"\n" +
 	"CodeWalker\x12Q\n" +
 	"\n" +
@@ -3456,7 +3601,8 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\fListSessions\x12\".codewalker.v1.ListSessionsRequest\x1a#.codewalker.v1.ListSessionsResponse\x12[\n" +
 	"\x11OpenReviewSession\x12'.codewalker.v1.OpenReviewSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12c\n" +
 	"\x10ListFileOrderers\x12&.codewalker.v1.ListFileOrderersRequest\x1a'.codewalker.v1.ListFileOrderersResponse\x12c\n" +
-	"\x10ListPullRequests\x12&.codewalker.v1.ListPullRequestsRequest\x1a'.codewalker.v1.ListPullRequestsResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
+	"\x10ListPullRequests\x12&.codewalker.v1.ListPullRequestsRequest\x1a'.codewalker.v1.ListPullRequestsResponse\x12]\n" +
+	"\x0eFetchFileAtRef\x12$.codewalker.v1.FetchFileAtRefRequest\x1a%.codewalker.v1.FetchFileAtRefResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
 
 var (
 	file_codewalker_v1_codewalker_proto_rawDescOnce sync.Once
@@ -3471,7 +3617,7 @@ func file_codewalker_v1_codewalker_proto_rawDescGZIP() []byte {
 }
 
 var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
-var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(SessionKind)(0),                 // 0: codewalker.v1.SessionKind
 	(StepKind)(0),                    // 1: codewalker.v1.StepKind
@@ -3518,6 +3664,8 @@ var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(*ListPullRequestsRequest)(nil),  // 42: codewalker.v1.ListPullRequestsRequest
 	(*ListPullRequestsResponse)(nil), // 43: codewalker.v1.ListPullRequestsResponse
 	(*PullRequestSummary)(nil),       // 44: codewalker.v1.PullRequestSummary
+	(*FetchFileAtRefRequest)(nil),    // 45: codewalker.v1.FetchFileAtRefRequest
+	(*FetchFileAtRefResponse)(nil),   // 46: codewalker.v1.FetchFileAtRefResponse
 }
 var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	8,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
@@ -3565,18 +3713,20 @@ var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	31, // 42: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
 	39, // 43: codewalker.v1.CodeWalker.ListFileOrderers:input_type -> codewalker.v1.ListFileOrderersRequest
 	42, // 44: codewalker.v1.CodeWalker.ListPullRequests:input_type -> codewalker.v1.ListPullRequestsRequest
-	38, // 45: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
-	11, // 46: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
-	24, // 47: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
-	24, // 48: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	24, // 49: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	15, // 50: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
-	17, // 51: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
-	11, // 52: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
-	40, // 53: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
-	43, // 54: codewalker.v1.CodeWalker.ListPullRequests:output_type -> codewalker.v1.ListPullRequestsResponse
-	45, // [45:55] is the sub-list for method output_type
-	35, // [35:45] is the sub-list for method input_type
+	45, // 45: codewalker.v1.CodeWalker.FetchFileAtRef:input_type -> codewalker.v1.FetchFileAtRefRequest
+	38, // 46: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
+	11, // 47: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
+	24, // 48: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	24, // 49: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	24, // 50: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	15, // 51: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	17, // 52: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	11, // 53: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
+	40, // 54: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
+	43, // 55: codewalker.v1.CodeWalker.ListPullRequests:output_type -> codewalker.v1.ListPullRequestsResponse
+	46, // 56: codewalker.v1.CodeWalker.FetchFileAtRef:output_type -> codewalker.v1.FetchFileAtRefResponse
+	46, // [46:57] is the sub-list for method output_type
+	35, // [35:46] is the sub-list for method input_type
 	35, // [35:35] is the sub-list for extension type_name
 	35, // [35:35] is the sub-list for extension extendee
 	0,  // [0:35] is the sub-list for field type_name
@@ -3609,7 +3759,7 @@ func file_codewalker_v1_codewalker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_codewalker_v1_codewalker_proto_rawDesc), len(file_codewalker_v1_codewalker_proto_rawDesc)),
 			NumEnums:      10,
-			NumMessages:   35,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

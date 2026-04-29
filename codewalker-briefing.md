@@ -408,6 +408,10 @@ Read from environment variables. No config files in v1.
 - ForgeHandler implementations must support listing open pull requests via
   `ListPullRequests(ctx, owner, repo, token)` so clients can build PR
   pickers without hardcoding forge-specific API calls.
+- ForgeHandler implementations support fetching arbitrary file content at
+  a ref via FetchFile. The FetchFileAtRef RPC exposes this directly to
+  clients so review session views can render the PR's head-ref version
+  of a file rather than the working-tree copy.
 - When in doubt about a design decision, check this document before asking. If it is not covered here, ask the user
 
 ### Tooling
