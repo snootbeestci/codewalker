@@ -28,6 +28,7 @@ const (
 	CodeWalker_ListSessions_FullMethodName      = "/codewalker.v1.CodeWalker/ListSessions"
 	CodeWalker_OpenReviewSession_FullMethodName = "/codewalker.v1.CodeWalker/OpenReviewSession"
 	CodeWalker_ListFileOrderers_FullMethodName  = "/codewalker.v1.CodeWalker/ListFileOrderers"
+	CodeWalker_ListPullRequests_FullMethodName  = "/codewalker.v1.CodeWalker/ListPullRequests"
 )
 
 // CodeWalkerClient is the client API for CodeWalker service.
@@ -60,6 +61,9 @@ type CodeWalkerClient interface {
 	// List available file ordering strategies. Clients can use this to
 	// populate user-facing pickers without hardcoding the strategy names.
 	ListFileOrderers(ctx context.Context, in *ListFileOrderersRequest, opts ...grpc.CallOption) (*ListFileOrderersResponse, error)
+	// List open pull requests for a repository.
+	// Used by clients to populate a PR picker.
+	ListPullRequests(ctx context.Context, in *ListPullRequestsRequest, opts ...grpc.CallOption) (*ListPullRequestsResponse, error)
 }
 
 type codeWalkerClient struct {
@@ -205,6 +209,16 @@ func (c *codeWalkerClient) ListFileOrderers(ctx context.Context, in *ListFileOrd
 	return out, nil
 }
 
+func (c *codeWalkerClient) ListPullRequests(ctx context.Context, in *ListPullRequestsRequest, opts ...grpc.CallOption) (*ListPullRequestsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPullRequestsResponse)
+	err := c.cc.Invoke(ctx, CodeWalker_ListPullRequests_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CodeWalkerServer is the server API for CodeWalker service.
 // All implementations should embed UnimplementedCodeWalkerServer
 // for forward compatibility.
@@ -235,6 +249,9 @@ type CodeWalkerServer interface {
 	// List available file ordering strategies. Clients can use this to
 	// populate user-facing pickers without hardcoding the strategy names.
 	ListFileOrderers(context.Context, *ListFileOrderersRequest) (*ListFileOrderersResponse, error)
+	// List open pull requests for a repository.
+	// Used by clients to populate a PR picker.
+	ListPullRequests(context.Context, *ListPullRequestsRequest) (*ListPullRequestsResponse, error)
 }
 
 // UnimplementedCodeWalkerServer should be embedded to have
@@ -270,6 +287,9 @@ func (UnimplementedCodeWalkerServer) OpenReviewSession(*OpenReviewSessionRequest
 }
 func (UnimplementedCodeWalkerServer) ListFileOrderers(context.Context, *ListFileOrderersRequest) (*ListFileOrderersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListFileOrderers not implemented")
+}
+func (UnimplementedCodeWalkerServer) ListPullRequests(context.Context, *ListPullRequestsRequest) (*ListPullRequestsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPullRequests not implemented")
 }
 func (UnimplementedCodeWalkerServer) testEmbeddedByValue() {}
 
@@ -418,6 +438,24 @@ func _CodeWalker_ListFileOrderers_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CodeWalker_ListPullRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPullRequestsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CodeWalkerServer).ListPullRequests(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CodeWalker_ListPullRequests_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CodeWalkerServer).ListPullRequests(ctx, req.(*ListPullRequestsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CodeWalker_ServiceDesc is the grpc.ServiceDesc for CodeWalker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -440,6 +478,10 @@ var CodeWalker_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFileOrderers",
 			Handler:    _CodeWalker_ListFileOrderers_Handler,
+		},
+		{
+			MethodName: "ListPullRequests",
+			Handler:    _CodeWalker_ListPullRequests_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

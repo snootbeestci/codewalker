@@ -2973,6 +2973,192 @@ func (x *FileOrderer) GetDescription() string {
 	return ""
 }
 
+type ListPullRequestsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Forge host (e.g. "github.com"). Must be the canonical form per
+	// forge.NormalizeHost — clients are expected to normalise before sending.
+	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	// Repository owner (org or user).
+	Owner string `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+	// Repository name.
+	Repo string `protobuf:"bytes,3,opt,name=repo,proto3" json:"repo,omitempty"`
+	// Optional forge token. Empty means unauthenticated (public repo).
+	// The server uses this verbatim — there is no server-side resolution.
+	ForgeToken    string `protobuf:"bytes,4,opt,name=forge_token,json=forgeToken,proto3" json:"forge_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPullRequestsRequest) Reset() {
+	*x = ListPullRequestsRequest{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPullRequestsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPullRequestsRequest) ProtoMessage() {}
+
+func (x *ListPullRequestsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPullRequestsRequest.ProtoReflect.Descriptor instead.
+func (*ListPullRequestsRequest) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListPullRequestsRequest) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *ListPullRequestsRequest) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *ListPullRequestsRequest) GetRepo() string {
+	if x != nil {
+		return x.Repo
+	}
+	return ""
+}
+
+func (x *ListPullRequestsRequest) GetForgeToken() string {
+	if x != nil {
+		return x.ForgeToken
+	}
+	return ""
+}
+
+type ListPullRequestsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PullRequests  []*PullRequestSummary  `protobuf:"bytes,1,rep,name=pull_requests,json=pullRequests,proto3" json:"pull_requests,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPullRequestsResponse) Reset() {
+	*x = ListPullRequestsResponse{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPullRequestsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPullRequestsResponse) ProtoMessage() {}
+
+func (x *ListPullRequestsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPullRequestsResponse.ProtoReflect.Descriptor instead.
+func (*ListPullRequestsResponse) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *ListPullRequestsResponse) GetPullRequests() []*PullRequestSummary {
+	if x != nil {
+		return x.PullRequests
+	}
+	return nil
+}
+
+type PullRequestSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Number        int32                  `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Author        string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
+	Url           string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PullRequestSummary) Reset() {
+	*x = PullRequestSummary{}
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PullRequestSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullRequestSummary) ProtoMessage() {}
+
+func (x *PullRequestSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_codewalker_v1_codewalker_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullRequestSummary.ProtoReflect.Descriptor instead.
+func (*PullRequestSummary) Descriptor() ([]byte, []int) {
+	return file_codewalker_v1_codewalker_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *PullRequestSummary) GetNumber() int32 {
+	if x != nil {
+		return x.Number
+	}
+	return 0
+}
+
+func (x *PullRequestSummary) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *PullRequestSummary) GetAuthor() string {
+	if x != nil {
+		return x.Author
+	}
+	return ""
+}
+
+func (x *PullRequestSummary) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
 var File_codewalker_v1_codewalker_proto protoreflect.FileDescriptor
 
 const file_codewalker_v1_codewalker_proto_rawDesc = "" +
@@ -3172,7 +3358,20 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\borderers\x18\x01 \x03(\v2\x1a.codewalker.v1.FileOrdererR\borderers\"C\n" +
 	"\vFileOrderer\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription*b\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\"x\n" +
+	"\x17ListPullRequestsRequest\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x14\n" +
+	"\x05owner\x18\x02 \x01(\tR\x05owner\x12\x12\n" +
+	"\x04repo\x18\x03 \x01(\tR\x04repo\x12\x1f\n" +
+	"\vforge_token\x18\x04 \x01(\tR\n" +
+	"forgeToken\"b\n" +
+	"\x18ListPullRequestsResponse\x12F\n" +
+	"\rpull_requests\x18\x01 \x03(\v2!.codewalker.v1.PullRequestSummaryR\fpullRequests\"l\n" +
+	"\x12PullRequestSummary\x12\x16\n" +
+	"\x06number\x18\x01 \x01(\x05R\x06number\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
+	"\x06author\x18\x03 \x01(\tR\x06author\x12\x10\n" +
+	"\x03url\x18\x04 \x01(\tR\x03url*b\n" +
 	"\vSessionKind\x12\x1c\n" +
 	"\x18SESSION_KIND_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SESSION_KIND_WALKTHROUGH\x10\x01\x12\x17\n" +
@@ -3243,7 +3442,7 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\x1cERROR_CODE_FORGE_AUTH_FAILED\x10\b\x12\x1e\n" +
 	"\x1aERROR_CODE_FORGE_NOT_FOUND\x10\t\x12\x1a\n" +
 	"\x16ERROR_CODE_INVALID_URL\x10\n" +
-	"2\x89\x06\n" +
+	"2\xee\x06\n" +
 	"\n" +
 	"CodeWalker\x12Q\n" +
 	"\n" +
@@ -3256,7 +3455,8 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\fCloseSession\x12\".codewalker.v1.CloseSessionRequest\x1a#.codewalker.v1.CloseSessionResponse\x12W\n" +
 	"\fListSessions\x12\".codewalker.v1.ListSessionsRequest\x1a#.codewalker.v1.ListSessionsResponse\x12[\n" +
 	"\x11OpenReviewSession\x12'.codewalker.v1.OpenReviewSessionRequest\x1a\x1b.codewalker.v1.SessionEvent0\x01\x12c\n" +
-	"\x10ListFileOrderers\x12&.codewalker.v1.ListFileOrderersRequest\x1a'.codewalker.v1.ListFileOrderersResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
+	"\x10ListFileOrderers\x12&.codewalker.v1.ListFileOrderersRequest\x1a'.codewalker.v1.ListFileOrderersResponse\x12c\n" +
+	"\x10ListPullRequests\x12&.codewalker.v1.ListPullRequestsRequest\x1a'.codewalker.v1.ListPullRequestsResponseB1Z/github.com/yourorg/codewalker/gen/codewalker/v1b\x06proto3"
 
 var (
 	file_codewalker_v1_codewalker_proto_rawDescOnce sync.Once
@@ -3271,7 +3471,7 @@ func file_codewalker_v1_codewalker_proto_rawDescGZIP() []byte {
 }
 
 var file_codewalker_v1_codewalker_proto_enumTypes = make([]protoimpl.EnumInfo, 10)
-var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_codewalker_v1_codewalker_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(SessionKind)(0),                 // 0: codewalker.v1.SessionKind
 	(StepKind)(0),                    // 1: codewalker.v1.StepKind
@@ -3315,6 +3515,9 @@ var file_codewalker_v1_codewalker_proto_goTypes = []any{
 	(*ListFileOrderersRequest)(nil),  // 39: codewalker.v1.ListFileOrderersRequest
 	(*ListFileOrderersResponse)(nil), // 40: codewalker.v1.ListFileOrderersResponse
 	(*FileOrderer)(nil),              // 41: codewalker.v1.FileOrderer
+	(*ListPullRequestsRequest)(nil),  // 42: codewalker.v1.ListPullRequestsRequest
+	(*ListPullRequestsResponse)(nil), // 43: codewalker.v1.ListPullRequestsResponse
+	(*PullRequestSummary)(nil),       // 44: codewalker.v1.PullRequestSummary
 }
 var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	8,  // 0: codewalker.v1.OpenSessionRequest.experience_level:type_name -> codewalker.v1.ExperienceLevel
@@ -3351,29 +3554,32 @@ var file_codewalker_v1_codewalker_proto_depIdxs = []int32{
 	7,  // 31: codewalker.v1.ReviewFile.change:type_name -> codewalker.v1.ChangeKind
 	9,  // 32: codewalker.v1.ServiceError.code:type_name -> codewalker.v1.ErrorCode
 	41, // 33: codewalker.v1.ListFileOrderersResponse.orderers:type_name -> codewalker.v1.FileOrderer
-	37, // 34: codewalker.v1.CodeWalker.GetVersion:input_type -> codewalker.v1.GetVersionRequest
-	10, // 35: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
-	23, // 36: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
-	28, // 37: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
-	30, // 38: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
-	14, // 39: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
-	16, // 40: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
-	31, // 41: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
-	39, // 42: codewalker.v1.CodeWalker.ListFileOrderers:input_type -> codewalker.v1.ListFileOrderersRequest
-	38, // 43: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
-	11, // 44: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
-	24, // 45: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
-	24, // 46: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
-	24, // 47: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
-	15, // 48: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
-	17, // 49: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
-	11, // 50: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
-	40, // 51: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
-	43, // [43:52] is the sub-list for method output_type
-	34, // [34:43] is the sub-list for method input_type
-	34, // [34:34] is the sub-list for extension type_name
-	34, // [34:34] is the sub-list for extension extendee
-	0,  // [0:34] is the sub-list for field type_name
+	44, // 34: codewalker.v1.ListPullRequestsResponse.pull_requests:type_name -> codewalker.v1.PullRequestSummary
+	37, // 35: codewalker.v1.CodeWalker.GetVersion:input_type -> codewalker.v1.GetVersionRequest
+	10, // 36: codewalker.v1.CodeWalker.OpenSession:input_type -> codewalker.v1.OpenSessionRequest
+	23, // 37: codewalker.v1.CodeWalker.Navigate:input_type -> codewalker.v1.NavigateRequest
+	28, // 38: codewalker.v1.CodeWalker.Rephrase:input_type -> codewalker.v1.RephraseRequest
+	30, // 39: codewalker.v1.CodeWalker.ExpandTerm:input_type -> codewalker.v1.ExpandTermRequest
+	14, // 40: codewalker.v1.CodeWalker.CloseSession:input_type -> codewalker.v1.CloseSessionRequest
+	16, // 41: codewalker.v1.CodeWalker.ListSessions:input_type -> codewalker.v1.ListSessionsRequest
+	31, // 42: codewalker.v1.CodeWalker.OpenReviewSession:input_type -> codewalker.v1.OpenReviewSessionRequest
+	39, // 43: codewalker.v1.CodeWalker.ListFileOrderers:input_type -> codewalker.v1.ListFileOrderersRequest
+	42, // 44: codewalker.v1.CodeWalker.ListPullRequests:input_type -> codewalker.v1.ListPullRequestsRequest
+	38, // 45: codewalker.v1.CodeWalker.GetVersion:output_type -> codewalker.v1.GetVersionResponse
+	11, // 46: codewalker.v1.CodeWalker.OpenSession:output_type -> codewalker.v1.SessionEvent
+	24, // 47: codewalker.v1.CodeWalker.Navigate:output_type -> codewalker.v1.NarrateEvent
+	24, // 48: codewalker.v1.CodeWalker.Rephrase:output_type -> codewalker.v1.NarrateEvent
+	24, // 49: codewalker.v1.CodeWalker.ExpandTerm:output_type -> codewalker.v1.NarrateEvent
+	15, // 50: codewalker.v1.CodeWalker.CloseSession:output_type -> codewalker.v1.CloseSessionResponse
+	17, // 51: codewalker.v1.CodeWalker.ListSessions:output_type -> codewalker.v1.ListSessionsResponse
+	11, // 52: codewalker.v1.CodeWalker.OpenReviewSession:output_type -> codewalker.v1.SessionEvent
+	40, // 53: codewalker.v1.CodeWalker.ListFileOrderers:output_type -> codewalker.v1.ListFileOrderersResponse
+	43, // 54: codewalker.v1.CodeWalker.ListPullRequests:output_type -> codewalker.v1.ListPullRequestsResponse
+	45, // [45:55] is the sub-list for method output_type
+	35, // [35:45] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_codewalker_v1_codewalker_proto_init() }
@@ -3403,7 +3609,7 @@ func file_codewalker_v1_codewalker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_codewalker_v1_codewalker_proto_rawDesc), len(file_codewalker_v1_codewalker_proto_rawDesc)),
 			NumEnums:      10,
-			NumMessages:   32,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

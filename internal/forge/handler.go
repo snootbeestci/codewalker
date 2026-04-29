@@ -22,4 +22,16 @@ type ForgeHandler interface {
 	// FetchFile fetches raw file content at a specific ref.
 	// Used to populate context_before and context_after on HunkSpan.
 	FetchFile(ctx context.Context, fc *ForgeContext, path, ref, token string) ([]byte, error)
+
+	// ListPullRequests returns open pull requests for a repository.
+	// token may be empty for public repositories.
+	ListPullRequests(ctx context.Context, owner, repo, token string) ([]*PullRequest, error)
+}
+
+// PullRequest is a forge-agnostic summary of an open pull request.
+type PullRequest struct {
+	Number int
+	Title  string
+	Author string
+	URL    string
 }

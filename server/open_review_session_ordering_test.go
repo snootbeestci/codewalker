@@ -51,6 +51,10 @@ func (m *multiFileForgeHandler) FetchFile(_ context.Context, _ *forge.ForgeConte
 	return []byte("line\n"), nil
 }
 
+func (m *multiFileForgeHandler) ListPullRequests(_ context.Context, _, _, _ string) ([]*forge.PullRequest, error) {
+	return nil, nil
+}
+
 func init() {
 	forge.Register(&multiFileForgeHandler{})
 }

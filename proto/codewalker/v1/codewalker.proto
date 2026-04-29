@@ -43,6 +43,10 @@ service CodeWalker {
   // List available file ordering strategies. Clients can use this to
   // populate user-facing pickers without hardcoding the strategy names.
   rpc ListFileOrderers(ListFileOrderersRequest) returns (ListFileOrderersResponse);
+
+  // List open pull requests for a repository.
+  // Used by clients to populate a PR picker.
+  rpc ListPullRequests(ListPullRequestsRequest) returns (ListPullRequestsResponse);
 }
 
 // ─────────────────────────────────────────────
@@ -504,4 +508,31 @@ message ListFileOrderersResponse {
 message FileOrderer {
   string name        = 1;
   string description = 2;
+}
+
+message ListPullRequestsRequest {
+  // Forge host (e.g. "github.com"). Must be the canonical form per
+  // forge.NormalizeHost — clients are expected to normalise before sending.
+  string host = 1;
+
+  // Repository owner (org or user).
+  string owner = 2;
+
+  // Repository name.
+  string repo = 3;
+
+  // Optional forge token. Empty means unauthenticated (public repo).
+  // The server uses this verbatim — there is no server-side resolution.
+  string forge_token = 4;
+}
+
+message ListPullRequestsResponse {
+  repeated PullRequestSummary pull_requests = 1;
+}
+
+message PullRequestSummary {
+  int32  number = 1;
+  string title  = 2;
+  string author = 3;
+  string url    = 4;
 }

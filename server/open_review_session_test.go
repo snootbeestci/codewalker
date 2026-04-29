@@ -65,6 +65,10 @@ func (m *mockForgeHandler) FetchFile(ctx context.Context, fc *forge.ForgeContext
 	return []byte("line 1\nline 2\nline 3\nline 4\nline 5\n"), nil
 }
 
+func (m *mockForgeHandler) ListPullRequests(_ context.Context, _, _, _ string) ([]*forge.PullRequest, error) {
+	return nil, nil
+}
+
 func init() {
 	forge.Register(&mockForgeHandler{})
 }
