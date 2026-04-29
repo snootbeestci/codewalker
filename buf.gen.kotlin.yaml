@@ -2,9 +2,12 @@ version: v2
 plugins:
   - remote: buf.build/protocolbuffers/java:v28.3
     out: gen/kotlin
+    opt: lite
   - remote: buf.build/grpc/java:v1.68.1
     out: gen/kotlin
   - remote: buf.build/protocolbuffers/kotlin:v28.3
     out: gen/kotlin
+    opt: lite
   - remote: buf.build/grpc/kotlin:v1.4.1
     out: gen/kotlin
+    opt: lite
