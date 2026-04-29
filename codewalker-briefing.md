@@ -405,6 +405,9 @@ Read from environment variables. No config files in v1.
   this to distinguish bad-token errors from SSO-authorization-required
   errors, and to surface forge-specific guidance (e.g. "Bad credentials"
   vs "token expired") without a second round trip.
+- ForgeHandler implementations must support listing open pull requests via
+  `ListPullRequests(ctx, owner, repo, token)` so clients can build PR
+  pickers without hardcoding forge-specific API calls.
 - When in doubt about a design decision, check this document before asking. If it is not covered here, ask the user
 
 ### Tooling

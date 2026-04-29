@@ -18,7 +18,28 @@ func init() {
 	forge.Register(&githubHandler{})
 }
 
-type githubHandler struct{}
+type githubHandler struct {
+	// apiBaseURL overrides https://api.github.com in tests.
+	// The empty string means use the default.
+	apiBaseURL string
+	// httpClient overrides http.DefaultClient in tests.
+	// The nil value means use the default.
+	httpClient *http.Client
+}
+
+func (g *githubHandler) baseURL() string {
+	if g.apiBaseURL != "" {
+		return g.apiBaseURL
+	}
+	return "https://api.github.com"
+}
+
+func (g *githubHandler) client() *http.Client {
+	if g.httpClient != nil {
+		return g.httpClient
+	}
+	return http.DefaultClient
+}
 
 func (g *githubHandler) Hosts() []string {
 	return []string{"github.com"}
@@ -86,8 +107,8 @@ func (g *githubHandler) FetchReview(ctx context.Context, fc *forge.ForgeContext,
 }
 
 func (g *githubHandler) FetchFile(ctx context.Context, fc *forge.ForgeContext, path, ref, token string) ([]byte, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s?ref=%s",
-		fc.Owner, fc.Repo, path, url.QueryEscape(ref))
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/contents/%s?ref=%s",
+		g.baseURL(), fc.Owner, fc.Repo, path, url.QueryEscape(ref))
 	resp, err := g.apiDo(ctx, apiURL, token)
 	if err != nil {
 		return nil, err
@@ -112,6 +133,43 @@ func (g *githubHandler) FetchFile(ctx context.Context, fc *forge.ForgeContext, p
 		return nil, fmt.Errorf("decode base64 content for %q: %w", path, err)
 	}
 	return data, nil
+}
+
+func (g *githubHandler) ListPullRequests(ctx context.Context, owner, repo, token string) ([]*forge.PullRequest, error) {
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/pulls?state=open&per_page=100", g.baseURL(), owner, repo)
+	// TODO: paginate — repositories with more than 100 open PRs will be silently truncated.
+	// GitHub returns a Link header with rel="next" for subsequent pages.
+	resp, err := g.apiDo(ctx, apiURL, token)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if err := checkStatus(resp); err != nil {
+		return nil, err
+	}
+
+	var items []struct {
+		Number  int    `json:"number"`
+		Title   string `json:"title"`
+		HTMLURL string `json:"html_url"`
+		User    struct {
+			Login string `json:"login"`
+		} `json:"user"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&items); err != nil {
+		return nil, fmt.Errorf("decode pull request list response: %w", err)
+	}
+
+	out := make([]*forge.PullRequest, 0, len(items))
+	for _, it := range items {
+		out = append(out, &forge.PullRequest{
+			Number: it.Number,
+			Title:  it.Title,
+			Author: it.User.Login,
+			URL:    it.HTMLURL,
+		})
+	}
+	return out, nil
 }
 
 // --- GitHub API types ---
@@ -160,7 +218,7 @@ func (g *githubHandler) apiDo(ctx context.Context, apiURL, token string) (*http.
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
-	return http.DefaultClient.Do(req)
+	return g.client().Do(req)
 }
 
 // errBodyMaxBytes caps how much of a forge response body we propagate into the
@@ -203,7 +261,7 @@ func readBodySnippet(r io.Reader) string {
 }
 
 func (g *githubHandler) fetchPRReview(ctx context.Context, fc *forge.ForgeContext, token string) (*forge.ReviewPayload, error) {
-	prURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%d", fc.Owner, fc.Repo, fc.PRNumber)
+	prURL := fmt.Sprintf("%s/repos/%s/%s/pulls/%d", g.baseURL(), fc.Owner, fc.Repo, fc.PRNumber)
 
 	resp, err := g.apiDo(ctx, prURL, token)
 	if err != nil {
@@ -248,7 +306,7 @@ func (g *githubHandler) fetchPRReview(ctx context.Context, fc *forge.ForgeContex
 }
 
 func (g *githubHandler) fetchCommitReview(ctx context.Context, fc *forge.ForgeContext, token string) (*forge.ReviewPayload, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", fc.Owner, fc.Repo, fc.HeadRef)
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/commits/%s", g.baseURL(), fc.Owner, fc.Repo, fc.HeadRef)
 	resp, err := g.apiDo(ctx, apiURL, token)
 	if err != nil {
 		return nil, err
@@ -275,8 +333,8 @@ func (g *githubHandler) fetchCommitReview(ctx context.Context, fc *forge.ForgeCo
 }
 
 func (g *githubHandler) fetchComparisonReview(ctx context.Context, fc *forge.ForgeContext, token string) (*forge.ReviewPayload, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/compare/%s...%s",
-		fc.Owner, fc.Repo, fc.BaseRef, fc.HeadRef)
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/compare/%s...%s",
+		g.baseURL(), fc.Owner, fc.Repo, fc.BaseRef, fc.HeadRef)
 	resp, err := g.apiDo(ctx, apiURL, token)
 	if err != nil {
 		return nil, err
