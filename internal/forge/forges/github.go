@@ -195,6 +195,10 @@ func checkStatus(resp *http.Response) error {
 
 // readBodySnippet reads up to errBodyMaxBytes from r and returns the result
 // as a trimmed string. Errors are swallowed — a missing body is acceptable.
+//
+// This function does NOT close r. The caller of apiDo owns the response
+// body and must close it via defer resp.Body.Close() at the call site.
+// Closing here would be redundant at best and a double-close at worst.
 func readBodySnippet(r io.Reader) string {
 	buf, err := io.ReadAll(io.LimitReader(r, errBodyMaxBytes))
 	if err != nil {
