@@ -12,5 +12,6 @@ func NormalizeHost(s string) string {
 	s = strings.TrimPrefix(s, "https://")
 	s = strings.TrimPrefix(s, "http://")
 	s = strings.TrimSuffix(s, "/")
+	s = strings.TrimSuffix(s, ".")
 	return strings.ToLower(s)
 }
