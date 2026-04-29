@@ -274,11 +274,10 @@ existing code.
 - `ForgeHandler` is an interface in `internal/forge/handler.go`, registered
   via init() in `internal/forge/forges/`. Same pattern as LanguageHandler.
 - GitHub is the v1 forge. GitLab, Gitea, Bitbucket are additive.
-- Token resolution order (plugin-side):
-    1. forge_token field on OpenReviewSessionRequest if supplied by client
-    2. handler.ResolveToken() — checks gh CLI silently
-    3. Empty string — public repo mode
-  The backend never stores tokens beyond the session lifetime. Never log them.
+- Token resolution is the client's responsibility. The server treats
+  `forge_token` as an opaque caller-supplied value — empty means
+  unauthenticated (public repo access only). The backend never stores
+  tokens beyond the request lifetime. Never log them.
 - Once open, review sessions use the same Navigate/Rephrase/ExpandTerm RPCs
   as walkthrough sessions. The step graph contains STEP_KIND_HUNK steps
   instead of AST steps.
@@ -393,6 +392,19 @@ Read from environment variables. No config files in v1.
   step proceeds with `summary = nil` and a debug log
 - Summary fields are always populated with "—" for non-applicable values rather
   than being absent. This guarantees clients can render a consistent layout
+- Forge handlers must not perform credential lookups. Tokens come from the
+  request only. Anything that reads ambient credentials (env vars, config
+  files, CLI tools) belongs in the client.
+- Host strings on RPC requests are normalised: bare hostname, lowercase,
+  no scheme, no trailing slash. The server applies `forge.NormalizeHost`
+  at handler entry as a defence; clients are expected to send the
+  canonical form so their own keying (e.g. token store keys) matches the
+  wire form.
+- 401 and 403 responses from forges must preserve the forge's response
+  body in the gRPC status detail (truncated to ~500 chars). Clients use
+  this to distinguish bad-token errors from SSO-authorization-required
+  errors, and to surface forge-specific guidance (e.g. "Bad credentials"
+  vs "token expired") without a second round trip.
 - When in doubt about a design decision, check this document before asking. If it is not covered here, ask the user
 
 ### Tooling

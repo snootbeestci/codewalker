@@ -51,8 +51,6 @@ func (m *multiFileForgeHandler) FetchFile(_ context.Context, _ *forge.ForgeConte
 	return []byte("line\n"), nil
 }
 
-func (m *multiFileForgeHandler) ResolveToken(_ context.Context) (string, error) { return "", nil }
-
 func init() {
 	forge.Register(&multiFileForgeHandler{})
 }
