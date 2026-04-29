@@ -47,6 +47,11 @@ service CodeWalker {
   // List open pull requests for a repository.
   // Used by clients to populate a PR picker.
   rpc ListPullRequests(ListPullRequestsRequest) returns (ListPullRequestsResponse);
+
+  // Fetch a file's content at a specific ref via the appropriate forge.
+  // Used by clients to display the head-ref version of a file during a
+  // review session, where the working-tree copy may not match.
+  rpc FetchFileAtRef(FetchFileAtRefRequest) returns (FetchFileAtRefResponse);
 }
 
 // ─────────────────────────────────────────────
@@ -535,4 +540,29 @@ message PullRequestSummary {
   string title  = 2;
   string author = 3;
   string url    = 4;
+}
+
+message FetchFileAtRefRequest {
+  // Forge host. Canonical form per forge.NormalizeHost.
+  string host = 1;
+
+  // Repository owner.
+  string owner = 2;
+
+  // Repository name.
+  string repo = 3;
+
+  // File path relative to the repo root.
+  string path = 4;
+
+  // Git ref (commit SHA, branch, or tag).
+  string ref = 5;
+
+  // Optional forge token. Empty means unauthenticated.
+  string forge_token = 6;
+}
+
+message FetchFileAtRefResponse {
+  // Raw file content as returned by the forge.
+  bytes content = 1;
 }
