@@ -170,12 +170,7 @@ const errBodyMaxBytes = 500
 
 func checkStatus(resp *http.Response) error {
 	switch resp.StatusCode {
-	case http.StatusUnauthorized:
-		return &forge.Error{
-			Code: forge.ErrCodeAuthFailed,
-			Msg:  fmt.Sprintf("GitHub API auth failed (%s)", resp.Status),
-		}
-	case http.StatusForbidden:
+	case http.StatusUnauthorized, http.StatusForbidden:
 		return &forge.Error{
 			Code:   forge.ErrCodeAuthFailed,
 			Msg:    fmt.Sprintf("GitHub API auth failed (%s)", resp.Status),

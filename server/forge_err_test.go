@@ -18,10 +18,14 @@ func TestForgeErrToStatus(t *testing.T) {
 		wantContains []string
 	}{
 		{
-			name:         "auth failed without detail",
-			err:          &forge.Error{Code: forge.ErrCodeAuthFailed, Msg: "GitHub API auth failed (401 Unauthorized)"},
+			name: "401 auth failed with detail",
+			err: &forge.Error{
+				Code:   forge.ErrCodeAuthFailed,
+				Msg:    "GitHub API auth failed (401 Unauthorized)",
+				Detail: `{"message":"Bad credentials","documentation_url":"https://docs.github.com/rest"}`,
+			},
 			wantCode:     codes.PermissionDenied,
-			wantContains: []string{"GitHub API auth failed"},
+			wantContains: []string{"GitHub API auth failed", "Bad credentials"},
 		},
 		{
 			name: "403 with SAML SSO body",
