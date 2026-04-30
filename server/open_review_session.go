@@ -90,7 +90,7 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 		return err
 	}
 
-	g, fileEntryStepIDs := buildHunkGraph(payload.Files, fileLines, req.OmitRawSource)
+	g, fileEntryStepIDs, orderedStepIDs := buildHunkGraph(payload.Files, fileLines, req.OmitRawSource)
 	slog.Debug("hunk graph built", "step_count", g.Len(), "entry_step_id", g.EntryID)
 
 	// --- Step 4: extract glossary ---
@@ -146,7 +146,7 @@ outer:
 
 	// --- Step 6: emit ReviewReady ---
 	forgeCtxProto := toProtoForgeContext(fc, payload.Files, fileEntryStepIDs)
-	steps := protoReviewSteps(g)
+	steps := protoReviewSteps(g, orderedStepIDs)
 
 	return send(stream, &v1.SessionEvent{
 		Event: &v1.SessionEvent_ReviewReady{
@@ -165,9 +165,16 @@ outer:
 
 const hunkContextLines = 5
 
-func buildHunkGraph(files []*forge.ReviewFile, fileLines map[string][]string, omitRaw bool) (*graph.Graph, map[string]string) {
+// buildHunkGraph builds the review-session step graph and returns it alongside
+// per-file entry step IDs and an ordered slice of step IDs in Forward
+// traversal order. The Forward order matches the file orderer's output, then
+// hunk parser order within each file — the same iteration order that wires
+// the NEXT edges, so callers can use it to emit ReviewReady.steps
+// deterministically.
+func buildHunkGraph(files []*forge.ReviewFile, fileLines map[string][]string, omitRaw bool) (*graph.Graph, map[string]string, []string) {
 	g := graph.NewGraph()
 	fileEntryStepIDs := make(map[string]string)
+	var orderedStepIDs []string
 
 	var prevStep *graph.Step
 
@@ -198,6 +205,7 @@ func buildHunkGraph(files []*forge.ReviewFile, fileLines map[string][]string, om
 				HunkSpan: hunkSpan,
 			}
 			g.Add(step)
+			orderedStepIDs = append(orderedStepIDs, id)
 
 			if _, ok := fileEntryStepIDs[file.Path]; !ok {
 				fileEntryStepIDs[file.Path] = id
@@ -217,7 +225,7 @@ func buildHunkGraph(files []*forge.ReviewFile, fileLines map[string][]string, om
 		}
 	}
 
-	return g, fileEntryStepIDs
+	return g, fileEntryStepIDs, orderedStepIDs
 }
 
 func extractContextLines(lines []string, start, end int) string {
@@ -233,10 +241,17 @@ func extractContextLines(lines []string, start, end int) string {
 	return strings.Join(lines[start:end], "\n")
 }
 
-func protoReviewSteps(g *graph.Graph) []*v1.Step {
-	all := g.AllSteps()
-	out := make([]*v1.Step, 0, len(all))
-	for _, s := range all {
+// protoReviewSteps emits steps in Forward traversal order using the
+// orderedIDs slice produced by buildHunkGraph. This guarantees that
+// ReviewReady.steps matches the order Navigate(Forward) follows from the
+// entry step.
+func protoReviewSteps(g *graph.Graph, orderedIDs []string) []*v1.Step {
+	out := make([]*v1.Step, 0, len(orderedIDs))
+	for _, id := range orderedIDs {
+		s, ok := g.Step(id)
+		if !ok {
+			continue
+		}
 		out = append(out, &v1.Step{
 			Id:       s.ID,
 			Label:    s.Label,

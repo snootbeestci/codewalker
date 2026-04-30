@@ -293,6 +293,20 @@ existing code.
 - github.com/{owner}/{repo}/commit/{sha}         → commit
 - github.com/{owner}/{repo}/compare/{base}...{head} → comparison
 
+### Step ordering on the wire
+
+`ReviewReady.steps` is emitted in Forward traversal order — the same order
+the navigation chain follows when calling `Navigate(Forward)` repeatedly
+from `entry_step_id`. Order is determined by the file orderer
+(default: `entry-points-first`) over `payload.Files`, then by parser order
+of hunks within each file. Clients can render the step list in wire
+order and trust that it matches navigation order.
+
+`graph.Graph.AllSteps()` iterates the underlying map and is therefore
+non-deterministic — never use it for proto emission. Capture the desired
+order explicitly at graph-build time (see `buildHunkGraph`'s
+`orderedStepIDs` return value) and iterate that slice instead.
+
 ### Not in scope for v1
 - OAuth flow — use gh CLI token or manual token entry
 - GitLab, Gitea, Bitbucket forge handlers
