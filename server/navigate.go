@@ -7,6 +7,7 @@ import (
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	"github.com/yourorg/codewalker/internal/graph"
 	"github.com/yourorg/codewalker/internal/llm"
+	"github.com/yourorg/codewalker/internal/session"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -74,6 +75,10 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	}
 	slog.Debug("source resolved", "step_id", step.ID, "code_len", len(code))
 
+	if cached, ok := sess.CachedNarration(step.ID); ok {
+		return replayCached(stream, step, cached, availableEdges, crumbLabels)
+	}
+
 	// Review steps get a structured summary in parallel with narration.
 	// Walkthrough steps leave summary unset.
 	var summaryCh chan *llm.StepSummary
@@ -110,6 +115,8 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 
 	tokenCount := 0
 	var summaryProto *v1.StepSummary
+	var summaryResult *llm.StepSummary
+	var collectedTokens []string
 
 	// Drain tokens and the summary channel concurrently so the structured
 	// summary can be sent the moment it is ready, without waiting for
@@ -127,6 +134,7 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 				continue
 			}
 			tokenCount++
+			collectedTokens = append(collectedTokens, token)
 			if err := stream.Send(&v1.NarrateEvent{
 				Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
 			}); err != nil {
@@ -137,16 +145,8 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 			if summary == nil {
 				continue
 			}
-			summaryProto = &v1.StepSummary{
-				Breaking:      summary.Breaking,
-				Risk:          summary.Risk,
-				WhatChanged:   summary.WhatChanged,
-				SideEffects:   summary.SideEffects,
-				Tests:         summary.Tests,
-				ReviewerFocus: summary.ReviewerFocus,
-				Suggestion:    summary.Suggestion,
-				Confidence:    summary.Confidence,
-			}
+			summaryResult = summary
+			summaryProto = stepSummaryToProto(summary)
 			if err := stream.Send(&v1.NarrateEvent{
 				Event: &v1.NarrateEvent_SummaryReady{
 					SummaryReady: &v1.SummaryReady{Summary: summaryProto},
@@ -158,12 +158,81 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	}
 	slog.Debug("narration complete", "step_id", step.ID, "token_count", tokenCount)
 
+	sess.CacheNarration(step.ID, &session.CachedStep{
+		NarrationTokens: collectedTokens,
+		Summary:         summaryResult,
+	})
+
 	return stream.Send(&v1.NarrateEvent{
 		Event: &v1.NarrateEvent_Complete{
 			Complete: &v1.StepComplete{
 				StepId:         step.ID,
 				AvailableEdges: availableEdges,
 				Breadcrumb:     crumbLabels,
+				Summary:        summaryProto,
+			},
+		},
+	})
+}
+
+// stepSummaryToProto converts an llm.StepSummary to its proto form. Used by
+// both the live narration path and the cached replay path.
+func stepSummaryToProto(s *llm.StepSummary) *v1.StepSummary {
+	if s == nil {
+		return nil
+	}
+	return &v1.StepSummary{
+		Breaking:      s.Breaking,
+		Risk:          s.Risk,
+		WhatChanged:   s.WhatChanged,
+		SideEffects:   s.SideEffects,
+		Tests:         s.Tests,
+		ReviewerFocus: s.ReviewerFocus,
+		Suggestion:    s.Suggestion,
+		Confidence:    s.Confidence,
+	}
+}
+
+// replayCached emits the same NarrateToken / SummaryReady / Complete sequence
+// as the live path, but sourced from the per-session cache. Tokens are sent
+// as fast as the gRPC channel will accept them.
+func replayCached(
+	stream v1.CodeWalker_NavigateServer,
+	step *graph.Step,
+	cached *session.CachedStep,
+	availableEdges []*v1.StepEdge,
+	breadcrumb []string,
+) error {
+	slog.Debug("narration cache hit", "step_id", step.ID, "token_count", len(cached.NarrationTokens))
+
+	for _, tok := range cached.NarrationTokens {
+		if err := stream.Context().Err(); err != nil {
+			return status.FromContextError(err).Err()
+		}
+		if err := stream.Send(&v1.NarrateEvent{
+			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: tok}},
+		}); err != nil {
+			return err
+		}
+	}
+
+	summaryProto := stepSummaryToProto(cached.Summary)
+	if summaryProto != nil {
+		if err := stream.Send(&v1.NarrateEvent{
+			Event: &v1.NarrateEvent_SummaryReady{
+				SummaryReady: &v1.SummaryReady{Summary: summaryProto},
+			},
+		}); err != nil {
+			return err
+		}
+	}
+
+	return stream.Send(&v1.NarrateEvent{
+		Event: &v1.NarrateEvent_Complete{
+			Complete: &v1.StepComplete{
+				StepId:         step.ID,
+				AvailableEdges: availableEdges,
+				Breadcrumb:     breadcrumb,
 				Summary:        summaryProto,
 			},
 		},

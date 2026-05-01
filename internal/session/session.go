@@ -6,7 +6,16 @@ import (
 
 	v1 "github.com/yourorg/codewalker/gen/codewalker/v1"
 	"github.com/yourorg/codewalker/internal/graph"
+	"github.com/yourorg/codewalker/internal/llm"
 )
+
+// CachedStep holds narration tokens and the structured summary for a single
+// step that has already been narrated within a session. Replay is byte-for-byte
+// identical to the live path's wire output.
+type CachedStep struct {
+	NarrationTokens []string
+	Summary         *llm.StepSummary // nil for walkthrough steps or when summary generation failed
+}
 
 // Session holds all server-side state for one client walkthrough.
 type Session struct {
@@ -25,24 +34,46 @@ type Session struct {
 	RepoPath      string
 	Ref           string
 	LastAccessed  time.Time
+
+	cacheMu        sync.Mutex
+	narrationCache map[string]*CachedStep
 }
 
 // New creates a Session from an already-built graph.
 func New(id string, g *graph.Graph, effectiveLevel int, language string, omitRaw bool, src []byte, filePath, repoPath, ref string) *Session {
 	return &Session{
-		ID:            id,
-		Graph:         g,
-		Walker:        graph.NewWalker(g),
-		EffLevel:      effectiveLevel,
-		Language:      language,
-		Glossary:      make(map[string]*v1.GlossaryTerm),
-		OmitRawSource: omitRaw,
-		Source:        src,
-		FilePath:      filePath,
-		RepoPath:      repoPath,
-		Ref:           ref,
-		LastAccessed:  time.Now(),
+		ID:             id,
+		Graph:          g,
+		Walker:         graph.NewWalker(g),
+		EffLevel:       effectiveLevel,
+		Language:       language,
+		Glossary:       make(map[string]*v1.GlossaryTerm),
+		OmitRawSource:  omitRaw,
+		Source:         src,
+		FilePath:       filePath,
+		RepoPath:       repoPath,
+		Ref:            ref,
+		LastAccessed:   time.Now(),
+		narrationCache: make(map[string]*CachedStep),
 	}
+}
+
+// CachedNarration returns the cached narration entry for a step, if any.
+// Cache reads use a dedicated mutex so they do not block while navigation
+// holds the session lock on another goroutine.
+func (s *Session) CachedNarration(stepID string) (*CachedStep, bool) {
+	s.cacheMu.Lock()
+	defer s.cacheMu.Unlock()
+	c, ok := s.narrationCache[stepID]
+	return c, ok
+}
+
+// CacheNarration stores narration tokens and an optional summary for a step.
+// Callers should not invoke this when narration generation failed.
+func (s *Session) CacheNarration(stepID string, entry *CachedStep) {
+	s.cacheMu.Lock()
+	defer s.cacheMu.Unlock()
+	s.narrationCache[stepID] = entry
 }
 
 // AddGlossaryTerm inserts or updates a glossary term.
