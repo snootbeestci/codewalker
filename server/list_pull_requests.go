@@ -30,10 +30,11 @@ func (s *Server) ListPullRequests(ctx context.Context, req *v1.ListPullRequestsR
 	out := make([]*v1.PullRequestSummary, 0, len(prs))
 	for _, p := range prs {
 		out = append(out, &v1.PullRequestSummary{
-			Number: int32(p.Number),
-			Title:  p.Title,
-			Author: p.Author,
-			Url:    p.URL,
+			Number:  int32(p.Number),
+			Title:   p.Title,
+			Author:  p.Author,
+			Url:     p.URL,
+			HeadRef: p.HeadRef,
 		})
 	}
 	return &v1.ListPullRequestsResponse{PullRequests: out}, nil

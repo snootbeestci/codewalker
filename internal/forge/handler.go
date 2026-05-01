@@ -30,8 +30,9 @@ type ForgeHandler interface {
 
 // PullRequest is a forge-agnostic summary of an open pull request.
 type PullRequest struct {
-	Number int
-	Title  string
-	Author string
-	URL    string
+	Number  int
+	Title   string
+	Author  string
+	URL     string
+	HeadRef string
 }

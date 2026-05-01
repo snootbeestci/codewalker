@@ -3092,11 +3092,14 @@ func (x *ListPullRequestsResponse) GetPullRequests() []*PullRequestSummary {
 }
 
 type PullRequestSummary struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Number        int32                  `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Author        string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
-	Url           string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Number int32                  `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
+	Title  string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Author string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
+	Url    string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	// The PR's head branch name (e.g. "feature/foo"). Used by clients to
+	// operate on the working tree before opening a review session.
+	HeadRef       string `protobuf:"bytes,5,opt,name=head_ref,json=headRef,proto3" json:"head_ref,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3155,6 +3158,13 @@ func (x *PullRequestSummary) GetAuthor() string {
 func (x *PullRequestSummary) GetUrl() string {
 	if x != nil {
 		return x.Url
+	}
+	return ""
+}
+
+func (x *PullRequestSummary) GetHeadRef() string {
+	if x != nil {
+		return x.HeadRef
 	}
 	return ""
 }
@@ -3501,12 +3511,13 @@ const file_codewalker_v1_codewalker_proto_rawDesc = "" +
 	"\vforge_token\x18\x04 \x01(\tR\n" +
 	"forgeToken\"b\n" +
 	"\x18ListPullRequestsResponse\x12F\n" +
-	"\rpull_requests\x18\x01 \x03(\v2!.codewalker.v1.PullRequestSummaryR\fpullRequests\"l\n" +
+	"\rpull_requests\x18\x01 \x03(\v2!.codewalker.v1.PullRequestSummaryR\fpullRequests\"\x87\x01\n" +
 	"\x12PullRequestSummary\x12\x16\n" +
 	"\x06number\x18\x01 \x01(\x05R\x06number\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x03 \x01(\tR\x06author\x12\x10\n" +
-	"\x03url\x18\x04 \x01(\tR\x03url\"\x9c\x01\n" +
+	"\x03url\x18\x04 \x01(\tR\x03url\x12\x19\n" +
+	"\bhead_ref\x18\x05 \x01(\tR\aheadRef\"\x9c\x01\n" +
 	"\x15FetchFileAtRefRequest\x12\x12\n" +
 	"\x04host\x18\x01 \x01(\tR\x04host\x12\x14\n" +
 	"\x05owner\x18\x02 \x01(\tR\x05owner\x12\x12\n" +
