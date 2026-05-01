@@ -155,6 +155,9 @@ func (g *githubHandler) ListPullRequests(ctx context.Context, owner, repo, token
 		User    struct {
 			Login string `json:"login"`
 		} `json:"user"`
+		Head struct {
+			Ref string `json:"ref"`
+		} `json:"head"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&items); err != nil {
 		return nil, fmt.Errorf("decode pull request list response: %w", err)
@@ -163,10 +166,11 @@ func (g *githubHandler) ListPullRequests(ctx context.Context, owner, repo, token
 	out := make([]*forge.PullRequest, 0, len(items))
 	for _, it := range items {
 		out = append(out, &forge.PullRequest{
-			Number: it.Number,
-			Title:  it.Title,
-			Author: it.User.Login,
-			URL:    it.HTMLURL,
+			Number:  it.Number,
+			Title:   it.Title,
+			Author:  it.User.Login,
+			URL:     it.HTMLURL,
+			HeadRef: it.Head.Ref,
 		})
 	}
 	return out, nil

@@ -171,9 +171,9 @@ func TestParseHunkRange(t *testing.T) {
 func TestListPullRequests(t *testing.T) {
 	const successBody = `[
 		{"number": 42, "title": "Add foo", "html_url": "https://github.com/octocat/hello-world/pull/42",
-		 "user": {"login": "alice"}},
+		 "user": {"login": "alice"}, "head": {"ref": "feature/foo"}},
 		{"number": 43, "title": "Fix bar", "html_url": "https://github.com/octocat/hello-world/pull/43",
-		 "user": {"login": "bob"}}
+		 "user": {"login": "bob"}, "head": {"ref": "fix/bar"}}
 	]`
 	const samlBody = `{"message":"Resource protected by organization SAML enforcement","documentation_url":"https://docs.github.com/articles/authenticating-to-a-github-organization-with-saml-single-sign-on"}`
 	const badCredsBody = `{"message":"Bad credentials","documentation_url":"https://docs.github.com/rest"}`
@@ -200,10 +200,11 @@ func TestListPullRequests(t *testing.T) {
 			wantAuthHdr: "Bearer ghp_secret",
 			checkResults: func(t *testing.T, prs []*forge.PullRequest) {
 				if prs[0].Number != 42 || prs[0].Title != "Add foo" || prs[0].Author != "alice" ||
-					prs[0].URL != "https://github.com/octocat/hello-world/pull/42" {
+					prs[0].URL != "https://github.com/octocat/hello-world/pull/42" ||
+					prs[0].HeadRef != "feature/foo" {
 					t.Errorf("PR[0] = %+v", prs[0])
 				}
-				if prs[1].Number != 43 || prs[1].Author != "bob" {
+				if prs[1].Number != 43 || prs[1].Author != "bob" || prs[1].HeadRef != "fix/bar" {
 					t.Errorf("PR[1] = %+v", prs[1])
 				}
 			},

@@ -421,7 +421,10 @@ Read from environment variables. No config files in v1.
   vs "token expired") without a second round trip.
 - ForgeHandler implementations must support listing open pull requests via
   `ListPullRequests(ctx, owner, repo, token)` so clients can build PR
-  pickers without hardcoding forge-specific API calls.
+  pickers without hardcoding forge-specific API calls. `PullRequest.HeadRef`
+  carries the head branch name and is surfaced through `PullRequestSummary.head_ref`
+  so clients can check working-tree state (e.g. dirty checkout) before paying
+  the cost of `OpenReviewSession`.
 - ForgeHandler implementations support fetching arbitrary file content at
   a ref via FetchFile. The FetchFileAtRef RPC exposes this directly to
   clients so review session views can render the PR's head-ref version
