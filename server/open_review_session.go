@@ -12,7 +12,6 @@ import (
 	_ "github.com/yourorg/codewalker/internal/forge/forges"
 	_ "github.com/yourorg/codewalker/internal/forge/orderers"
 	"github.com/yourorg/codewalker/internal/graph"
-	"github.com/yourorg/codewalker/internal/llm"
 	"github.com/yourorg/codewalker/internal/session"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -93,58 +92,24 @@ func (s *Server) OpenReviewSession(req *v1.OpenReviewSessionRequest, stream v1.C
 	g, fileEntryStepIDs, orderedStepIDs := buildHunkGraph(payload.Files, fileLines, req.OmitRawSource)
 	slog.Debug("hunk graph built", "step_count", g.Len(), "entry_step_id", g.EntryID)
 
-	// --- Step 4: extract glossary ---
-	if err := send(stream, progress("extracting glossary", 75)); err != nil {
+	// --- Step 4: create session ---
+	// Glossary extraction was removed: the only client that consumed
+	// ReviewReady.glossary never read it, and the LLM call added several
+	// seconds of latency to session open. The proto field is retained for
+	// backward compatibility but is now always empty.
+	if err := send(stream, progress("creating session", 90)); err != nil {
 		return err
 	}
 
 	effectiveLevel := session.EffectiveLevel(req.ExperienceLevel)
 
-	var diffSample strings.Builder
-	if fc.PRDescription != "" {
-		diffSample.WriteString(fc.PRDescription)
-		diffSample.WriteString("\n\n")
-	}
-outer:
-	for _, f := range payload.Files {
-		for _, h := range f.Hunks {
-			diffSample.WriteString(h.RawDiff)
-			if diffSample.Len() > 4096 {
-				break outer
-			}
-		}
-	}
-
-	glossaryCandidates, _ := s.provider.ExtractGlossaryTerms(ctx, llm.GlossaryRequest{
-		Code:     diffSample.String(),
-		Language: "diff",
-		Level:    effectiveLevel,
-	})
-	slog.Debug("glossary extracted", "term_count", len(glossaryCandidates))
-
-	// --- Step 5: create session ---
-	if err := send(stream, progress("creating session", 90)); err != nil {
-		return err
-	}
-
 	sessID := newSessionID()
 	sess := session.New(sessID, g, effectiveLevel, "diff", req.OmitRawSource, nil, "", "", "")
 	sess.Kind = v1.SessionKind_SESSION_KIND_REVIEW
 
-	glossaryProto := make([]*v1.GlossaryTerm, 0, len(glossaryCandidates))
-	for _, c := range glossaryCandidates {
-		t := &v1.GlossaryTerm{
-			Term:   c.Term,
-			Kind:   termKindFromString(c.Kind),
-			StepId: g.EntryID,
-		}
-		sess.AddGlossaryTerm(t)
-		glossaryProto = append(glossaryProto, t)
-	}
-
 	s.store.Set(sess)
 
-	// --- Step 6: emit ReviewReady ---
+	// --- Step 5: emit ReviewReady ---
 	forgeCtxProto := toProtoForgeContext(fc, payload.Files, fileEntryStepIDs)
 	steps := protoReviewSteps(g, orderedStepIDs)
 
@@ -154,7 +119,6 @@ outer:
 				SessionId:      sessID,
 				ForgeContext:   forgeCtxProto,
 				Steps:          steps,
-				Glossary:       glossaryProto,
 				TotalSteps:     uint32(g.Len()),
 				EntryStepId:    g.EntryID,
 				EffectiveLevel: uint32(effectiveLevel),

@@ -109,24 +109,34 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 	slog.Debug("narration started", "step_id", step.ID)
 
 	tokenCount := 0
-	for token := range tokens {
+	var summaryProto *v1.StepSummary
+
+	// Drain tokens and the summary channel concurrently so the structured
+	// summary can be sent the moment it is ready, without waiting for
+	// narration to finish. Setting tokens or summaryCh to nil after either
+	// is exhausted removes that case from the select (a nil channel blocks
+	// forever), letting the loop exit when both are done.
+	tokenCh := tokens
+	for tokenCh != nil || summaryCh != nil {
 		select {
 		case <-ctx.Done():
 			return status.FromContextError(ctx.Err()).Err()
-		default:
-		}
-		tokenCount++
-		if err := stream.Send(&v1.NarrateEvent{
-			Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
-		}); err != nil {
-			return err
-		}
-	}
-	slog.Debug("narration complete", "step_id", step.ID, "token_count", tokenCount)
-
-	var summaryProto *v1.StepSummary
-	if summaryCh != nil {
-		if summary := <-summaryCh; summary != nil {
+		case token, ok := <-tokenCh:
+			if !ok {
+				tokenCh = nil
+				continue
+			}
+			tokenCount++
+			if err := stream.Send(&v1.NarrateEvent{
+				Event: &v1.NarrateEvent_Token{Token: &v1.NarrateToken{Text: token}},
+			}); err != nil {
+				return err
+			}
+		case summary := <-summaryCh:
+			summaryCh = nil
+			if summary == nil {
+				continue
+			}
 			summaryProto = &v1.StepSummary{
 				Breaking:      summary.Breaking,
 				Risk:          summary.Risk,
@@ -137,8 +147,16 @@ func (s *Server) Navigate(req *v1.NavigateRequest, stream v1.CodeWalker_Navigate
 				Suggestion:    summary.Suggestion,
 				Confidence:    summary.Confidence,
 			}
+			if err := stream.Send(&v1.NarrateEvent{
+				Event: &v1.NarrateEvent_SummaryReady{
+					SummaryReady: &v1.SummaryReady{Summary: summaryProto},
+				},
+			}); err != nil {
+				return err
+			}
 		}
 	}
+	slog.Debug("narration complete", "step_id", step.ID, "token_count", tokenCount)
 
 	return stream.Send(&v1.NarrateEvent{
 		Event: &v1.NarrateEvent_Complete{
