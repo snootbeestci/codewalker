@@ -421,6 +421,19 @@ Read from environment variables. No config files in v1.
   `StepComplete.summary` for backward compatibility — old clients reading
   only `complete` see no behavioural change. New clients should prefer
   `summary_ready` to render summary fields without waiting for narration
+- The session caches the narration tokens and structured summary for every
+  step that has been narrated. Repeat navigation to a cached step replays
+  the cached content as fast as the gRPC channel allows — no LLM call. The
+  wire protocol is unchanged: clients receive the same NarrateToken stream,
+  SummaryReady event, and Complete event in the same order; they arrive in
+  quick succession rather than throttled by LLM generation pace. Cache
+  scope is per-session; eviction happens when the session itself is
+  evicted. There is no cross-session persistence. Failed narrations are
+  not cached. Failed summary generations are cached with the narration
+  intact and `Summary` nil — replay sends the narration but no
+  SummaryReady event. The cache uses a dedicated mutex (`cacheMu`) so
+  reads do not block while navigation holds the session lock on another
+  goroutine
 - `OpenReviewSession` does not produce a glossary. The `ReviewReady.glossary`
   proto field is retained for backward compatibility but is always empty.
   The glossary LLM call was removed because it added several seconds of
