@@ -266,10 +266,20 @@ enum SimpleDirection {
 // Streamed back for Navigate, Rephrase, and ExpandTerm.
 message NarrateEvent {
   oneof event {
-    NarrateToken    token    = 1; // Streaming LLM token
-    StepComplete    complete = 2; // Final event for this narration
-    ServiceError    error    = 3;
+    NarrateToken    token         = 1; // Streaming LLM token
+    StepComplete    complete      = 2; // Final event for this narration
+    ServiceError    error         = 3;
+    SummaryReady    summary_ready = 4; // Structured summary, sent as soon as available
   }
+}
+
+// Emitted by Navigate as soon as the structured summary is available, which is
+// typically before narration tokens finish streaming. New clients should
+// prefer this over reading StepComplete.summary so the summary can render
+// without waiting for the full narration stream. StepComplete.summary
+// continues to be populated for backward compatibility.
+message SummaryReady {
+  StepSummary summary = 1;
 }
 
 message NarrateToken {

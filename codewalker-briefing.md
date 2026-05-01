@@ -111,8 +111,17 @@ truth. Key messages:
   `ExternalCallInfo` (only set when navigable = false)
 - `ExternalCallInfo` — package_name, symbol_name, llm_summary (always set),
   docs_url, source_url, version (last three best-effort only)
-- `NarrateEvent` (streamed) — token stream → `StepComplete` (new glossary
-  terms, available edges, breadcrumb)
+- `NarrateEvent` (streamed) — A successful Navigate stream emits:
+  - Zero or more `NarrateEvent.token` events as narration text streams from
+    the LLM.
+  - One `NarrateEvent.summary_ready` event as soon as the structured summary
+    is available — typically before narration finishes, so the reviewer
+    sees risk/breaking/tests early. Only emitted for steps that produce a
+    summary (review-session hunk steps in v1).
+  - One terminal `NarrateEvent.complete` event carrying the breadcrumb,
+    available edges, step id, and (for backward compatibility) the summary
+    again. New clients should prefer `summary_ready` when present; old
+    clients continue to read `Complete.summary`.
 - `RephraseRequest` — session_id + RephraseMode (SIMPLER/DEEPER/ANALOGY/TLDR)
 - `GlossaryTerm` — term, definition, step_id, TermKind
   (LANGUAGE/PATTERN/DOMAIN/LIBRARY)
@@ -406,6 +415,16 @@ Read from environment variables. No config files in v1.
   step proceeds with `summary = nil` and a debug log
 - Summary fields are always populated with "—" for non-applicable values rather
   than being absent. This guarantees clients can render a consistent layout
+- Navigate emits `NarrateEvent.summary_ready` the moment the summary channel
+  produces a non-nil summary, which is typically before narration finishes
+  streaming. The same summary is also placed on the terminal
+  `StepComplete.summary` for backward compatibility — old clients reading
+  only `complete` see no behavioural change. New clients should prefer
+  `summary_ready` to render summary fields without waiting for narration
+- `OpenReviewSession` does not produce a glossary. The `ReviewReady.glossary`
+  proto field is retained for backward compatibility but is always empty.
+  The glossary LLM call was removed because it added several seconds of
+  latency at session open and the only consumer never read the field
 - Forge handlers must not perform credential lookups. Tokens come from the
   request only. Anything that reads ambient credentials (env vars, config
   files, CLI tools) belongs in the client.
